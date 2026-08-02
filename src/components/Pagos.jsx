@@ -1,20 +1,45 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { formatARS, formatFecha } from '../lib/format'
-import { estadoPago, ESTADO_INFO } from '../lib/domain'
+import { formatARS } from '../lib/format'
+import { precioMensual } from '../lib/domain'
+
+const CATEGORIAS = [
+  'Alquiler', 'Pago a profe', 'App turnos', 'App Builderpro',
+  'Tarjeta', 'Dejar en cuenta', 'Mantenimiento', 'Otro',
+]
+const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
+function periodoActual(d = new Date()) {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-01`
+}
+function nombreMes(iso) {
+  const [y, m] = iso.split('-')
+  return `${MESES[+m - 1]} ${y}`
+}
 
 export default function Pagos() {
-  const [pendientes, setPendientes] = useState([])
+  const [periodo] = useState(periodoActual())
+  const [alumnos, setAlumnos] = useState([])
+  const [pagos, setPagos] = useState([])
+  const [gastos, setGastos] = useState([])
   const [loading, setLoading] = useState(true)
+  const [showForm, setShowForm] = useState(false)
+  const [confirmando, setConfirmando] = useState(null)
 
   async function load() {
     setLoading(true)
-    const { data } = await supabase
-      .from('pagos')
-      .select('id, monto, vencimiento, fecha_pago, alumnos(nombre)')
-      .is('fecha_pago', null)
-      .order('vencimiento')
-    setPendientes(data || [])
+    const [al, pg, gs] = await Promise.all([
+      supabase
+        .from('alumnos')
+        .select('ajuste_monto, medicion_nutricional, planes(precio_mensual)')
+        .eq('estado', 'activo'),
+      supabase.from('pagos').select('monto, fecha_pago'),
+      supabase.from('gastos').select('*').eq('periodo', periodo).order('monto', { ascending: false }),
+    ])
+    setAlumnos(al.data || [])
+    setPagos(pg.data || [])
+    setGastos(gs.data || [])
     setLoading(false)
   }
 
@@ -22,9 +47,23 @@ export default function Pagos() {
     load()
   }, [])
 
-  const vencidos = pendientes.filter((p) => estadoPago(p) === 'vencido')
-  const porVencer = pendientes.filter((p) => estadoPago(p) === 'por_vencer')
-  const total = pendientes.reduce((s, p) => s + Number(p.monto || 0), 0)
+  const ahora = new Date()
+  const facturacion = alumnos.reduce((s, a) => s + precioMensual(a), 0)
+  const cobrado = pagos
+    .filter((p) => {
+      if (!p.fecha_pago) return false
+      const d = new Date(p.fecha_pago)
+      return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth()
+    })
+    .reduce((s, p) => s + Number(p.monto || 0), 0)
+  const totalGastos = gastos.reduce((s, g) => s + Number(g.monto || 0), 0)
+  const resultado = facturacion - totalGastos
+
+  async function delGasto(id) {
+    await supabase.from('gastos').delete().eq('id', id)
+    setConfirmando(null)
+    await load()
+  }
 
   return (
     <div>
@@ -32,46 +71,149 @@ export default function Pagos() {
         <h1 className="section-title">Pagos</h1>
       </div>
       <p className="muted" style={{ marginTop: -8, marginBottom: 16 }}>
-        Deudores del centro. La facturación total y los gastos los sumamos en el próximo paso (con tu
-        Excel).
+        Resumen de {nombreMes(periodo)}
       </p>
 
       {loading ? (
         <p className="muted">Cargando…</p>
-      ) : pendientes.length === 0 ? (
-        <p className="muted">¡Todo al día! No hay pagos pendientes. 🎉</p>
       ) : (
         <>
-          <p className="muted" style={{ marginBottom: 16 }}>
-            {pendientes.length} pendiente{pendientes.length === 1 ? '' : 's'} · {formatARS(total)} por
-            cobrar
-          </p>
-          {vencidos.length > 0 && <Sec title="Vencidos" items={vencidos} estado="vencido" />}
-          {porVencer.length > 0 && <Sec title="Por vencer" items={porVencer} estado="por_vencer" />}
+          <div className="stat-grid">
+            <div className="stat-card">
+              <div className="stat-label">Facturación esperada</div>
+              <div className="stat-value">{formatARS(facturacion)}</div>
+              <div className="stat-sub">{alumnos.length} alumnos activos</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Cobrado este mes</div>
+              <div className="stat-value">{formatARS(cobrado)}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Gastos</div>
+              <div className="stat-value" style={{ color: '#f0999a' }}>{formatARS(totalGastos)}</div>
+            </div>
+            <div className="stat-card">
+              <div className="stat-label">Resultado (esperado)</div>
+              <div className="stat-value" style={{ color: '#86d98f' }}>{formatARS(resultado)}</div>
+              <div className="stat-sub">{formatARS(resultado / 2)} c/u (vos y Eze)</div>
+            </div>
+          </div>
+
+          <div className="section-subhead">
+            <h2>Gastos de {nombreMes(periodo)}</h2>
+            {!showForm && (
+              <button className="btn-primary" onClick={() => setShowForm(true)}>+ Agregar</button>
+            )}
+          </div>
+
+          {showForm && (
+            <GastoForm
+              periodo={periodo}
+              onDone={async () => {
+                setShowForm(false)
+                await load()
+              }}
+              onCancel={() => setShowForm(false)}
+            />
+          )}
+
+          {gastos.length === 0 ? (
+            <p className="muted">Sin gastos cargados este mes.</p>
+          ) : (
+            <ul className="pago-list">
+              {gastos.map((g) => (
+                <li key={g.id} className="pago-row">
+                  <div className="pago-info">
+                    <span className="pago-venc">{g.categoria}</span>
+                    {g.descripcion && <span className="pago-sub">{g.descripcion}</span>}
+                  </div>
+                  {confirmando === g.id ? (
+                    <div className="pago-confirm">
+                      <span>¿Borrar?</span>
+                      <button className="confirm-si" onClick={() => delGasto(g.id)}>Sí</button>
+                      <button className="confirm-no" onClick={() => setConfirmando(null)}>No</button>
+                    </div>
+                  ) : (
+                    <>
+                      <span className="pago-monto">{formatARS(g.monto)}</span>
+                      <button
+                        className="pago-del"
+                        aria-label="Borrar gasto"
+                        onClick={() => setConfirmando(g.id)}
+                      >
+                        ✕
+                      </button>
+                    </>
+                  )}
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {gastos.length > 0 && (
+            <p className="muted" style={{ textAlign: 'right', marginTop: 10 }}>
+              Total gastos: <b style={{ color: '#fff' }}>{formatARS(totalGastos)}</b>
+            </p>
+          )}
         </>
       )}
     </div>
   )
 }
 
-function Sec({ title, items, estado }) {
-  const info = ESTADO_INFO[estado]
+function GastoForm({ periodo, onDone, onCancel }) {
+  const [categoria, setCategoria] = useState('Alquiler')
+  const [monto, setMonto] = useState('')
+  const [descripcion, setDescripcion] = useState('')
+  const [saving, setSaving] = useState(false)
+  const [error, setError] = useState('')
+
+  async function guardar(e) {
+    e.preventDefault()
+    setError('')
+    if (!monto || Number(monto) <= 0) {
+      setError('Poné un monto válido.')
+      return
+    }
+    setSaving(true)
+    const { error } = await supabase
+      .from('gastos')
+      .insert({ periodo, categoria, monto: Number(monto), descripcion: descripcion.trim() || null })
+    setSaving(false)
+    if (error) {
+      setError('No se pudo guardar: ' + error.message)
+      return
+    }
+    onDone()
+  }
+
   return (
-    <div style={{ marginBottom: 20 }}>
-      <h2 style={{ color: info.text, fontSize: 16, marginBottom: 10 }}>
-        {title} ({items.length})
-      </h2>
-      <ul className="pago-list">
-        {items.map((p) => (
-          <li key={p.id} className="pago-row">
-            <div className="pago-info">
-              <span className="pago-venc">{p.alumnos?.nombre || 'Alumno'}</span>
-              <span className="pago-sub">Vence {formatFecha(p.vencimiento)}</span>
-            </div>
-            <span className="pago-monto">{formatARS(p.monto)}</span>
-          </li>
-        ))}
-      </ul>
-    </div>
+    <form className="pago-form" onSubmit={guardar}>
+      <div className="field-row">
+        <label className="field">
+          <span>Categoría</span>
+          <select value={categoria} onChange={(e) => setCategoria(e.target.value)}>
+            {CATEGORIAS.map((c) => (
+              <option key={c} value={c}>{c}</option>
+            ))}
+          </select>
+        </label>
+        <label className="field">
+          <span>Monto</span>
+          <input type="number" value={monto} onChange={(e) => setMonto(e.target.value)} inputMode="numeric" />
+        </label>
+      </div>
+      <label className="field">
+        <span>Detalle (opcional)</span>
+        <input value={descripcion} onChange={(e) => setDescripcion(e.target.value)} placeholder="Ej: Octavio" />
+      </label>
+      {error && <p className="login-error">{error}</p>}
+      <div className="form-actions">
+        <button type="button" className="btn-ghost" onClick={onCancel}>Cancelar</button>
+        <button type="submit" className="btn-primary" disabled={saving}>
+          {saving ? 'Guardando…' : 'Guardar gasto'}
+        </button>
+      </div>
+    </form>
   )
 }
