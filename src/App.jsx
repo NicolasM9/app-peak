@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from './lib/supabase'
 import Login from './components/Login'
-import Home from './components/Home'
+import AppShell from './components/AppShell'
 
 export default function App() {
   const [session, setSession] = useState(null)
@@ -42,5 +42,5 @@ export default function App() {
     return <Login />
   }
 
-  return <Home profe={profe} user={session.user} />
+  return <AppShell profe={profe} user={session.user} />
 }

@@ -3,7 +3,7 @@ import { supabase } from '../lib/supabase'
 import { formatARS, formatFecha } from '../lib/format'
 import { estadoPago, ESTADO_INFO } from '../lib/domain'
 
-export default function Cobros() {
+export default function Pagos() {
   const [pendientes, setPendientes] = useState([])
   const [loading, setLoading] = useState(true)
 
@@ -27,8 +27,15 @@ export default function Cobros() {
   const total = pendientes.reduce((s, p) => s + Number(p.monto || 0), 0)
 
   return (
-    <div className="cobros">
-      <h1 className="section-title">Cobros</h1>
+    <div>
+      <div className="section-head">
+        <h1 className="section-title">Pagos</h1>
+      </div>
+      <p className="muted" style={{ marginTop: -8, marginBottom: 16 }}>
+        Deudores del centro. La facturación total y los gastos los sumamos en el próximo paso (con tu
+        Excel).
+      </p>
+
       {loading ? (
         <p className="muted">Cargando…</p>
       ) : pendientes.length === 0 ? (
@@ -39,17 +46,15 @@ export default function Cobros() {
             {pendientes.length} pendiente{pendientes.length === 1 ? '' : 's'} · {formatARS(total)} por
             cobrar
           </p>
-          {vencidos.length > 0 && <CobroSection title="Vencidos" items={vencidos} estado="vencido" />}
-          {porVencer.length > 0 && (
-            <CobroSection title="Por vencer" items={porVencer} estado="por_vencer" />
-          )}
+          {vencidos.length > 0 && <Sec title="Vencidos" items={vencidos} estado="vencido" />}
+          {porVencer.length > 0 && <Sec title="Por vencer" items={porVencer} estado="por_vencer" />}
         </>
       )}
     </div>
   )
 }
 
-function CobroSection({ title, items, estado }) {
+function Sec({ title, items, estado }) {
   const info = ESTADO_INFO[estado]
   return (
     <div style={{ marginBottom: 20 }}>
