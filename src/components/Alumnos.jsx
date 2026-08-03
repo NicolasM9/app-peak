@@ -5,7 +5,7 @@ import { precioMensual, estadoAlumno, ESTADO_INFO } from '../lib/domain'
 import AlumnoForm from './AlumnoForm'
 import AlumnoDetalle from './AlumnoDetalle'
 
-export default function Alumnos() {
+export default function Alumnos({ autor }) {
   const [alumnos, setAlumnos] = useState([])
   const [planes, setPlanes] = useState([])
   const [pagosByAlumno, setPagosByAlumno] = useState({})
@@ -20,7 +20,7 @@ export default function Alumnos() {
       supabase
         .from('alumnos')
         .select(
-          'id, nombre, telefono, fecha_nacimiento, deporte, estado, plan_id, ajuste_motivo, ajuste_monto, modalidad_rutina, medicion_nutricional, planes(nombre, precio_mensual)',
+          'id, nombre, telefono, fecha_nacimiento, deporte, estado, plan_id, ajuste_motivo, ajuste_monto, modalidad_rutina, medicion_nutricional, estado_fisico, lesion_detalle, lesion_desde, planes(nombre, precio_mensual)',
         )
         .order('nombre'),
       supabase.from('planes').select('id, nombre, precio_mensual, frecuencia_max').order('id'),
@@ -75,6 +75,7 @@ export default function Alumnos() {
         onBack={() => setView({ name: 'list' })}
         onEdit={() => setView({ name: 'form', alumno })}
         onChanged={load}
+        autor={autor}
       />
     )
   }

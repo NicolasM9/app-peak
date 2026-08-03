@@ -19,6 +19,9 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
     ajuste_motivo: alumno?.ajuste_motivo || '',
     ajuste_monto: alumno?.ajuste_monto ?? '',
     medicion_nutricional: alumno?.medicion_nutricional || false,
+    estado_fisico: alumno?.estado_fisico || 'sano',
+    lesion_detalle: alumno?.lesion_detalle || '',
+    lesion_desde: alumno?.lesion_desde || '',
     estado: alumno?.estado || 'activo',
   })
   const [saving, setSaving] = useState(false)
@@ -46,6 +49,9 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
       ajuste_motivo: form.ajuste_motivo.trim() || null,
       ajuste_monto: form.ajuste_monto === '' ? null : Number(form.ajuste_monto),
       medicion_nutricional: form.medicion_nutricional,
+      estado_fisico: form.estado_fisico,
+      lesion_detalle: form.lesion_detalle.trim() || null,
+      lesion_desde: form.lesion_desde || null,
       estado: form.estado,
     }
     const resp = editing
@@ -161,6 +167,32 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
           />
           <span>Hace medición con Diego (+{formatARS(20000)})</span>
         </label>
+
+        <label className="field">
+          <span>Estado físico</span>
+          <select value={form.estado_fisico} onChange={(e) => set('estado_fisico', e.target.value)}>
+            <option value="sano">Sano</option>
+            <option value="lesionado">Lesionado</option>
+            <option value="recuperacion">En recuperación</option>
+          </select>
+        </label>
+
+        {form.estado_fisico !== 'sano' && (
+          <div className="field-row">
+            <label className="field">
+              <span>Detalle de la lesión</span>
+              <input
+                value={form.lesion_detalle}
+                onChange={(e) => set('lesion_detalle', e.target.value)}
+                placeholder="Ej: esguince de tobillo"
+              />
+            </label>
+            <label className="field">
+              <span>Desde</span>
+              <input type="date" value={form.lesion_desde} onChange={(e) => set('lesion_desde', e.target.value)} />
+            </label>
+          </div>
+        )}
 
         {editing && (
           <label className="field">

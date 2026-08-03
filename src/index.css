@@ -630,6 +630,141 @@ html {
   color: var(--muted);
 }
 
+/* ---- Mediciones ---- */
+.medicion-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.medicion-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+}
+
+.medicion-main {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  flex: 1;
+  min-width: 0;
+}
+
+.medicion-fecha {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.medicion-archivo {
+  align-self: flex-start;
+  background: transparent;
+  border: none;
+  padding: 0;
+  color: #8fb4f0;
+  font-size: 13px;
+  cursor: pointer;
+  text-align: left;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.medicion-archivo:hover {
+  text-decoration: underline;
+}
+
+.medicion-vals {
+  display: flex;
+  gap: 18px;
+  white-space: nowrap;
+}
+
+.medicion-val {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  line-height: 1.15;
+}
+
+.medicion-val b {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--brand, #1a4fa3);
+}
+
+.medicion-val small {
+  font-size: 11px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+/* ---- Testeos ---- */
+.testeo-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.testeo-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+}
+
+.testeo-info {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  flex: 1;
+  min-width: 0;
+}
+
+.testeo-test {
+  font-weight: 500;
+  font-size: 15px;
+}
+
+.testeo-sub {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.testeo-chip {
+  font-size: 11px;
+  padding: 1px 8px;
+  border-radius: 999px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+
+.testeo-valor {
+  white-space: nowrap;
+  font-size: 14px;
+  color: var(--muted);
+}
+
+.testeo-valor b {
+  font-size: 18px;
+  font-weight: 700;
+  color: #fff;
+}
+
 /* ---- Barra lateral ---- */
 .sidebar {
   width: 214px;
@@ -825,6 +960,65 @@ html {
 
 .txt-venc {
   color: #f0999a;
+}
+
+/* ---- Ficha de investigación: estado + notas ---- */
+.estado-linea {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+  color: #c9d0da;
+  margin-top: 12px;
+  flex-wrap: wrap;
+}
+
+textarea {
+  font-family: inherit;
+}
+
+.nota-add {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+.nota-add textarea {
+  width: 100%;
+  min-height: 72px;
+  padding: 12px 14px;
+  border-radius: 10px;
+  border: 1px solid var(--field-border);
+  background: var(--field-bg);
+  color: #fff;
+  font-size: 15px;
+  outline: none;
+  resize: vertical;
+}
+
+.nota-add textarea:focus {
+  border-color: var(--cobalt);
+}
+
+.nota-item {
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 8px;
+}
+
+.nota-texto {
+  font-size: 14px;
+  color: #e6e9ee;
+  white-space: pre-wrap;
+}
+
+.nota-meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
 }
 
 /* ---- Responsive: barra lateral colapsable en pantallas chicas ---- */
