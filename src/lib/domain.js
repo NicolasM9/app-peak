@@ -10,6 +10,18 @@ export function precioMensual(a) {
   return base + ajuste + med
 }
 
+// Lo que cobra un profe por mes: base + personalizados
+// (100% los marcados al100; el resto al split_resto% que le queda al profe)
+export function totalAcuerdo(p) {
+  const base = Number(p.base_mensual || 0)
+  const split = Number(p.split_resto ?? 60)
+  const pers = (p.personalizados || []).reduce((s, x) => {
+    const m = Number(x.monto || 0)
+    return s + (x.al100 ? m : Math.round((m * split) / 100))
+  }, 0)
+  return base + pers
+}
+
 // Estado de un pago según la fecha de hoy
 export function estadoPago(pago, today = new Date()) {
   if (pago.fecha_pago) return 'al_dia'

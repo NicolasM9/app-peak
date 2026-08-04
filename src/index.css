@@ -1035,6 +1035,126 @@ html {
   font-weight: 600;
 }
 
+/* ---- Acuerdos profes ---- */
+.acuerdo-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.acuerdo-card {
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 14px 16px;
+  cursor: pointer;
+}
+
+.acuerdo-card:hover {
+  border-color: #2f3a4f;
+}
+
+.acuerdo-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.acuerdo-nombre {
+  font-weight: 600;
+  font-size: 16px;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tag-admin {
+  font-size: 10px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  color: #8fb4f0;
+  background: rgba(26, 79, 163, 0.2);
+  padding: 2px 7px;
+  border-radius: 999px;
+}
+
+.acuerdo-total {
+  font-weight: 700;
+  font-size: 17px;
+  color: #86d98f;
+  white-space: nowrap;
+}
+
+.acuerdo-total small {
+  color: var(--muted);
+  font-weight: 400;
+  font-size: 12px;
+}
+
+.acuerdo-sub {
+  color: var(--muted);
+  font-size: 13px;
+  margin-top: 4px;
+}
+
+.pers-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.pers-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.pers-nombre {
+  flex: 1;
+  min-width: 0;
+}
+
+.pers-monto {
+  width: 110px;
+  flex: none;
+}
+
+.pers-100 {
+  flex: none;
+  width: 58px;
+  border: 1px solid #2c3444;
+  background: transparent;
+  color: var(--muted);
+  border-radius: 8px;
+  padding: 8px 0;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.pers-100.on {
+  background: rgba(76, 175, 80, 0.16);
+  border-color: rgba(76, 175, 80, 0.5);
+  color: #86d98f;
+}
+
+.acuerdo-preview {
+  margin-top: 16px;
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 12px 16px;
+  font-size: 15px;
+  color: var(--muted);
+}
+
+.acuerdo-preview b {
+  color: #86d98f;
+  font-size: 20px;
+  font-weight: 700;
+  margin-left: 6px;
+}
+
 /* ---- Barra lateral ---- */
 .sidebar {
   width: 214px;

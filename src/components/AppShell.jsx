@@ -5,6 +5,7 @@ import Alumnos from './Alumnos'
 import Calendario from './Calendario'
 import Horas from './Horas'
 import Pagos from './Pagos'
+import Acuerdos from './Acuerdos'
 import Placeholder from './Placeholder'
 import { Menu } from 'lucide-react'
 
@@ -48,12 +49,8 @@ export default function AppShell({ profe, user }) {
         return <Horas esAdmin={esAdmin} />
 
       case 'acuerdos':
-        return (
-          <Placeholder
-            titulo="Acuerdos profes"
-            desc="El acuerdo de cada profe: personalizados, pagos, horas y qué incluye."
-          />
-        )
+        return <Acuerdos />
+
       default:
         return <Inicio />
     }
