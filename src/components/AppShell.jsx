@@ -20,6 +20,7 @@ export default function AppShell({ profe, user }) {
   const esAdmin = profe?.rol === 'admin'
   const [seccion, setSeccion] = useState('inicio')
   const [menuOpen, setMenuOpen] = useState(false)
+  const [alumnoTarget, setAlumnoTarget] = useState(null)
 
   let sec = seccion
   if (ADMIN_SECC.has(sec) && !esAdmin) sec = 'inicio'
@@ -29,12 +30,18 @@ export default function AppShell({ profe, user }) {
     setMenuOpen(false)
   }
 
+  function irAlAlumno(id) {
+    setAlumnoTarget(id)
+    setSeccion('alumnos')
+    setMenuOpen(false)
+  }
+
   function contenido() {
     switch (sec) {
       case 'alumnos':
-        return <Alumnos autor={nombre} />
+        return <Alumnos autor={nombre} abrir={alumnoTarget} onAbierto={() => setAlumnoTarget(null)} />
       case 'pagos':
-        return <Pagos />
+        return <Pagos irAlAlumno={irAlAlumno} />
       case 'calendario':
         return <Calendario esAdmin={esAdmin} />
 

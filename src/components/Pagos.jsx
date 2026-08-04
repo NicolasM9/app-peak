@@ -19,7 +19,7 @@ function nombreMes(iso) {
   return `${MESES[+m - 1]} ${y}`
 }
 
-export default function Pagos() {
+export default function Pagos({ irAlAlumno }) {
   const [periodo] = useState(periodoActual())
   const [alumnos, setAlumnos] = useState([])
   const [pagos, setPagos] = useState([])
@@ -70,6 +70,7 @@ export default function Pagos() {
   if (showCarga) {
     return (
       <CargaPagos
+        onIrAlumno={irAlAlumno}
         onDone={async () => { setShowCarga(false); await load() }}
         onCancel={() => setShowCarga(false)}
       />

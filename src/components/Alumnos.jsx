@@ -5,7 +5,7 @@ import { precioMensual, estadoAlumno, ESTADO_INFO } from '../lib/domain'
 import AlumnoForm from './AlumnoForm'
 import AlumnoDetalle from './AlumnoDetalle'
 
-export default function Alumnos({ autor }) {
+export default function Alumnos({ autor, abrir, onAbierto }) {
   const [alumnos, setAlumnos] = useState([])
   const [planes, setPlanes] = useState([])
   const [pagosByAlumno, setPagosByAlumno] = useState({})
@@ -40,6 +40,13 @@ export default function Alumnos({ autor }) {
     load()
   }, [])
 
+  useEffect(() => {
+    if (abrir) {
+      setView({ name: 'detalle', alumnoId: abrir })
+      onAbierto && onAbierto()
+    }
+  }, [abrir])
+
   function backTo(alumnoId) {
     return alumnoId ? { name: 'detalle', alumnoId } : { name: 'list' }
   }
@@ -65,7 +72,8 @@ export default function Alumnos({ autor }) {
         <p className="muted">
           <button className="btn-back" onClick={() => setView({ name: 'list' })}>
             ← Volver
-          </button>
+          </button>{' '}
+          {loading ? 'Cargando…' : 'No se encontró el alumno.'}
         </p>
       )
     }

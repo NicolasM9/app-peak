@@ -39,11 +39,12 @@ function matchAlumno(token, alumnos) {
   return bestScore >= 30 ? best : null
 }
 
-export default function CargaPagos({ onDone, onCancel }) {
+export default function CargaPagos({ onDone, onCancel, onIrAlumno }) {
   const [alumnos, setAlumnos] = useState([])
   const [pagosMes, setPagosMes] = useState(new Set())
   const [texto, setTexto] = useState('')
   const [filas, setFilas] = useState(null)
+  const [creados, setCreados] = useState([])
   const [metodo, setMetodo] = useState('transferencia')
   const [fechaPago, setFechaPago] = useState(hoyISO())
   const [vencimiento, setVencimiento] = useState(vencimientoPorDefecto())
@@ -90,6 +91,20 @@ export default function CargaPagos({ onDone, onCancel }) {
     )
   }
 
+  async function crearAlumno(i) {
+    const nombre = (filas[i].texto || '').trim()
+    if (!nombre) return
+    const { data, error } = await supabase
+      .from('alumnos')
+      .insert({ nombre, estado: 'activo' })
+      .select('id, nombre, ajuste_monto, medicion_nutricional, planes(precio_mensual)')
+      .single()
+    if (error || !data) return
+    setAlumnos((list) => [...list, data].sort((a, b) => a.nombre.localeCompare(b.nombre)))
+    setCreados((c) => [...c, { id: data.id, nombre: data.nombre }])
+    setFilas((list) => list.map((r, idx) => (idx === i ? { ...r, alumnoId: data.id, monto: '' } : r)))
+  }
+
   const validas = (filas || []).filter((f) => f.alumnoId)
   const total = validas.reduce((s, f) => s + Number(f.monto || 0), 0)
   const sinEncontrar = (filas || []).filter((f) => !f.alumnoId).length
@@ -131,6 +146,18 @@ export default function CargaPagos({ onDone, onCancel }) {
       {hechos !== null ? (
         <div className="carga-ok">
           <p>✅ Se registraron <b>{hechos}</b> pago{hechos === 1 ? '' : 's'}.</p>
+          {creados.length > 0 && (
+            <div className="carga-creados">
+              <p className="cal-sub">Alumnos nuevos — tocá para completar la ficha:</p>
+              <div className="carga-creados-list">
+                {creados.map((c) => (
+                  <button key={c.id} type="button" className="btn-ghost" onClick={() => onIrAlumno && onIrAlumno(c.id)}>
+                    {c.nombre} →
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
           <div className="form-actions">
             <button className="btn-ghost" onClick={() => { setHechos(null); setFilas(null); setTexto('') }}>
               Cargar más
@@ -198,6 +225,9 @@ export default function CargaPagos({ onDone, onCancel }) {
                   placeholder="$"
                 />
                 {f.alumnoId && pagosMes.has(Number(f.alumnoId)) && <span className="carga-dup">ya pagó</span>}
+                {!f.alumnoId && (
+                  <button type="button" className="carga-nuevo" onClick={() => crearAlumno(i)}>+ Nuevo</button>
+                )}
               </div>
             ))}
           </div>
