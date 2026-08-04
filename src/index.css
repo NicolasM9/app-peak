@@ -1155,6 +1155,79 @@ html {
   margin-left: 6px;
 }
 
+/* ---- Carga rápida de pagos ---- */
+.carga-batch {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 12px;
+}
+
+.carga-batch .field {
+  flex: 1;
+  min-width: 130px;
+}
+
+.carga-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin: 6px 0 4px;
+}
+
+.carga-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 10px;
+}
+
+.carga-row.sin {
+  border-color: #7a4a1e;
+  background: rgba(234, 179, 8, 0.06);
+}
+
+.carga-token {
+  width: 130px;
+  flex: none;
+  font-size: 13px;
+  color: var(--muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.carga-row select {
+  flex: 1;
+  min-width: 0;
+}
+
+.carga-monto {
+  width: 104px;
+  flex: none;
+}
+
+.carga-dup {
+  flex: none;
+  font-size: 11px;
+  color: #f2cd5c;
+  background: rgba(234, 179, 8, 0.16);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.carga-ok {
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 18px 18px 14px;
+  font-size: 16px;
+}
+
 /* ---- Barra lateral ---- */
 .sidebar {
   width: 214px;

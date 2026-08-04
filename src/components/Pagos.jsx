@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
 import { precioMensual } from '../lib/domain'
+import CargaPagos from './CargaPagos'
 
 const CATEGORIAS = [
   'Alquiler', 'Pago a profe', 'App turnos', 'App Builderpro',
@@ -25,6 +26,7 @@ export default function Pagos() {
   const [gastos, setGastos] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [showCarga, setShowCarga] = useState(false)
   const [confirmando, setConfirmando] = useState(null)
 
   async function load() {
@@ -65,10 +67,20 @@ export default function Pagos() {
     await load()
   }
 
+  if (showCarga) {
+    return (
+      <CargaPagos
+        onDone={async () => { setShowCarga(false); await load() }}
+        onCancel={() => setShowCarga(false)}
+      />
+    )
+  }
+
   return (
     <div>
       <div className="section-head">
         <h1 className="section-title">Pagos</h1>
+        <button className="btn-primary" onClick={() => setShowCarga(true)}>+ Carga rápida de pagos</button>
       </div>
       <p className="muted" style={{ marginTop: -8, marginBottom: 16 }}>
         Resumen de {nombreMes(periodo)}
