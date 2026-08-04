@@ -902,6 +902,139 @@ html {
   background: rgba(239, 68, 68, 0.12);
 }
 
+/* ---- Horas (grilla de rotaciones) ---- */
+.horas-tabla {
+  border-collapse: collapse;
+  width: 100%;
+  min-width: 620px;
+}
+
+.horas-tabla th {
+  font-size: 12px;
+  font-weight: 600;
+  color: #c3cad6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  padding: 8px 4px;
+  border-bottom: 1px solid #232a3a;
+}
+
+.horas-tabla td {
+  border-bottom: 1px solid #1a1f2b;
+  border-left: 1px solid #1c212e;
+  padding: 5px;
+  text-align: center;
+  vertical-align: middle;
+  height: 40px;
+}
+
+.ht-turno {
+  text-align: left !important;
+  font-weight: 600;
+  font-size: 13px;
+  color: #e8ecf3;
+  white-space: nowrap;
+  padding-left: 12px !important;
+  border-left: none !important;
+}
+
+.ht-cell.clickable {
+  cursor: pointer;
+}
+
+.ht-cell.clickable:hover {
+  background: #171c28;
+}
+
+.ht-cell.activo {
+  background: #1c2333;
+  box-shadow: inset 0 0 0 2px var(--brand, #1a4fa3);
+}
+
+.ht-chip {
+  display: inline-block;
+  color: #fff;
+  font-size: 11px;
+  font-weight: 500;
+  padding: 2px 7px;
+  border-radius: 5px;
+  margin: 1px;
+  white-space: nowrap;
+}
+
+.ht-plus {
+  color: #3d4757;
+  font-size: 16px;
+}
+
+.ht-editor {
+  margin-top: 12px;
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.ht-editor-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: var(--muted);
+  margin-bottom: 10px;
+}
+
+.ht-editor-head b {
+  color: #e8ecf3;
+}
+
+.ht-editor-head .btn-ghost {
+  margin-left: auto;
+}
+
+.ht-editor-profes {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.ht-toggle {
+  background: transparent;
+  border: 1px solid #2c3444;
+  color: #c3cad6;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.ht-toggle.on {
+  color: #fff;
+}
+
+.ht-totales {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.ht-total {
+  display: inline-flex;
+  align-items: center;
+  gap: 7px;
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 999px;
+  padding: 5px 14px 5px 8px;
+  font-size: 13px;
+  color: #c3cad6;
+}
+
+.ht-total b {
+  color: #fff;
+  font-weight: 600;
+}
+
 /* ---- Barra lateral ---- */
 .sidebar {
   width: 214px;

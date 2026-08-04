@@ -3,6 +3,7 @@ import Sidebar from './Sidebar'
 import Inicio from './Inicio'
 import Alumnos from './Alumnos'
 import Calendario from './Calendario'
+import Horas from './Horas'
 import Pagos from './Pagos'
 import Placeholder from './Placeholder'
 import { Menu } from 'lucide-react'
@@ -44,12 +45,8 @@ export default function AppShell({ profe, user }) {
           />
         )
       case 'horas':
-        return (
-          <Placeholder
-            titulo="Horas"
-            desc="Horas trabajadas de cada profe (con las rotaciones) y las vacaciones."
-          />
-        )
+        return <Horas esAdmin={esAdmin} />
+
       case 'acuerdos':
         return (
           <Placeholder
