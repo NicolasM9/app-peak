@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Sidebar from './Sidebar'
 import Inicio from './Inicio'
 import Alumnos from './Alumnos'
+import Calendario from './Calendario'
 import Pagos from './Pagos'
 import Placeholder from './Placeholder'
 import { Menu } from 'lucide-react'
@@ -33,12 +34,8 @@ export default function AppShell({ profe, user }) {
       case 'pagos':
         return <Pagos />
       case 'calendario':
-        return (
-          <Placeholder
-            titulo="Calendario"
-            desc="Acá va a estar el calendario del staff. Lo armamos en el próximo paso; vas a poder adjuntar tu Excel."
-          />
-        )
+        return <Calendario esAdmin={esAdmin} />
+
       case 'planificaciones':
         return (
           <Placeholder
