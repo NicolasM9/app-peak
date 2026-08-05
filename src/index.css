@@ -1269,6 +1269,225 @@ html {
   gap: 8px;
 }
 
+/* ---- Planificaciones ---- */
+.mes-tabs {
+  display: flex;
+  gap: 6px;
+  overflow-x: auto;
+  padding-bottom: 6px;
+  margin-bottom: 14px;
+}
+
+.mes-tab {
+  flex: none;
+  background: #171c28;
+  border: 1px solid #232a3a;
+  color: var(--muted);
+  padding: 7px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 500;
+}
+
+.mes-tab.on {
+  background: #1a4fa3;
+  border-color: #1a4fa3;
+  color: #fff;
+}
+
+.plan-semana {
+  margin-bottom: 18px;
+}
+
+.plan-semana-tit {
+  font-size: 14px;
+  font-weight: 600;
+  color: #c3cad6;
+  margin: 0 0 8px;
+}
+
+.plan-dias {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+}
+
+.plan-dia-card {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: flex-start;
+  text-align: left;
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+
+.plan-dia-card:hover {
+  border-color: #2f3a4f;
+}
+
+.plan-dia-card.vacio {
+  border-style: dashed;
+  background: transparent;
+}
+
+.plan-dia-tit {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.plan-dia-sub {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+/* editor */
+.plan-bloque {
+  background: #171c28;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-bottom: 12px;
+}
+
+.plan-bloque-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 8px;
+}
+
+.plan-bloque-tit {
+  font-weight: 600;
+  font-size: 15px;
+}
+
+.plan-bloque-chip {
+  background: #1a4fa3;
+  color: #fff;
+  font-size: 13px;
+  padding: 2px 10px;
+  border-radius: 6px;
+}
+
+.ej-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.ej-nombre { flex: 1; min-width: 0; }
+.ej-reps { width: 72px; flex: none; }
+.ej-series { width: 68px; flex: none; }
+
+.btn-add-ej {
+  font-size: 13px;
+  padding: 6px 10px;
+}
+
+/* stats */
+.stat-bars {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+
+.stat-bar-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.stat-bar-name {
+  width: 150px;
+  flex: none;
+  font-size: 13px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.stat-bar-track {
+  flex: 1;
+  height: 12px;
+  background: #171c28;
+  border-radius: 999px;
+  overflow: hidden;
+}
+
+.stat-bar-fill {
+  display: block;
+  height: 100%;
+  background: #1a4fa3;
+  border-radius: 999px;
+}
+
+.stat-bar-num {
+  width: 26px;
+  flex: none;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+/* modo TV */
+.plan-tv {
+  background: #0c0f16;
+  border-radius: 12px;
+  min-height: 70vh;
+  padding: 22px 26px;
+}
+
+.plan-tv-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 18px;
+  font-size: 20px;
+  font-weight: 600;
+  color: #fff;
+}
+
+.plan-tv-body {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 20px;
+}
+
+.plan-tv-bloque-tit {
+  font-size: 18px;
+  font-weight: 700;
+  color: #6ea8ff;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  border-bottom: 1px solid #232a3a;
+  padding-bottom: 4px;
+}
+
+.plan-tv-ej {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 5px 0;
+  font-size: 17px;
+  color: #e8ecf3;
+}
+
+.plan-tv-ej-datos {
+  color: #9aa6b6;
+  white-space: nowrap;
+}
+
+@media (max-width: 560px) {
+  .stat-bar-name { width: 110px; }
+}
+
 /* ---- Barra lateral ---- */
 .sidebar {
   width: 214px;

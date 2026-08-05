@@ -3,6 +3,7 @@ import Sidebar from './Sidebar'
 import Inicio from './Inicio'
 import Alumnos from './Alumnos'
 import Calendario from './Calendario'
+import Planificaciones from './Planificaciones'
 import Horas from './Horas'
 import Pagos from './Pagos'
 import Acuerdos from './Acuerdos'
@@ -46,12 +47,8 @@ export default function AppShell({ profe, user }) {
         return <Calendario esAdmin={esAdmin} />
 
       case 'planificaciones':
-        return (
-          <Placeholder
-            titulo="Planificaciones"
-            desc="Acá vas a planificar con los profes, guardar el historial y generar la imagen para la tele."
-          />
-        )
+        return <Planificaciones />
+
       case 'horas':
         return <Horas esAdmin={esAdmin} />
 
