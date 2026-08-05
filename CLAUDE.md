@@ -33,22 +33,27 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Fase 2:** calendario, roster semanal de profes y vacaciones.
 - **Fase 3:** armado de rutinas (bloque grupal).
 
-## Estado del proyecto (al 2026-08-03)
-Lo que ya está hecho y funcionando:
+## Estado del proyecto (al 2026-08-05)
+**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0009.
 
-- **Fase 0 — Datos:** esquema + RLS aplicados en Supabase (planes, profes, alumnos,
-  pagos, gastos, mediciones, testeos, notas).
-- **Fase 1 — Alumnos + Pagos:** login, ABM de alumnos y registro de pagos. 74 alumnos
-  activos importados desde el Excel.
-- **Rediseño:** barra lateral con 7 solapas (Inicio, Calendario, Alumnos,
-  Planificaciones, Horas, Pagos [admin], Acuerdos profes [admin]) + pantalla de Inicio.
-- **Pagos:** facturación esperada + gastos mensuales + resultado (repartido entre los dueños).
-- **Ficha del alumno (investigación):** estado físico/lesión, notas de los profes,
-  mediciones (% masa muscular y adiposa + subida de PDF/Excel a Supabase Storage con
-  ver/descargar) y testeos (fuerza en kg, salto en cm y tests personalizados).
+- **Fase 0 — Datos:** esquema + RLS (planes, profes, alumnos, pagos, gastos, mediciones,
+  testeos, notas, sesiones, planificaciones).
+- **Fase 1 — Alumnos + Pagos:** login, ABM de alumnos, 74 alumnos importados.
+- **Inicio:** resumen (alumnos activos, cobros, ingresos, próximos vencimientos).
+- **Alumnos:** ABM + ficha de investigación (estado/lesión, notas, mediciones con % y
+  PDF/Excel a Storage, testeos de fuerza/salto/custom).
+- **Pagos [admin]:** facturación esperada + gastos (editables) + resultado. **Carga rápida**
+  (pegar nombres → registrar varios; crear alumno nuevo y saltar a su ficha). El gasto
+  "pago a profe" sale solo del sueldo base del acuerdo.
+- **Calendario:** vista semanal de sesiones estilo Google (tabla `sesiones`), color por tipo,
+  permiso por sesión.
+- **Horas:** grilla de rotaciones semanal + total por profe + vacaciones (tablas `turnos`/`vacaciones`).
+- **Acuerdos profes [admin]:** lo que cobra cada profe (base + personalizados 100%/60%); dueños excluidos.
+- **Planificaciones:** rutinas por mes/semana/día (148 sesiones importadas del Excel 2026),
+  Modo TV para la pantalla, ranking de ejercicios más usados.
 
-Pendiente: Calendario, Planificaciones, Horas + vacaciones, Acuerdos profes, publicar la
-app en una URL pública y crear los logins del resto del staff.
+Pendiente: **publicar la app** en una URL pública (para usarla en el celular) y crear los
+**logins del resto del staff** (Eze admin; Octavio/Gastón/Ailén profe).
 
 Entorno: Node portátil en `~/.peak-tools/node` (no está en el PATH del sistema); la app
 corre con Vite en el puerto 5173.
