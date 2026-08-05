@@ -61,3 +61,20 @@ export function hoyISO(today = new Date()) {
   const d = String(today.getDate()).padStart(2, '0')
   return `${y}-${m}-${d}`
 }
+
+// Normaliza un teléfono argentino al formato que usa WhatsApp: 54 9 <área><número>
+export function waPhone(tel) {
+  let d = (tel || '').replace(/\D/g, '')
+  if (!d) return ''
+  d = d.replace(/^0+/, '') // saca ceros iniciales
+  if (d.startsWith('54')) d = d.slice(2) // saca el código de país si ya venía
+  if (d.startsWith('9')) d = d.slice(1) // saca el 9 de celular si ya venía
+  return '549' + d
+}
+
+// Arma el link de WhatsApp con el mensaje ya escrito. '' si no hay teléfono.
+export function waLink(tel, mensaje) {
+  const p = waPhone(tel)
+  if (!p) return ''
+  return `https://wa.me/${p}?text=${encodeURIComponent(mensaje)}`
+}

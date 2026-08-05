@@ -575,6 +575,55 @@ html {
   font-size: 15px;
 }
 
+.cobro-actions {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-left: 10px;
+  flex: none;
+}
+.btn-wa {
+  display: inline-flex;
+  align-items: center;
+  background: #1f8f63;
+  color: #fff;
+  border: none;
+  border-radius: 8px;
+  padding: 6px 11px;
+  font-size: 12.5px;
+  font-weight: 600;
+  text-decoration: none;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn-wa:hover {
+  filter: brightness(1.08);
+}
+.btn-wa.off {
+  background: transparent;
+  color: #5f6b7a;
+  border: 1px dashed #33415a;
+  cursor: default;
+}
+.btn-pagado {
+  background: transparent;
+  color: #86d98f;
+  border: 1px solid rgba(76, 175, 80, 0.4);
+  border-radius: 8px;
+  padding: 6px 11px;
+  font-size: 12.5px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+.btn-pagado:hover {
+  background: rgba(76, 175, 80, 0.14);
+}
+.btn-pagado:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+
 .estado-chip {
   font-size: 11px;
   padding: 2px 9px;

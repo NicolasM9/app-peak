@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
-import { precioMensual } from '../lib/domain'
+import { precioMensual, hoyISO, vencimientoPorDefecto, estadoPago, ESTADO_INFO, waLink } from '../lib/domain'
 import CargaPagos from './CargaPagos'
 
 const CATEGORIAS = [
@@ -30,15 +30,18 @@ export default function Pagos({ irAlAlumno }) {
   const [editGasto, setEditGasto] = useState(null)
   const [showCarga, setShowCarga] = useState(false)
   const [confirmando, setConfirmando] = useState(null)
+  const [showPagados, setShowPagados] = useState(false)
+  const [marcando, setMarcando] = useState(null)
 
   async function load() {
     setLoading(true)
     const [al, pg, gs, pr] = await Promise.all([
       supabase
         .from('alumnos')
-        .select('ajuste_monto, medicion_nutricional, planes(precio_mensual)')
-        .eq('estado', 'activo'),
-      supabase.from('pagos').select('monto, fecha_pago'),
+        .select('id, nombre, telefono, ajuste_monto, medicion_nutricional, planes(precio_mensual)')
+        .eq('estado', 'activo')
+        .order('nombre'),
+      supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
       supabase.from('gastos').select('*').eq('periodo', periodo).order('monto', { ascending: false }),
       supabase
         .from('profes')
@@ -66,6 +69,42 @@ export default function Pagos({ irAlAlumno }) {
       return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth()
     })
     .reduce((s, p) => s + Number(p.monto || 0), 0)
+
+  // Cobros del mes: por cada alumno activo, si ya pagó este mes o todavía debe
+  const pagadoSet = new Set(
+    pagos
+      .filter((p) => {
+        if (!p.fecha_pago) return false
+        const d = new Date(p.fecha_pago)
+        return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth()
+      })
+      .map((p) => p.alumno_id),
+  )
+  const venc6 = vencimientoPorDefecto()
+  const rank = { vencido: 0, por_vencer: 1, al_dia: 2 }
+  const cobros = alumnos
+    .map((a) => {
+      const pagado = pagadoSet.has(a.id)
+      const estado = estadoPago({ vencimiento: venc6, fecha_pago: pagado ? hoyISO() : null })
+      return { id: a.id, nombre: a.nombre, telefono: a.telefono, monto: precioMensual(a), pagado, estado }
+    })
+    .sort((x, y) => (rank[x.estado] - rank[y.estado]) || x.nombre.localeCompare(y.nombre))
+  const deudores = cobros.filter((c) => !c.pagado)
+  const deudaTotal = deudores.reduce((s, c) => s + c.monto, 0)
+  const listado = showPagados ? cobros : deudores
+  const mesTxt = MESES[ahora.getMonth()].toLowerCase()
+  const msgCobro = (c) =>
+    `Hola ${c.nombre}! 👋 Te recordamos la cuota de ${mesTxt} de Peak Performance: ${formatARS(c.monto)}. ¡Gracias! 💪`
+
+  async function marcarPagado(c) {
+    setMarcando(c.id)
+    const pago = { alumno_id: c.id, monto: c.monto, vencimiento: venc6, fecha_pago: hoyISO(), metodo: null }
+    pago.estado = estadoPago(pago)
+    await supabase.from('pagos').insert(pago)
+    setMarcando(null)
+    await load()
+  }
+
   const pagosProfes = profes
     .map((p) => ({ id: p.id, nombre: p.nombre, monto: Number(p.base_mensual || 0) }))
     .filter((x) => x.monto > 0)
@@ -124,6 +163,54 @@ export default function Pagos({ irAlAlumno }) {
               <div className="stat-sub">{formatARS(resultado / 2)} c/u (vos y Eze)</div>
             </div>
           </div>
+
+          <div className="section-subhead">
+            <h2>Cobros de {nombreMes(periodo)}</h2>
+            {deudores.length > 0 && (
+              <button className="btn-ghost" onClick={() => setShowPagados((s) => !s)}>
+                {showPagados ? 'Solo deudores' : 'Ver todos'}
+              </button>
+            )}
+          </div>
+          <p className="cal-sub" style={{ marginTop: -4 }}>
+            {cobros.length - deudores.length} al día ·{' '}
+            <b style={{ color: '#f0999a' }}>{deudores.length} deben</b> ({formatARS(deudaTotal)})
+          </p>
+          {listado.length === 0 ? (
+            <p className="muted">¡Todos al día este mes! 🎉</p>
+          ) : (
+            <ul className="pago-list">
+              {listado.map((c) => {
+                const info = ESTADO_INFO[c.estado]
+                const wa = waLink(c.telefono, msgCobro(c))
+                return (
+                  <li key={c.id} className="pago-row">
+                    <div className="pago-info">
+                      <span className="pago-venc">{c.nombre}</span>
+                      <span className="pago-sub" style={{ color: info.text }}>{info.label}</span>
+                    </div>
+                    <span className="pago-monto">{formatARS(c.monto)}</span>
+                    {!c.pagado && (
+                      <div className="cobro-actions">
+                        {wa ? (
+                          <a className="btn-wa" href={wa} target="_blank" rel="noopener noreferrer">WhatsApp</a>
+                        ) : (
+                          <span className="btn-wa off" title="Sin teléfono cargado">sin tel</span>
+                        )}
+                        <button
+                          className="btn-pagado"
+                          disabled={marcando === c.id}
+                          onClick={() => marcarPagado(c)}
+                        >
+                          {marcando === c.id ? '…' : 'Pagado'}
+                        </button>
+                      </div>
+                    )}
+                  </li>
+                )
+              })}
+            </ul>
+          )}
 
           <div className="section-subhead">
             <h2>Gastos de {nombreMes(periodo)}</h2>
