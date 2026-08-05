@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
-import { precioMensual, totalAcuerdo } from '../lib/domain'
+import { precioMensual } from '../lib/domain'
 import CargaPagos from './CargaPagos'
 
 const CATEGORIAS = [
@@ -42,7 +42,7 @@ export default function Pagos({ irAlAlumno }) {
       supabase.from('gastos').select('*').eq('periodo', periodo).order('monto', { ascending: false }),
       supabase
         .from('profes')
-        .select('id, nombre, base_mensual, split_resto, personalizados')
+        .select('id, nombre, base_mensual')
         .eq('rol', 'profe')
         .order('id'),
     ])
@@ -67,7 +67,7 @@ export default function Pagos({ irAlAlumno }) {
     })
     .reduce((s, p) => s + Number(p.monto || 0), 0)
   const pagosProfes = profes
-    .map((p) => ({ id: p.id, nombre: p.nombre, monto: totalAcuerdo(p) }))
+    .map((p) => ({ id: p.id, nombre: p.nombre, monto: Number(p.base_mensual || 0) }))
     .filter((x) => x.monto > 0)
   const totalProfes = pagosProfes.reduce((s, x) => s + x.monto, 0)
   const gastosManuales = gastos.reduce((s, g) => s + Number(g.monto || 0), 0)
@@ -189,10 +189,10 @@ export default function Pagos({ irAlAlumno }) {
             <h2>Pagos a profes</h2>
           </div>
           <p className="cal-sub" style={{ marginTop: -4 }}>
-            Sale de la solapa Acuerdos. Si cambiás un acuerdo, se actualiza acá solo.
+            Es el sueldo base de cada profe (sale de Acuerdos). Si lo cambiás allá, se actualiza acá solo.
           </p>
           {pagosProfes.length === 0 ? (
-            <p className="muted">Cargá los acuerdos para ver acá lo que se le paga a cada profe.</p>
+            <p className="muted">Los profes con sueldo base van a aparecer acá (se toma de Acuerdos).</p>
           ) : (
             <ul className="pago-list">
               {pagosProfes.map((x) => (
