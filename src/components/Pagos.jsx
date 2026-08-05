@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
-import { precioMensual } from '../lib/domain'
+import { precioMensual, totalAcuerdo } from '../lib/domain'
 import CargaPagos from './CargaPagos'
 
 const CATEGORIAS = [
@@ -24,24 +24,32 @@ export default function Pagos({ irAlAlumno }) {
   const [alumnos, setAlumnos] = useState([])
   const [pagos, setPagos] = useState([])
   const [gastos, setGastos] = useState([])
+  const [profes, setProfes] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [editGasto, setEditGasto] = useState(null)
   const [showCarga, setShowCarga] = useState(false)
   const [confirmando, setConfirmando] = useState(null)
 
   async function load() {
     setLoading(true)
-    const [al, pg, gs] = await Promise.all([
+    const [al, pg, gs, pr] = await Promise.all([
       supabase
         .from('alumnos')
         .select('ajuste_monto, medicion_nutricional, planes(precio_mensual)')
         .eq('estado', 'activo'),
       supabase.from('pagos').select('monto, fecha_pago'),
       supabase.from('gastos').select('*').eq('periodo', periodo).order('monto', { ascending: false }),
+      supabase
+        .from('profes')
+        .select('id, nombre, base_mensual, split_resto, personalizados')
+        .eq('rol', 'profe')
+        .order('id'),
     ])
     setAlumnos(al.data || [])
     setPagos(pg.data || [])
     setGastos(gs.data || [])
+    setProfes(pr.data || [])
     setLoading(false)
   }
 
@@ -58,7 +66,12 @@ export default function Pagos({ irAlAlumno }) {
       return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth()
     })
     .reduce((s, p) => s + Number(p.monto || 0), 0)
-  const totalGastos = gastos.reduce((s, g) => s + Number(g.monto || 0), 0)
+  const pagosProfes = profes
+    .map((p) => ({ id: p.id, nombre: p.nombre, monto: totalAcuerdo(p) }))
+    .filter((x) => x.monto > 0)
+  const totalProfes = pagosProfes.reduce((s, x) => s + x.monto, 0)
+  const gastosManuales = gastos.reduce((s, g) => s + Number(g.monto || 0), 0)
+  const totalGastos = gastosManuales + totalProfes
   const resultado = facturacion - totalGastos
 
   async function delGasto(id) {
@@ -115,18 +128,20 @@ export default function Pagos({ irAlAlumno }) {
           <div className="section-subhead">
             <h2>Gastos de {nombreMes(periodo)}</h2>
             {!showForm && (
-              <button className="btn-primary" onClick={() => setShowForm(true)}>+ Agregar</button>
+              <button className="btn-primary" onClick={() => { setEditGasto(null); setShowForm(true) }}>+ Agregar</button>
             )}
           </div>
 
           {showForm && (
             <GastoForm
               periodo={periodo}
+              gasto={editGasto}
               onDone={async () => {
                 setShowForm(false)
+                setEditGasto(null)
                 await load()
               }}
-              onCancel={() => setShowForm(false)}
+              onCancel={() => { setShowForm(false); setEditGasto(null) }}
             />
           )}
 
@@ -150,6 +165,13 @@ export default function Pagos({ irAlAlumno }) {
                     <>
                       <span className="pago-monto">{formatARS(g.monto)}</span>
                       <button
+                        className="pago-edit"
+                        aria-label="Editar gasto"
+                        onClick={() => { setEditGasto(g); setShowForm(true) }}
+                      >
+                        ✎
+                      </button>
+                      <button
                         className="pago-del"
                         aria-label="Borrar gasto"
                         onClick={() => setConfirmando(g.id)}
@@ -163,9 +185,31 @@ export default function Pagos({ irAlAlumno }) {
             </ul>
           )}
 
-          {gastos.length > 0 && (
-            <p className="muted" style={{ textAlign: 'right', marginTop: 10 }}>
-              Total gastos: <b style={{ color: '#fff' }}>{formatARS(totalGastos)}</b>
+          <div className="section-subhead">
+            <h2>Pagos a profes</h2>
+          </div>
+          <p className="cal-sub" style={{ marginTop: -4 }}>
+            Sale de la solapa Acuerdos. Si cambiás un acuerdo, se actualiza acá solo.
+          </p>
+          {pagosProfes.length === 0 ? (
+            <p className="muted">Cargá los acuerdos para ver acá lo que se le paga a cada profe.</p>
+          ) : (
+            <ul className="pago-list">
+              {pagosProfes.map((x) => (
+                <li key={x.id} className="pago-row">
+                  <div className="pago-info">
+                    <span className="pago-venc">{x.nombre}</span>
+                    <span className="pago-sub">según acuerdo</span>
+                  </div>
+                  <span className="pago-monto">{formatARS(x.monto)}</span>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {(gastos.length > 0 || pagosProfes.length > 0) && (
+            <p className="muted" style={{ textAlign: 'right', marginTop: 12 }}>
+              Total gastos (con profes): <b style={{ color: '#fff' }}>{formatARS(totalGastos)}</b>
             </p>
           )}
         </>
@@ -174,10 +218,11 @@ export default function Pagos({ irAlAlumno }) {
   )
 }
 
-function GastoForm({ periodo, onDone, onCancel }) {
-  const [categoria, setCategoria] = useState('Alquiler')
-  const [monto, setMonto] = useState('')
-  const [descripcion, setDescripcion] = useState('')
+function GastoForm({ periodo, gasto, onDone, onCancel }) {
+  const editing = !!gasto
+  const [categoria, setCategoria] = useState(gasto?.categoria || 'Alquiler')
+  const [monto, setMonto] = useState(gasto?.monto ?? '')
+  const [descripcion, setDescripcion] = useState(gasto?.descripcion || '')
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -189,9 +234,10 @@ function GastoForm({ periodo, onDone, onCancel }) {
       return
     }
     setSaving(true)
-    const { error } = await supabase
-      .from('gastos')
-      .insert({ periodo, categoria, monto: Number(monto), descripcion: descripcion.trim() || null })
+    const payload = { periodo, categoria, monto: Number(monto), descripcion: descripcion.trim() || null }
+    const { error } = editing
+      ? await supabase.from('gastos').update(payload).eq('id', gasto.id)
+      : await supabase.from('gastos').insert(payload)
     setSaving(false)
     if (error) {
       setError('No se pudo guardar: ' + error.message)
@@ -224,7 +270,7 @@ function GastoForm({ periodo, onDone, onCancel }) {
       <div className="form-actions">
         <button type="button" className="btn-ghost" onClick={onCancel}>Cancelar</button>
         <button type="submit" className="btn-primary" disabled={saving}>
-          {saving ? 'Guardando…' : 'Guardar gasto'}
+          {saving ? 'Guardando…' : editing ? 'Guardar cambios' : 'Guardar gasto'}
         </button>
       </div>
     </form>

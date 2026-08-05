@@ -602,6 +602,21 @@ html {
   background: rgba(239, 68, 68, 0.12);
 }
 
+.pago-edit {
+  background: transparent;
+  border: none;
+  color: #5f6b7a;
+  font-size: 15px;
+  padding: 4px 6px;
+  border-radius: 8px;
+  flex: none;
+}
+
+.pago-edit:hover {
+  color: #8fb4f0;
+  background: rgba(26, 79, 163, 0.14);
+}
+
 .pago-confirm {
   display: flex;
   align-items: center;
