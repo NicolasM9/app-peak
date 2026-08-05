@@ -40,7 +40,7 @@ export default function Horas({ esAdmin }) {
   async function load(showLoading) {
     if (showLoading) setLoading(true)
     const [{ data: pr }, { data: tu }, { data: va }] = await Promise.all([
-      supabase.from('profes').select('id, nombre').order('id'),
+      supabase.from('profes_publico').select('id, nombre').order('id'),
       supabase.from('turnos').select('id, profe_id, dia, horario, horas'),
       supabase.from('vacaciones').select('*').order('inicio', { ascending: false }),
     ])

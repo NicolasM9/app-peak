@@ -14,9 +14,9 @@ import {
 } from 'lucide-react'
 
 const ITEMS = [
-  { id: 'inicio', label: 'Inicio', Icon: Home },
+  { id: 'inicio', label: 'Inicio', Icon: Home, admin: true },
   { id: 'calendario', label: 'Calendario', Icon: Calendar },
-  { id: 'alumnos', label: 'Alumnos', Icon: Users },
+  { id: 'alumnos', label: 'Alumnos', Icon: Users, admin: true },
   { id: 'planificaciones', label: 'Planificaciones', Icon: ClipboardList },
   { id: 'horas', label: 'Horas', Icon: Clock },
 ]
@@ -43,7 +43,7 @@ export default function Sidebar({ seccion, onIr, esAdmin, nombre, open, onClose 
         </div>
 
         <nav className="sidebar-nav">
-          {ITEMS.map(({ id, label, Icon }) => (
+          {ITEMS.filter((it) => !it.admin || esAdmin).map(({ id, label, Icon }) => (
             <button
               key={id}
               className={`nav-item ${seccion === id ? 'on' : ''}`}

@@ -34,7 +34,9 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Fase 3:** armado de rutinas (bloque grupal).
 
 ## Estado del proyecto (al 2026-08-05)
-**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0009.
+**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0010.
+**App publicada** en `earnest-moonbeam-59f0d7.netlify.app` (Netlify; se actualiza arrastrando
+la carpeta `dist/` a la pestaña Deploys del sitio).
 
 - **Fase 0 — Datos:** esquema + RLS (planes, profes, alumnos, pagos, gastos, mediciones,
   testeos, notas, sesiones, planificaciones).
@@ -52,8 +54,14 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Planificaciones:** rutinas por mes/semana/día (148 sesiones importadas del Excel 2026),
   Modo TV para la pantalla, ranking de ejercicios más usados.
 
-Pendiente: **publicar la app** en una URL pública (para usarla en el celular) y crear los
-**logins del resto del staff** (Eze admin; Octavio/Gastón/Ailén profe).
+**Logins del staff:** creados y conectados Eze (admin), Gastón y Ailén (profe), además de
+Nico (admin). Se crean en Supabase → Authentication → Users (con "Auto Confirm") y se enlazan
+a la ficha de `profes` por `user_id` (match por mail). **Falta solo Octavio** (pendiente su mail).
+
+**Seguridad del rol profe (migración 0010):** un profe NO puede ver sueldos ajenos, mediciones,
+testeos, notas ni pagos — cerrado en las pantallas (Sidebar/AppShell ocultan Inicio, Alumnos,
+Pagos, Acuerdos) *y* en la base (RLS). Los nombres de profes para Calendario/Horas salen de la
+vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RLS.
 
 Entorno: Node portátil en `~/.peak-tools/node` (no está en el PATH del sistema); la app
 corre con Vite en el puerto 5173.

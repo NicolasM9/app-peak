@@ -14,7 +14,7 @@ const TITULOS = {
   inicio: 'Inicio', calendario: 'Calendario', alumnos: 'Alumnos',
   planificaciones: 'Planificaciones', horas: 'Horas', pagos: 'Pagos', acuerdos: 'Acuerdos profes',
 }
-const ADMIN_SECC = new Set(['pagos', 'acuerdos'])
+const ADMIN_SECC = new Set(['inicio', 'alumnos', 'pagos', 'acuerdos'])
 
 export default function AppShell({ profe, user }) {
   const nombre = profe?.nombre || user?.email
@@ -24,7 +24,7 @@ export default function AppShell({ profe, user }) {
   const [alumnoTarget, setAlumnoTarget] = useState(null)
 
   let sec = seccion
-  if (ADMIN_SECC.has(sec) && !esAdmin) sec = 'inicio'
+  if (ADMIN_SECC.has(sec) && !esAdmin) sec = 'calendario'
 
   function ir(id) {
     setSeccion(id)

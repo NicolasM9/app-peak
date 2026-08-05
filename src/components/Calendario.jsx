@@ -75,7 +75,7 @@ export default function Calendario({ esAdmin }) {
     setLoading(true)
     const [{ data: ses }, { data: pr }] = await Promise.all([
       supabase.from('sesiones').select('*'),
-      supabase.from('profes').select('id, nombre'),
+      supabase.from('profes_publico').select('id, nombre'),
     ])
     setSesiones(ses || [])
     setProfes(pr || [])
