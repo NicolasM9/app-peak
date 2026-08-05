@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
-import { precioMensual, hoyISO, vencimientoPorDefecto, estadoPago, ESTADO_INFO, waLink } from '../lib/domain'
+import { precioMensual, hoyISO, vencimientoPorDefecto, estadoPago, ESTADO_INFO, waLink, MEDICION_MONTO } from '../lib/domain'
 import CargaPagos from './CargaPagos'
 
 const CATEGORIAS = [
@@ -110,7 +110,9 @@ export default function Pagos({ irAlAlumno }) {
     .filter((x) => x.monto > 0)
   const totalProfes = pagosProfes.reduce((s, x) => s + x.monto, 0)
   const gastosManuales = gastos.reduce((s, g) => s + Number(g.monto || 0), 0)
-  const totalGastos = gastosManuales + totalProfes
+  const conMedicion = alumnos.filter((a) => a.medicion_nutricional).length
+  const diegoTotal = conMedicion * MEDICION_MONTO
+  const totalGastos = gastosManuales + totalProfes + diegoTotal
   const resultado = facturacion - totalGastos
 
   async function delGasto(id) {
@@ -273,13 +275,13 @@ export default function Pagos({ irAlAlumno }) {
           )}
 
           <div className="section-subhead">
-            <h2>Pagos a profes</h2>
+            <h2>Pagos a profes y terceros</h2>
           </div>
           <p className="cal-sub" style={{ marginTop: -4 }}>
-            Es el sueldo base de cada profe (sale de Acuerdos). Si lo cambiás allá, se actualiza acá solo.
+            Sueldo base de cada profe (sale de Acuerdos) y el pago a Diego por las mediciones. Se actualizan solos.
           </p>
-          {pagosProfes.length === 0 ? (
-            <p className="muted">Los profes con sueldo base van a aparecer acá (se toma de Acuerdos).</p>
+          {pagosProfes.length === 0 && diegoTotal === 0 ? (
+            <p className="muted">Van a aparecer acá cuando cargues sueldos base (en Acuerdos) o mediciones (en las fichas).</p>
           ) : (
             <ul className="pago-list">
               {pagosProfes.map((x) => (
@@ -291,10 +293,19 @@ export default function Pagos({ irAlAlumno }) {
                   <span className="pago-monto">{formatARS(x.monto)}</span>
                 </li>
               ))}
+              {diegoTotal > 0 && (
+                <li className="pago-row">
+                  <div className="pago-info">
+                    <span className="pago-venc">Diego Sívori</span>
+                    <span className="pago-sub">mediciones · {conMedicion} alumno{conMedicion === 1 ? '' : 's'}</span>
+                  </div>
+                  <span className="pago-monto">{formatARS(diegoTotal)}</span>
+                </li>
+              )}
             </ul>
           )}
 
-          {(gastos.length > 0 || pagosProfes.length > 0) && (
+          {(gastos.length > 0 || pagosProfes.length > 0 || diegoTotal > 0) && (
             <p className="muted" style={{ textAlign: 'right', marginTop: 12 }}>
               Total gastos (con profes): <b style={{ color: '#fff' }}>{formatARS(totalGastos)}</b>
             </p>

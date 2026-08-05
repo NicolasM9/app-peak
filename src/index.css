@@ -1730,6 +1730,22 @@ html {
   padding: 6px 0;
 }
 
+.mini-row-btn {
+  width: 100%;
+  background: transparent;
+  border: none;
+  border-radius: 8px;
+  text-align: left;
+  font: inherit;
+  color: #c9d0da;
+  cursor: pointer;
+  padding: 8px 8px;
+  margin: 0 -8px;
+}
+.mini-row-btn:hover {
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .txt-venc {
   color: #f0999a;
 }

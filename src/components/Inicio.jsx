@@ -1,16 +1,27 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { formatARS, formatFecha } from '../lib/format'
-import { estadoPago, MEDICION_MONTO } from '../lib/domain'
+import { formatARS } from '../lib/format'
+import {
+  precioMensual,
+  estadoPago,
+  vencimientoPorDefecto,
+  MEDICION_MONTO,
+  ESTADO_INFO,
+} from '../lib/domain'
 
-export default function Inicio() {
+const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
+export default function Inicio({ onIrAlumno }) {
   const [data, setData] = useState(null)
 
   useEffect(() => {
     ;(async () => {
       const [{ data: alumnos }, { data: pagos }] = await Promise.all([
-        supabase.from('alumnos').select('id, estado, medicion_nutricional'),
-        supabase.from('pagos').select('monto, vencimiento, fecha_pago, alumnos(nombre)'),
+        supabase
+          .from('alumnos')
+          .select('id, nombre, estado, medicion_nutricional, fecha_nacimiento, ajuste_monto, planes(precio_mensual)'),
+        supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
       ])
       setData({ alumnos: alumnos || [], pagos: pagos || [] })
     })()
@@ -18,23 +29,34 @@ export default function Inicio() {
 
   if (!data) return <p className="muted">Cargando…</p>
 
-  const activos = data.alumnos.filter((a) => a.estado === 'activo').length
-  const conMedicion = data.alumnos.filter((a) => a.medicion_nutricional).length
-  const pendientes = data.pagos.filter((p) => !p.fecha_pago)
-  const pendienteTotal = pendientes.reduce((s, p) => s + Number(p.monto || 0), 0)
-
   const ahora = new Date()
+  const esteMes = (iso) => {
+    if (!iso) return false
+    const d = new Date(iso)
+    return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth()
+  }
+
+  const activos = data.alumnos.filter((a) => a.estado === 'activo')
+  const conMedicion = activos.filter((a) => a.medicion_nutricional).length
+
+  const pagadoSet = new Set(data.pagos.filter((p) => esteMes(p.fecha_pago)).map((p) => p.alumno_id))
   const ingresosMes = data.pagos
-    .filter((p) => {
-      if (!p.fecha_pago) return false
-      const d = new Date(p.fecha_pago)
-      return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth()
-    })
+    .filter((p) => esteMes(p.fecha_pago))
     .reduce((s, p) => s + Number(p.monto || 0), 0)
 
-  const proximos = [...pendientes]
-    .sort((a, b) => (a.vencimiento < b.vencimiento ? -1 : 1))
-    .slice(0, 5)
+  const venc6 = vencimientoPorDefecto()
+  const estadoDeuda = estadoPago({ vencimiento: venc6, fecha_pago: null })
+  const deudores = activos
+    .filter((a) => !pagadoSet.has(a.id))
+    .map((a) => ({ id: a.id, nombre: a.nombre, monto: precioMensual(a) }))
+    .sort((x, y) => x.nombre.localeCompare(y.nombre))
+  const pendienteTotal = deudores.reduce((s, d) => s + d.monto, 0)
+  const proximos = deudores.slice(0, 6)
+
+  const cumples = activos
+    .filter((a) => a.fecha_nacimiento && Number(a.fecha_nacimiento.split('-')[1]) === ahora.getMonth() + 1)
+    .map((a) => ({ id: a.id, nombre: a.nombre, dia: Number(a.fecha_nacimiento.split('-')[2]) }))
+    .sort((x, y) => x.dia - y.dia)
 
   return (
     <div>
@@ -46,11 +68,11 @@ export default function Inicio() {
       </p>
 
       <div className="stat-grid">
-        <Stat label="Alumnos activos" value={activos} />
+        <Stat label="Alumnos activos" value={activos.length} />
         <Stat
-          label="Cobros pendientes"
+          label="Deben este mes"
           value={formatARS(pendienteTotal)}
-          sub={`${pendientes.length} pago${pendientes.length === 1 ? '' : 's'}`}
+          sub={`${deudores.length} alumno${deudores.length === 1 ? '' : 's'}`}
           accent="#f2cd5c"
         />
         <Stat label="Ingresos del mes" value={formatARS(ingresosMes)} />
@@ -62,23 +84,47 @@ export default function Inicio() {
       </div>
 
       <div className="pk-card" style={{ marginTop: 14 }}>
-        <div className="card-title">Próximos vencimientos</div>
+        <div className="card-title">Deudores del mes</div>
         {proximos.length === 0 ? (
-          <p className="muted" style={{ margin: 0 }}>
-            No hay pagos pendientes. 🎉
-          </p>
+          <p className="muted" style={{ margin: 0 }}>¡Todos al día! 🎉</p>
         ) : (
-          proximos.map((p, i) => (
-            <div key={i} className="mini-row">
-              <span>{p.alumnos?.nombre || 'Alumno'}</span>
-              <span className={estadoPago(p) === 'vencido' ? 'txt-venc' : 'muted'}>
-                {estadoPago(p) === 'vencido' ? 'vencido' : formatFecha(p.vencimiento)} ·{' '}
-                {formatARS(p.monto)}
-              </span>
-            </div>
-          ))
+          <>
+            {proximos.map((d) => (
+              <button
+                key={d.id}
+                className="mini-row mini-row-btn"
+                onClick={() => onIrAlumno && onIrAlumno(d.id)}
+              >
+                <span>{d.nombre}</span>
+                <span className={estadoDeuda === 'vencido' ? 'txt-venc' : 'muted'}>
+                  {ESTADO_INFO[estadoDeuda].label} · {formatARS(d.monto)}
+                </span>
+              </button>
+            ))}
+            {deudores.length > proximos.length && (
+              <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>
+                y {deudores.length - proximos.length} más… (ver todos en Pagos)
+              </p>
+            )}
+          </>
         )}
       </div>
+
+      {cumples.length > 0 && (
+        <div className="pk-card" style={{ marginTop: 14 }}>
+          <div className="card-title">🎂 Cumpleaños de {MESES[ahora.getMonth()]}</div>
+          {cumples.map((c) => (
+            <button
+              key={c.id}
+              className="mini-row mini-row-btn"
+              onClick={() => onIrAlumno && onIrAlumno(c.id)}
+            >
+              <span>{c.nombre}</span>
+              <span className="muted">{c.dia} de {MESES[ahora.getMonth()].toLowerCase()}</span>
+            </button>
+          ))}
+        </div>
+      )}
     </div>
   )
 }

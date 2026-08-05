@@ -56,7 +56,7 @@ export default function AppShell({ profe, user }) {
         return <Acuerdos />
 
       default:
-        return <Inicio />
+        return <Inicio onIrAlumno={irAlAlumno} />
     }
   }
 
