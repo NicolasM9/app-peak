@@ -28,7 +28,7 @@ export default function App() {
     }
     supabase
       .from('profes')
-      .select('nombre, rol')
+      .select('id, nombre, rol, base_mensual, split_resto, personalizados')
       .eq('user_id', session.user.id)
       .maybeSingle()
       .then(({ data }) => setProfe(data))

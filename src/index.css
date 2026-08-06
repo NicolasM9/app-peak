@@ -1746,6 +1746,21 @@ html {
   background: rgba(255, 255, 255, 0.05);
 }
 
+.mipeak-dia {
+  margin-top: 12px;
+}
+.mipeak-dia:first-of-type {
+  margin-top: 4px;
+}
+.mipeak-dia-tit {
+  font-weight: 700;
+  font-size: 12px;
+  color: #8fb4f0;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  margin-bottom: 2px;
+}
+
 .txt-venc {
   color: #f0999a;
 }

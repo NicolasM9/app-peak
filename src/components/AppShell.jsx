@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import Sidebar from './Sidebar'
 import Inicio from './Inicio'
+import MiPeak from './MiPeak'
 import Alumnos from './Alumnos'
 import Calendario from './Calendario'
 import Planificaciones from './Planificaciones'
@@ -14,7 +15,7 @@ const TITULOS = {
   inicio: 'Inicio', calendario: 'Calendario', alumnos: 'Alumnos',
   planificaciones: 'Planificaciones', horas: 'Horas', pagos: 'Pagos', acuerdos: 'Acuerdos profes',
 }
-const ADMIN_SECC = new Set(['inicio', 'alumnos', 'pagos', 'acuerdos'])
+const ADMIN_SECC = new Set(['alumnos', 'pagos', 'acuerdos'])
 
 export default function AppShell({ profe, user }) {
   const nombre = profe?.nombre || user?.email
@@ -24,7 +25,7 @@ export default function AppShell({ profe, user }) {
   const [alumnoTarget, setAlumnoTarget] = useState(null)
 
   let sec = seccion
-  if (ADMIN_SECC.has(sec) && !esAdmin) sec = 'calendario'
+  if (ADMIN_SECC.has(sec) && !esAdmin) sec = 'inicio'
 
   function ir(id) {
     setSeccion(id)
@@ -56,7 +57,7 @@ export default function AppShell({ profe, user }) {
         return <Acuerdos />
 
       default:
-        return <Inicio onIrAlumno={irAlAlumno} />
+        return esAdmin ? <Inicio onIrAlumno={irAlAlumno} /> : <MiPeak profe={profe} />
     }
   }
 

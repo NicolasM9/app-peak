@@ -14,7 +14,7 @@ import {
 } from 'lucide-react'
 
 const ITEMS = [
-  { id: 'inicio', label: 'Inicio', Icon: Home, admin: true },
+  { id: 'inicio', label: 'Inicio', labelProfe: 'Mi Peak', Icon: Home },
   { id: 'calendario', label: 'Calendario', Icon: Calendar },
   { id: 'alumnos', label: 'Alumnos', Icon: Users, admin: true },
   { id: 'planificaciones', label: 'Planificaciones', Icon: ClipboardList },
@@ -43,15 +43,19 @@ export default function Sidebar({ seccion, onIr, esAdmin, nombre, open, onClose 
         </div>
 
         <nav className="sidebar-nav">
-          {ITEMS.filter((it) => !it.admin || esAdmin).map(({ id, label, Icon }) => (
-            <button
-              key={id}
-              className={`nav-item ${seccion === id ? 'on' : ''}`}
-              onClick={() => onIr(id)}
-            >
-              <Icon size={18} /> {label}
-            </button>
-          ))}
+          {ITEMS.filter((it) => !it.admin || esAdmin).map((it) => {
+            const Icon = it.Icon
+            const label = !esAdmin && it.labelProfe ? it.labelProfe : it.label
+            return (
+              <button
+                key={it.id}
+                className={`nav-item ${seccion === it.id ? 'on' : ''}`}
+                onClick={() => onIr(it.id)}
+              >
+                <Icon size={18} /> {label}
+              </button>
+            )
+          })}
 
           {esAdmin && (
             <>
