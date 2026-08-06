@@ -5,6 +5,7 @@ import { precioMensual, estadoPago, ESTADO_INFO, METODO_LABEL, hoyISO } from '..
 import PagoForm from './PagoForm'
 import Mediciones from './Mediciones'
 import Testeos from './Testeos'
+import Evolucion from './Evolucion'
 
 const EST_FISICO = {
   sano: { label: 'Sano', color: '#4caf50' },
@@ -170,6 +171,8 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
       <Mediciones alumnoId={alumno.id} />
 
       <Testeos alumnoId={alumno.id} />
+
+      <Evolucion alumnoId={alumno.id} />
 
       <div className="section-subhead"><h2>Notas de los profes</h2></div>
       <form className="nota-add" onSubmit={agregarNota}>

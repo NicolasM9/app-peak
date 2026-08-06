@@ -2230,3 +2230,93 @@ textarea {
   font-size: 14px;
   color: #dfe4ec;
 }
+
+/* ===== Evolución del alumno ===== */
+.ev-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  gap: 10px;
+  margin-bottom: 12px;
+}
+.ev-card {
+  background: #12161f;
+  border: 1px solid #232a39;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.ev-card-top {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.ev-label {
+  font-size: 13px;
+  color: #8b94a6;
+}
+.ev-last {
+  font-size: 22px;
+  font-weight: 700;
+  color: #fff;
+}
+.ev-card-bot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+.ev-tests {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.ev-test-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #12161f;
+  border: 1px solid #232a39;
+  border-radius: 10px;
+  padding: 9px 13px;
+}
+.ev-test-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+}
+.ev-test-name {
+  font-size: 15px;
+  color: #e7ebf1;
+  font-weight: 600;
+}
+.ev-test-val {
+  font-size: 13px;
+  color: #8b94a6;
+}
+.ev-test-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.ev-delta {
+  font-size: 12.5px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+.ev-delta.sube {
+  color: #86d98f;
+}
+.ev-delta.baja {
+  color: #f4a0a0;
+}
+.ev-delta.neutro {
+  color: #8b94a6;
+  font-weight: 600;
+}
+.ev-spark {
+  flex-shrink: 0;
+}

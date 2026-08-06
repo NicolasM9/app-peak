@@ -82,6 +82,10 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
   lista** por fecha (✓ Vino / ✕ Faltó, upsert por `sesion_id+alumno_id+fecha`). La ficha del alumno
   muestra "vino X veces este mes · última vez". Solo admin (RLS `es_admin()`). Componente
   `SesionAlumnos.jsx` colgado de `SesionForm` al editar.
+- **Evolución del alumno** (sin migración; usa mediciones/testeos): sección en la ficha con
+  mini-gráficos SVG propios (sin librerías). Muestra masa muscular ↑ / adiposa ↓ (variación
+  primero→último + sparkline) y cada testeo agrupado por ejercicio con su progreso (delta + % +
+  sparkline). Verde = mejoró, rojo = empeoró. Componente `Evolucion.jsx`.
 
 **Pendientes:** teléfonos de los alumnos (para que sirva WhatsApp), asignar el profe a cada sesión del
 Calendario (para llenar "Mis días"), login de Octavio, y montar **auto-deploy** (GitHub + Netlify) para
