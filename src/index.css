@@ -2320,3 +2320,28 @@ textarea {
 .ev-spark {
   flex-shrink: 0;
 }
+
+/* ===== Header con varias acciones + carga de teléfonos ===== */
+.section-head-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ct-tel {
+  width: 150px;
+  flex: none;
+}
+.ct-actual {
+  flex: none;
+  font-size: 11px;
+  color: #f2cd5c;
+  background: rgba(234, 179, 8, 0.12);
+  padding: 2px 8px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+@media (max-width: 560px) {
+  .ct-tel {
+    width: 120px;
+  }
+}

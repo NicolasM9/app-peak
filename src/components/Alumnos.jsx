@@ -4,6 +4,7 @@ import { formatARS } from '../lib/format'
 import { precioMensual, estadoAlumno, ESTADO_INFO } from '../lib/domain'
 import AlumnoForm from './AlumnoForm'
 import AlumnoDetalle from './AlumnoDetalle'
+import CargaTelefonos from './CargaTelefonos'
 
 export default function Alumnos({ autor, abrir, onAbierto }) {
   const [alumnos, setAlumnos] = useState([])
@@ -65,6 +66,15 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
     )
   }
 
+  if (view.name === 'telefonos') {
+    return (
+      <CargaTelefonos
+        onDone={async () => { await load(); setView({ name: 'list' }) }}
+        onCancel={() => setView({ name: 'list' })}
+      />
+    )
+  }
+
   if (view.name === 'detalle') {
     const alumno = alumnos.find((a) => a.id === view.alumnoId)
     if (!alumno) {
@@ -97,9 +107,14 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
     <div className="alumnos">
       <div className="section-head">
         <h1 className="section-title">Alumnos</h1>
-        <button className="btn-primary" onClick={() => setView({ name: 'form' })}>
-          + Nuevo
-        </button>
+        <div className="section-head-actions">
+          <button className="btn-ghost" onClick={() => setView({ name: 'telefonos' })}>
+            ☎ Teléfonos
+          </button>
+          <button className="btn-primary" onClick={() => setView({ name: 'form' })}>
+            + Nuevo
+          </button>
+        </div>
       </div>
 
       <input

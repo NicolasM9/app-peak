@@ -86,6 +86,10 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
   mini-gráficos SVG propios (sin librerías). Muestra masa muscular ↑ / adiposa ↓ (variación
   primero→último + sparkline) y cada testeo agrupado por ejercicio con su progreso (delta + % +
   sparkline). Verde = mejoró, rojo = empeoró. Componente `Evolucion.jsx`.
+- **Carga masiva de teléfonos** (sin migración): botón "☎ Teléfonos" en Alumnos → pegás
+  "nombre + teléfono" por línea, matchea contra los alumnos (util `src/lib/match.js`, reusado de
+  la carga de pagos), confirmás/corregís y guarda todo junto. Destraba el WhatsApp de Pagos/Inicio.
+  Componente `CargaTelefonos.jsx`. **Falta que Nico cargue los números.**
 
 **Pendientes:** teléfonos de los alumnos (para que sirva WhatsApp), asignar el profe a cada sesión del
 Calendario (para llenar "Mis días"), login de Octavio, y montar **auto-deploy** (GitHub + Netlify) para
