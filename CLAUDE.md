@@ -33,8 +33,9 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Fase 2:** calendario, roster semanal de profes y vacaciones.
 - **Fase 3:** armado de rutinas (bloque grupal).
 
-## Estado del proyecto (al 2026-08-05)
-**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0010.
+## Estado del proyecto (al 2026-08-06)
+**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0012.
+Migración **0013 (asistencia) creada, PENDIENTE de aplicar** (Nico corre el SQL).
 **App publicada** en `earnest-moonbeam-59f0d7.netlify.app` (Netlify; se actualiza arrastrando
 la carpeta `dist/` a la pestaña Deploys del sitio).
 
@@ -62,6 +63,29 @@ a la ficha de `profes` por `user_id` (match por mail). **Falta solo Octavio** (p
 testeos, notas ni pagos — cerrado en las pantallas (Sidebar/AppShell ocultan Inicio, Alumnos,
 Pagos, Acuerdos) *y* en la base (RLS). Los nombres de profes para Calendario/Horas salen de la
 vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RLS.
+
+**Mejoras recientes (roadmap post-revisión, 2026-08-06):**
+- **Cobros del mes + WhatsApp** en Pagos: lista automática de quién debe/pagó (modelo *virtual*:
+  no genera filas de pago, cruza alumnos activos con los pagos cobrados del mes), botón WhatsApp
+  por deudor (`waLink` en `domain.js`) y "Pagado" que **tilda en el lugar sin refrescar**.
+- **Inicio accionable:** "Deben este mes" con el mismo cálculo que Pagos, deudores clickeables →
+  ficha, cumpleaños del mes. El pago a **Diego** (mediciones × $20.000) suma solo a los gastos.
+- **Personalizado directo** (migración 0011, `alumnos.paga_directo_profe`): un alumno que le paga
+  100% al profe NO suma a la facturación ni a los cobros de Peak (tilde en la ficha). Ej: Jorge López.
+- **"Mi Peak"** (inicio propio del profe): su acuerdo del mes, sus horas/semana y sus días/sesiones;
+  solo ve lo suyo. Sidebar muestra "Mi Peak" (profe) / "Inicio" (admin).
+- **Horas:** "carga rápida de la semana" (elegir profe + AM/PM o turnos sueltos + días → agregar/quitar
+  todo junto) y tarjeta **Diferencia Nico↔Eze** (solo admin) con arrastre editable — migración 0012,
+  tabla `config` (clave/valor, admin-only); arrastre actual = Eze +14 turnos.
+- **Asistencia [admin]** (migración 0013, tablas `sesion_alumnos` + `asistencias`): dentro de cada
+  sesión del Calendario se arma el **roster** (alumnos reales, reemplaza el texto libre) y se **toma
+  lista** por fecha (✓ Vino / ✕ Faltó, upsert por `sesion_id+alumno_id+fecha`). La ficha del alumno
+  muestra "vino X veces este mes · última vez". Solo admin (RLS `es_admin()`). Componente
+  `SesionAlumnos.jsx` colgado de `SesionForm` al editar.
+
+**Pendientes:** teléfonos de los alumnos (para que sirva WhatsApp), asignar el profe a cada sesión del
+Calendario (para llenar "Mis días"), login de Octavio, y montar **auto-deploy** (GitHub + Netlify) para
+no arrastrar `dist/` a mano — hoy no puedo publicar yo porque requiere el login de Netlify de Nico.
 
 Entorno: Node portátil en `~/.peak-tools/node` (no está en el PATH del sistema); la app
 corre con Vite en el puerto 5173.

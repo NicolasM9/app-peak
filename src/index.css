@@ -2081,3 +2081,152 @@ textarea {
   color: #fff;
   box-shadow: inset 0 2px 0 var(--cobalt);
 }
+
+/* ===== Asistencia: roster + tomar lista (SesionAlumnos) ===== */
+.sa {
+  margin-top: 26px;
+  border-top: 1px solid #232a39;
+  padding-top: 4px;
+}
+.sa-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.sa-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: #1b2130;
+  border: 1px solid #2b3346;
+  color: #dfe4ec;
+  border-radius: 999px;
+  padding: 6px 8px 6px 14px;
+  font-size: 14px;
+}
+.sa-chip-x {
+  background: #2b3346;
+  border: none;
+  color: #aeb6c4;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  font-size: 11px;
+  cursor: pointer;
+  line-height: 1;
+}
+.sa-chip-x:hover {
+  background: #ef4444;
+  color: #fff;
+}
+.sa-add {
+  position: relative;
+  max-width: 420px;
+}
+.sa-sug {
+  list-style: none;
+  margin: 4px 0 0;
+  padding: 6px;
+  background: #161b26;
+  border: 1px solid #2b3346;
+  border-radius: 10px;
+  position: absolute;
+  z-index: 5;
+  width: 100%;
+  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.35);
+}
+.sa-sug li button {
+  width: 100%;
+  text-align: left;
+  background: transparent;
+  border: none;
+  color: #dfe4ec;
+  padding: 8px 10px;
+  border-radius: 7px;
+  font-size: 14px;
+  cursor: pointer;
+}
+.sa-sug li button:hover {
+  background: #1a4fa3;
+  color: #fff;
+}
+.sa-lista-head {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+  margin-bottom: 10px;
+}
+.sa-cuenta {
+  font-size: 14px;
+  color: #8b94a6;
+  font-weight: 600;
+  padding-bottom: 8px;
+}
+.sa-lista {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+}
+.sa-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  background: #161b26;
+  border: 1px solid #232a39;
+  border-radius: 10px;
+  padding: 9px 12px;
+}
+.sa-item.no {
+  opacity: 0.72;
+}
+.sa-item-nombre {
+  font-size: 15px;
+  color: #e7ebf1;
+}
+.sa-toggle {
+  border: 1px solid transparent;
+  border-radius: 8px;
+  padding: 6px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  cursor: pointer;
+  min-width: 82px;
+}
+.sa-toggle.ok {
+  background: rgba(76, 175, 80, 0.16);
+  color: #86d98f;
+  border-color: rgba(76, 175, 80, 0.4);
+}
+.sa-toggle.no {
+  background: rgba(239, 68, 68, 0.16);
+  color: #f4a0a0;
+  border-color: rgba(239, 68, 68, 0.4);
+}
+.sa-guardar {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 14px;
+  margin-top: 14px;
+}
+.sa-saved {
+  color: #86d98f;
+  font-weight: 600;
+  font-size: 14px;
+}
+.asis-linea {
+  background: #12161f;
+  border: 1px solid #232a39;
+  border-radius: 10px;
+  padding: 10px 14px;
+  margin-bottom: 18px;
+  font-size: 14px;
+  color: #dfe4ec;
+}

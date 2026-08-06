@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
+import SesionAlumnos from './SesionAlumnos'
 
 const DIAS = [
   { value: 'lunes', label: 'Lunes' },
@@ -176,6 +177,8 @@ export default function SesionForm({ sesion, profes, onDone, onCancel }) {
           </button>
         </div>
       </form>
+
+      {editing && <SesionAlumnos sesionId={sesion.id} dia={sesion.dia} />}
     </div>
   )
 }

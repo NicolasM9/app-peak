@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS, formatFecha } from '../lib/format'
-import { precioMensual, estadoPago, ESTADO_INFO, METODO_LABEL } from '../lib/domain'
+import { precioMensual, estadoPago, ESTADO_INFO, METODO_LABEL, hoyISO } from '../lib/domain'
 import PagoForm from './PagoForm'
 import Mediciones from './Mediciones'
 import Testeos from './Testeos'
@@ -15,6 +15,7 @@ const EST_FISICO = {
 export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor }) {
   const [pagos, setPagos] = useState([])
   const [notas, setNotas] = useState([])
+  const [asistencias, setAsistencias] = useState([])
   const [loading, setLoading] = useState(true)
   const [showPagoForm, setShowPagoForm] = useState(false)
   const [confirmando, setConfirmando] = useState(null)
@@ -37,11 +38,23 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
       .order('created_at', { ascending: false })
     setNotas(data || [])
   }
+  async function loadAsistencias() {
+    const { data } = await supabase
+      .from('asistencias')
+      .select('fecha, presente')
+      .eq('alumno_id', alumno.id)
+      .order('fecha', { ascending: false })
+    setAsistencias(data || [])
+  }
 
   useEffect(() => {
     setLoading(true)
-    Promise.all([loadPagos(), loadNotas()]).then(() => setLoading(false))
+    Promise.all([loadPagos(), loadNotas(), loadAsistencias()]).then(() => setLoading(false))
   }, [alumno.id])
+
+  const mesPrefix = hoyISO().slice(0, 7)
+  const vinoMes = asistencias.filter((a) => a.presente && a.fecha.slice(0, 7) === mesPrefix).length
+  const ultimaVez = asistencias.find((a) => a.presente)?.fecha
 
   async function borrarPago(id) {
     const { error } = await supabase.from('pagos').delete().eq('id', id)
@@ -95,6 +108,13 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
           <span><b>Ajuste:</b> {formatARS(alumno.ajuste_monto)}{alumno.ajuste_motivo ? ` (${alumno.ajuste_motivo})` : ''}</span>
         ) : null}
       </div>
+
+      {asistencias.length > 0 && (
+        <div className="asis-linea">
+          <b>Asistencia:</b> vino <b>{vinoMes}</b> {vinoMes === 1 ? 'vez' : 'veces'} este mes
+          {ultimaVez && <span className="muted"> · última vez {formatFecha(ultimaVez)}</span>}
+        </div>
+      )}
 
       <div className="section-subhead">
         <h2>Pagos</h2>
