@@ -19,6 +19,7 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
     ajuste_motivo: alumno?.ajuste_motivo || '',
     ajuste_monto: alumno?.ajuste_monto ?? '',
     medicion_nutricional: alumno?.medicion_nutricional || false,
+    paga_directo_profe: alumno?.paga_directo_profe || false,
     estado_fisico: alumno?.estado_fisico || 'sano',
     lesion_detalle: alumno?.lesion_detalle || '',
     lesion_desde: alumno?.lesion_desde || '',
@@ -49,6 +50,7 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
       ajuste_motivo: form.ajuste_motivo.trim() || null,
       ajuste_monto: form.ajuste_monto === '' ? null : Number(form.ajuste_monto),
       medicion_nutricional: form.medicion_nutricional,
+      paga_directo_profe: form.paga_directo_profe,
       estado_fisico: form.estado_fisico,
       lesion_detalle: form.lesion_detalle.trim() || null,
       lesion_desde: form.lesion_desde || null,
@@ -166,6 +168,15 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
             onChange={(e) => set('medicion_nutricional', e.target.checked)}
           />
           <span>Hace medición con Diego (+{formatARS(20000)})</span>
+        </label>
+
+        <label className="check">
+          <input
+            type="checkbox"
+            checked={form.paga_directo_profe}
+            onChange={(e) => set('paga_directo_profe', e.target.checked)}
+          />
+          <span>Personalizado directo: le paga 100% al profe (no suma a Peak)</span>
         </label>
 
         <label className="field">

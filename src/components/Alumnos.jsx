@@ -20,7 +20,7 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
       supabase
         .from('alumnos')
         .select(
-          'id, nombre, telefono, fecha_nacimiento, deporte, estado, plan_id, ajuste_motivo, ajuste_monto, modalidad_rutina, medicion_nutricional, estado_fisico, lesion_detalle, lesion_desde, planes(nombre, precio_mensual)',
+          'id, nombre, telefono, fecha_nacimiento, deporte, estado, plan_id, ajuste_motivo, ajuste_monto, modalidad_rutina, medicion_nutricional, paga_directo_profe, estado_fisico, lesion_detalle, lesion_desde, planes(nombre, precio_mensual)',
         )
         .order('nombre'),
       supabase.from('planes').select('id, nombre, precio_mensual, frecuencia_max').order('id'),
@@ -145,6 +145,7 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
                   <span className="alumno-sub">
                     {a.planes?.nombre || 'Sin plan'}
                     {a.medicion_nutricional ? ' · con medición' : ''}
+                    {a.paga_directo_profe ? ' · directo al profe' : ''}
                   </span>
                 </div>
                 <div className="alumno-right">

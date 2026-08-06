@@ -20,7 +20,7 @@ export default function Inicio({ onIrAlumno }) {
       const [{ data: alumnos }, { data: pagos }] = await Promise.all([
         supabase
           .from('alumnos')
-          .select('id, nombre, estado, medicion_nutricional, fecha_nacimiento, ajuste_monto, planes(precio_mensual)'),
+          .select('id, nombre, estado, medicion_nutricional, paga_directo_profe, fecha_nacimiento, ajuste_monto, planes(precio_mensual)'),
         supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
       ])
       setData({ alumnos: alumnos || [], pagos: pagos || [] })
@@ -37,7 +37,8 @@ export default function Inicio({ onIrAlumno }) {
   }
 
   const activos = data.alumnos.filter((a) => a.estado === 'activo')
-  const conMedicion = activos.filter((a) => a.medicion_nutricional).length
+  const activosPeak = activos.filter((a) => !a.paga_directo_profe)
+  const conMedicion = activosPeak.filter((a) => a.medicion_nutricional).length
 
   const pagadoSet = new Set(data.pagos.filter((p) => esteMes(p.fecha_pago)).map((p) => p.alumno_id))
   const ingresosMes = data.pagos
@@ -46,7 +47,7 @@ export default function Inicio({ onIrAlumno }) {
 
   const venc6 = vencimientoPorDefecto()
   const estadoDeuda = estadoPago({ vencimiento: venc6, fecha_pago: null })
-  const deudores = activos
+  const deudores = activosPeak
     .filter((a) => !pagadoSet.has(a.id))
     .map((a) => ({ id: a.id, nombre: a.nombre, monto: precioMensual(a) }))
     .sort((x, y) => x.nombre.localeCompare(y.nombre))
@@ -68,7 +69,7 @@ export default function Inicio({ onIrAlumno }) {
       </p>
 
       <div className="stat-grid">
-        <Stat label="Alumnos activos" value={activos.length} />
+        <Stat label="Alumnos activos" value={activosPeak.length} />
         <Stat
           label="Deben este mes"
           value={formatARS(pendienteTotal)}

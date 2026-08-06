@@ -38,7 +38,7 @@ export default function Pagos({ irAlAlumno }) {
     const [al, pg, gs, pr] = await Promise.all([
       supabase
         .from('alumnos')
-        .select('id, nombre, telefono, ajuste_monto, medicion_nutricional, planes(precio_mensual)')
+        .select('id, nombre, telefono, ajuste_monto, medicion_nutricional, paga_directo_profe, planes(precio_mensual)')
         .eq('estado', 'activo')
         .order('nombre'),
       supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
@@ -61,7 +61,8 @@ export default function Pagos({ irAlAlumno }) {
   }, [])
 
   const ahora = new Date()
-  const facturacion = alumnos.reduce((s, a) => s + precioMensual(a), 0)
+  const alumnosPeak = alumnos.filter((a) => !a.paga_directo_profe)
+  const facturacion = alumnosPeak.reduce((s, a) => s + precioMensual(a), 0)
   const cobrado = pagos
     .filter((p) => {
       if (!p.fecha_pago) return false
@@ -82,7 +83,7 @@ export default function Pagos({ irAlAlumno }) {
   )
   const venc6 = vencimientoPorDefecto()
   const rank = { vencido: 0, por_vencer: 1, al_dia: 2 }
-  const cobros = alumnos
+  const cobros = alumnosPeak
     .map((a) => {
       const pagado = pagadoSet.has(a.id)
       const estado = estadoPago({ vencimiento: venc6, fecha_pago: pagado ? hoyISO() : null })
@@ -110,7 +111,7 @@ export default function Pagos({ irAlAlumno }) {
     .filter((x) => x.monto > 0)
   const totalProfes = pagosProfes.reduce((s, x) => s + x.monto, 0)
   const gastosManuales = gastos.reduce((s, g) => s + Number(g.monto || 0), 0)
-  const conMedicion = alumnos.filter((a) => a.medicion_nutricional).length
+  const conMedicion = alumnosPeak.filter((a) => a.medicion_nutricional).length
   const diegoTotal = conMedicion * MEDICION_MONTO
   const totalGastos = gastosManuales + totalProfes + diegoTotal
   const resultado = facturacion - totalGastos
@@ -149,7 +150,7 @@ export default function Pagos({ irAlAlumno }) {
             <div className="stat-card">
               <div className="stat-label">Facturación esperada</div>
               <div className="stat-value">{formatARS(facturacion)}</div>
-              <div className="stat-sub">{alumnos.length} alumnos activos</div>
+              <div className="stat-sub">{alumnosPeak.length} alumnos activos</div>
             </div>
             <div className="stat-card">
               <div className="stat-label">Cobrado este mes</div>
