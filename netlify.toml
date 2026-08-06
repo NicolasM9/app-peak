@@ -1,0 +1,21 @@
+# Config de Netlify para cuando el sitio se conecte a un repositorio Git
+# (auto-deploy: cada commit publica solo, sin arrastrar dist/ a mano).
+#
+# NO afecta el método actual (arrastrar la carpeta dist/ a Netlify Drop):
+# este archivo solo lo usa Netlify cuando el sitio está enlazado a un repo.
+#
+# Pasos para activarlo (una sola vez, los hace Nico):
+#   1) Subir este repo a GitHub.
+#   2) En Netlify → Site configuration → Build & deploy → "Link repository".
+#   3) Netlify toma de acá el comando y la carpeta. Listo: cada push publica.
+
+[build]
+  command = "npm run build"
+  publish = "dist"
+
+# La app es una SPA (una sola página). Si alguien entra a una URL profunda,
+# servimos index.html para que no dé 404.
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200
