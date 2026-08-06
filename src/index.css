@@ -2345,3 +2345,12 @@ textarea {
     width: 120px;
   }
 }
+.detalle-tel {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+}
+.detalle-tel .btn-wa {
+  padding: 3px 10px;
+  font-size: 12px;
+}

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS, formatFecha } from '../lib/format'
-import { precioMensual, estadoPago, ESTADO_INFO, METODO_LABEL, hoyISO } from '../lib/domain'
+import { precioMensual, estadoPago, ESTADO_INFO, METODO_LABEL, hoyISO, waLink } from '../lib/domain'
 import PagoForm from './PagoForm'
 import Mediciones from './Mediciones'
 import Testeos from './Testeos'
@@ -103,7 +103,19 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
       </div>
 
       <div className="detalle-info">
-        {alumno.telefono && <span><b>Tel:</b> {alumno.telefono}</span>}
+        {alumno.telefono && (
+          <span className="detalle-tel">
+            <b>Tel:</b> {alumno.telefono}
+            <a
+              className="btn-wa"
+              href={waLink(alumno.telefono, `Hola ${alumno.nombre.split(' ')[0]}!`)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              WhatsApp
+            </a>
+          </span>
+        )}
         {alumno.deporte && <span><b>Deporte:</b> {alumno.deporte}</span>}
         {alumno.ajuste_monto ? (
           <span><b>Ajuste:</b> {formatARS(alumno.ajuste_monto)}{alumno.ajuste_motivo ? ` (${alumno.ajuste_motivo})` : ''}</span>

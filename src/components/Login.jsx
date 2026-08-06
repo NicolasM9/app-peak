@@ -54,7 +54,7 @@ export default function Login() {
         </form>
 
         {error && <p className="login-error">{error}</p>}
-        <p className="build-note">Versión en construcción · Fase 1</p>
+        <p className="build-note">Uso exclusivo del staff</p>
       </div>
     </div>
   )
