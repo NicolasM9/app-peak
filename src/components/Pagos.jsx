@@ -32,6 +32,7 @@ export default function Pagos({ irAlAlumno }) {
   const [confirmando, setConfirmando] = useState(null)
   const [showPagados, setShowPagados] = useState(false)
   const [marcando, setMarcando] = useState(null)
+  const [recienPagados, setRecienPagados] = useState(() => new Set())
 
   async function load() {
     setLoading(true)
@@ -91,7 +92,8 @@ export default function Pagos({ irAlAlumno }) {
     })
     .sort((x, y) => (rank[x.estado] - rank[y.estado]) || x.nombre.localeCompare(y.nombre))
   const deudores = cobros.filter((c) => !c.pagado)
-  const deudaTotal = deudores.reduce((s, c) => s + c.monto, 0)
+  const deudoresPend = deudores.filter((c) => !recienPagados.has(c.id))
+  const deudaPend = deudoresPend.reduce((s, c) => s + c.monto, 0)
   const listado = showPagados ? cobros : deudores
   const mesTxt = MESES[ahora.getMonth()].toLowerCase()
   const msgCobro = (c) =>
@@ -101,9 +103,10 @@ export default function Pagos({ irAlAlumno }) {
     setMarcando(c.id)
     const pago = { alumno_id: c.id, monto: c.monto, vencimiento: venc6, fecha_pago: hoyISO(), metodo: null }
     pago.estado = estadoPago(pago)
-    await supabase.from('pagos').insert(pago)
+    const { error } = await supabase.from('pagos').insert(pago)
     setMarcando(null)
-    await load()
+    // No refrescamos la página: tildamos la fila en el lugar
+    if (!error) setRecienPagados((s) => new Set(s).add(c.id))
   }
 
   const pagosProfes = profes
@@ -176,15 +179,16 @@ export default function Pagos({ irAlAlumno }) {
             )}
           </div>
           <p className="cal-sub" style={{ marginTop: -4 }}>
-            {cobros.length - deudores.length} al día ·{' '}
-            <b style={{ color: '#f0999a' }}>{deudores.length} deben</b> ({formatARS(deudaTotal)})
+            {cobros.length - deudoresPend.length} al día ·{' '}
+            <b style={{ color: '#f0999a' }}>{deudoresPend.length} deben</b> ({formatARS(deudaPend)})
           </p>
           {listado.length === 0 ? (
             <p className="muted">¡Todos al día este mes! 🎉</p>
           ) : (
             <ul className="pago-list">
               {listado.map((c) => {
-                const info = ESTADO_INFO[c.estado]
+                const pagado = c.pagado || recienPagados.has(c.id)
+                const info = ESTADO_INFO[pagado ? 'al_dia' : c.estado]
                 const wa = waLink(c.telefono, msgCobro(c))
                 return (
                   <li key={c.id} className="pago-row">
@@ -193,7 +197,9 @@ export default function Pagos({ irAlAlumno }) {
                       <span className="pago-sub" style={{ color: info.text }}>{info.label}</span>
                     </div>
                     <span className="pago-monto">{formatARS(c.monto)}</span>
-                    {!c.pagado && (
+                    {pagado ? (
+                      <span className="cobro-ok">✓ Pagado</span>
+                    ) : (
                       <div className="cobro-actions">
                         {wa ? (
                           <a className="btn-wa" href={wa} target="_blank" rel="noopener noreferrer">WhatsApp</a>

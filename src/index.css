@@ -623,6 +623,14 @@ html {
   opacity: 0.5;
   cursor: default;
 }
+.cobro-ok {
+  color: #86d98f;
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+  margin-left: 10px;
+  flex: none;
+}
 
 .estado-chip {
   font-size: 11px;
@@ -1097,6 +1105,162 @@ html {
 .ht-total b {
   color: #fff;
   font-weight: 600;
+}
+
+/* ---- Horas: carga rápida ---- */
+.ht-carga {
+  margin-bottom: 12px;
+}
+.ht-carga-panel {
+  margin-top: 10px;
+  background: #141924;
+  border: 1px solid #232a3a;
+  border-radius: 12px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+.ht-carga-panel .field {
+  max-width: 220px;
+}
+.ht-carga-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ht-carga-lbl {
+  font-size: 12px;
+  color: #8b94a6;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+.ht-chips {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 7px;
+}
+.ht-pick {
+  background: #1b2130;
+  border: 1px solid #2b3346;
+  color: #c3cad6;
+  border-radius: 8px;
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+}
+.ht-pick:hover {
+  border-color: #3a63a8;
+}
+.ht-pick.on {
+  background: #1a4fa3;
+  border-color: #1a4fa3;
+  color: #fff;
+}
+.ht-sep {
+  width: 1px;
+  align-self: stretch;
+  background: #2b3346;
+  margin: 2px 4px;
+}
+.ht-carga-acciones {
+  display: flex;
+  gap: 10px;
+}
+.ht-carga-hint {
+  margin: 0;
+  font-size: 12.5px;
+  color: #8b94a6;
+}
+
+/* ---- Horas: diferencia Nico/Eze (privado, solo admin) ---- */
+.ht-dif {
+  margin-top: 16px;
+  background: linear-gradient(180deg, #16233a, #141c2b);
+  border: 1px solid #26406b;
+  border-radius: 12px;
+  padding: 14px 16px;
+}
+.ht-dif-head {
+  font-weight: 700;
+  font-size: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.ht-dif-priv {
+  font-size: 11px;
+  font-weight: 600;
+  color: #8fb4f0;
+  background: rgba(26, 79, 163, 0.22);
+  border-radius: 999px;
+  padding: 2px 8px;
+}
+.ht-dif-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px 22px;
+  margin-top: 8px;
+  font-size: 13.5px;
+  color: #c3cad6;
+}
+.ht-dif-row b {
+  color: #fff;
+}
+.ht-dif-linea {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 10px;
+  margin-top: 8px;
+  font-size: 13.5px;
+  color: #c3cad6;
+}
+.ht-dif-lbl {
+  color: #8b94a6;
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.4px;
+}
+.ht-base-form {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+.ht-base-form select,
+.ht-base-form input {
+  padding: 3px 6px;
+  font-size: 13px;
+  background: #1b2130;
+  border: 1px solid #2b3346;
+  border-radius: 6px;
+  color: #e7ecf4;
+}
+.ht-base-edit {
+  background: transparent;
+  border: none;
+  color: #8fb4f0;
+  font-size: 12px;
+  margin-left: 8px;
+  cursor: pointer;
+  text-decoration: underline;
+}
+.ht-dif-total {
+  margin-top: 10px;
+  padding-top: 10px;
+  border-top: 1px solid #26406b;
+  font-size: 15px;
+  color: #e7ecf4;
+}
+.ht-dif-total b {
+  color: #f2cd5c;
+}
+.ht-dif-nota {
+  margin: 6px 0 0;
+  font-size: 12px;
+  color: #8b94a6;
 }
 
 /* ---- Acuerdos profes ---- */
