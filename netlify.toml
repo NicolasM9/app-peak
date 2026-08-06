@@ -13,6 +13,10 @@
   command = "npm run build"
   publish = "dist"
 
+# Vite 8 necesita Node 20+. Fijamos 22 para que el build de Netlify no falle.
+[build.environment]
+  NODE_VERSION = "22"
+
 # La app es una SPA (una sola página). Si alguien entra a una URL profunda,
 # servimos index.html para que no dé 404.
 [[redirects]]
