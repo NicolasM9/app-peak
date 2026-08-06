@@ -34,10 +34,10 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Fase 3:** armado de rutinas (bloque grupal).
 
 ## Estado del proyecto (al 2026-08-06)
-**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0012.
-Migración **0013 (asistencia) creada, PENDIENTE de aplicar** (Nico corre el SQL).
-**App publicada** en `earnest-moonbeam-59f0d7.netlify.app` (Netlify; se actualiza arrastrando
-la carpeta `dist/` a la pestaña Deploys del sitio).
+**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0013
+(0013 = asistencia, aplicada el 2026-08-06). **App publicada** en `earnest-moonbeam-59f0d7.netlify.app`
+(Netlify; se actualiza arrastrando la carpeta `dist/` a la pestaña Deploys del sitio). **Pendiente:
+subir el `dist/` nuevo** (asistencia + evolución + teléfonos + pulido) para que la web los tenga.
 
 - **Fase 0 — Datos:** esquema + RLS (planes, profes, alumnos, pagos, gastos, mediciones,
   testeos, notas, sesiones, planificaciones).
