@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
 import { precioMensual, hoyISO, vencimientoPorDefecto, estadoPago, ESTADO_INFO, waLink, MEDICION_MONTO } from '../lib/domain'
 import CargaPagos from './CargaPagos'
+import { exportarRespaldo } from '../lib/exportar'
 
 const CATEGORIAS = [
   'Alquiler', 'Pago a profe', 'App turnos', 'App Builderpro',
@@ -33,6 +34,17 @@ export default function Pagos({ irAlAlumno }) {
   const [showPagados, setShowPagados] = useState(false)
   const [marcando, setMarcando] = useState(null)
   const [recienPagados, setRecienPagados] = useState(() => new Set())
+  const [exportando, setExportando] = useState(false)
+
+  async function respaldo() {
+    setExportando(true)
+    try {
+      await exportarRespaldo()
+    } catch (e) {
+      alert('No se pudo generar el respaldo: ' + (e?.message || e))
+    }
+    setExportando(false)
+  }
 
   async function load() {
     setLoading(true)
@@ -139,7 +151,12 @@ export default function Pagos({ irAlAlumno }) {
     <div>
       <div className="section-head">
         <h1 className="section-title">Pagos</h1>
-        <button className="btn-primary" onClick={() => setShowCarga(true)}>+ Carga rápida de pagos</button>
+        <div className="section-head-actions">
+          <button className="btn-ghost" onClick={respaldo} disabled={exportando}>
+            {exportando ? 'Generando…' : '⬇ Respaldo Excel'}
+          </button>
+          <button className="btn-primary" onClick={() => setShowCarga(true)}>+ Carga rápida de pagos</button>
+        </div>
       </div>
       <p className="muted" style={{ marginTop: -8, marginBottom: 16 }}>
         Resumen de {nombreMes(periodo)}
