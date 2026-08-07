@@ -34,8 +34,8 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Fase 3:** armado de rutinas (bloque grupal).
 
 ## Estado del proyecto (al 2026-08-07)
-**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0013
-(0013 = asistencia, aplicada el 2026-08-06). **App publicada** en `earnest-moonbeam-59f0d7.netlify.app`
+**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0014
+(0013 = asistencia; 0014 = `fecha_alta`/`fecha_baja` de alumnos, 2026-08-07). **App publicada** en `earnest-moonbeam-59f0d7.netlify.app`
 con **auto-deploy activo** (2026-08-07): repo privado `github.com/NicolasM9/app-peak` enlazado a Netlify;
 cada `git push` a `main` buildea (`npm run build`→`dist`, Node 22 vía `netlify.toml`) y publica solo.
 Las claves de Supabase van como variables de entorno en Netlify (`VITE_SUPABASE_URL` /
@@ -94,9 +94,22 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
   la carga de pagos), confirmás/corregís y guarda todo junto. Destraba el WhatsApp de Pagos/Inicio.
   Componente `CargaTelefonos.jsx`. **Falta que Nico cargue los números.**
 
-**Pendientes:** cargar los teléfonos de los alumnos (para que sirva WhatsApp), cargar mediciones/testeos
-(para que Evolución muestre progreso), cargar las sesiones del Calendario y asignarles profe + roster
-(para llenar "Mis días" y tomar lista en serio), y el login de Octavio (falta su mail).
+**Mejoras (2026-08-07):**
+- **Auto-deploy** GitHub→Netlify (ver arriba) y **Calendario cargado**: 26 sesiones Peak de la semana
+  (vacaciones de Eze) con **carga rápida** (`CargaSesiones.jsx`, botón en el Calendario).
+- **Alta/baja de alumno** con un toque desde la lista (botón Baja/Alta con confirm, actualiza en el lugar).
+- **Pagos:** los gastos se actualizan sin refrescar la pantalla.
+- **Planificaciones** rediseñada (semanas en paneles con acento cobalto, tarjetas grandes 2/fila en mobile,
+  días con plan marcados con badge).
+- **Inicio:** tarjeta "Altas y bajas del mes" vs mes anterior (migración 0014; la baja setea `fecha_baja`,
+  el alta nueva `fecha_alta`).
+- **Horas ↔ Calendario** sincronizados (`src/lib/syncTurnos.js`): asignar/cambiar el profe de un turno Peak
+  en cualquiera de las dos pestañas actualiza la otra (un profe por turno). Horarios PM emparejados a
+  18:00/19:30. La cuenta Nico↔Eze no se toca.
+
+**Pendientes:** cargar los teléfonos de los alumnos (para WhatsApp) y mediciones/testeos (para que
+Evolución muestre progreso); armar el roster de alumnos en cada sesión (para tomar lista de verdad); y el
+login de Octavio (falta su mail).
 **Auto-deploy YA montado** (GitHub + Netlify): ya no se arrastra `dist/`; alcanza con `git push`.
 
 Entorno: Node portátil en `~/.peak-tools/node` (no está en el PATH del sistema); la app
