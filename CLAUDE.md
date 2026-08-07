@@ -116,6 +116,13 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
 - **"Crear informe" del alumno** (`Informe.jsx`): PDF limpio y profesional (`window.print`, `@media print`)
   con objetivos + progreso de mediciones/testeos, para mandar por WhatsApp. Se completa con los datos cargados.
 
+**Mejoras (2026-08-07, tanda 4):**
+- **Respaldo Excel** (`src/lib/exportar.js`): botón "⬇ Respaldo Excel" en Pagos (admin) que baja un `.xlsx`
+  con hojas Alumnos/Pagos/Gastos. Usa **SheetJS (`xlsx`)** con import dinámico (chunk aparte).
+- **Mi Peak** (profe) mejorado: tarjeta **"Hoy"** con las clases del día, "Mis días" resalta hoy, y card de
+  próximas vacaciones.
+- Pulido: se sacó el import muerto `Placeholder` y se ajustó el padding del informe en mobile.
+
 **Pendientes:** cargar datos de los alumnos para que se llenen Estadísticas / Evolución / Informe /
 tomar lista: **fechas de nacimiento** y **deportes** (Estadísticas), **teléfonos** (WhatsApp),
 **mediciones/testeos** (Evolución e Informe) y el **roster** de cada sesión (AM/PM, días/semana, asistencia).
