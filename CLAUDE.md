@@ -33,11 +33,13 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Fase 2:** calendario, roster semanal de profes y vacaciones.
 - **Fase 3:** armado de rutinas (bloque grupal).
 
-## Estado del proyecto (al 2026-08-06)
+## Estado del proyecto (al 2026-08-07)
 **Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0013
 (0013 = asistencia, aplicada el 2026-08-06). **App publicada** en `earnest-moonbeam-59f0d7.netlify.app`
-(Netlify; se actualiza arrastrando la carpeta `dist/` a la pestaña Deploys del sitio). **Pendiente:
-subir el `dist/` nuevo** (asistencia + evolución + teléfonos + pulido) para que la web los tenga.
+con **auto-deploy activo** (2026-08-07): repo privado `github.com/NicolasM9/app-peak` enlazado a Netlify;
+cada `git push` a `main` buildea (`npm run build`→`dist`, Node 22 vía `netlify.toml`) y publica solo.
+Las claves de Supabase van como variables de entorno en Netlify (`VITE_SUPABASE_URL` /
+`VITE_SUPABASE_ANON_KEY`), porque el código las toma de `import.meta.env` y `.env` está gitignoreado.
 
 - **Fase 0 — Datos:** esquema + RLS (planes, profes, alumnos, pagos, gastos, mediciones,
   testeos, notas, sesiones, planificaciones).
@@ -91,9 +93,10 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
   la carga de pagos), confirmás/corregís y guarda todo junto. Destraba el WhatsApp de Pagos/Inicio.
   Componente `CargaTelefonos.jsx`. **Falta que Nico cargue los números.**
 
-**Pendientes:** teléfonos de los alumnos (para que sirva WhatsApp), asignar el profe a cada sesión del
-Calendario (para llenar "Mis días"), login de Octavio, y montar **auto-deploy** (GitHub + Netlify) para
-no arrastrar `dist/` a mano — hoy no puedo publicar yo porque requiere el login de Netlify de Nico.
+**Pendientes:** cargar los teléfonos de los alumnos (para que sirva WhatsApp), cargar mediciones/testeos
+(para que Evolución muestre progreso), cargar las sesiones del Calendario y asignarles profe + roster
+(para llenar "Mis días" y tomar lista en serio), y el login de Octavio (falta su mail).
+**Auto-deploy YA montado** (GitHub + Netlify): ya no se arrastra `dist/`; alcanza con `git push`.
 
 Entorno: Node portátil en `~/.peak-tools/node` (no está en el PATH del sistema); la app
 corre con Vite en el puerto 5173.
