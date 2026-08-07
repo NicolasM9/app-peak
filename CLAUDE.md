@@ -58,9 +58,9 @@ Las claves de Supabase van como variables de entorno en Netlify (`VITE_SUPABASE_
 - **Planificaciones:** rutinas por mes/semana/día (148 sesiones importadas del Excel 2026),
   Modo TV para la pantalla, ranking de ejercicios más usados.
 
-**Logins del staff:** creados y conectados Eze (admin), Gastón y Ailén (profe), además de
-Nico (admin). Se crean en Supabase → Authentication → Users (con "Auto Confirm") y se enlazan
-a la ficha de `profes` por `user_id` (match por mail). **Falta solo Octavio** (pendiente su mail).
+**Logins del staff:** los **5 creados y conectados** — Nico y Eze (admin), Gastón, Ailén y Octavio
+(profe). Se crean en Supabase → Authentication → Users (con "Auto Confirm") y se enlazan a la ficha
+de `profes` por `user_id` (match por mail). Octavio linkeado el 2026-08-07 (profe id 2).
 
 **Seguridad del rol profe (migración 0010):** un profe NO puede ver sueldos ajenos, mediciones,
 testeos, notas ni pagos — cerrado en las pantallas (Sidebar/AppShell ocultan Inicio, Alumnos,
@@ -108,8 +108,8 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
   18:00/19:30. La cuenta Nico↔Eze no se toca.
 
 **Pendientes:** cargar los teléfonos de los alumnos (para WhatsApp) y mediciones/testeos (para que
-Evolución muestre progreso); armar el roster de alumnos en cada sesión (para tomar lista de verdad); y el
-login de Octavio (falta su mail).
+Evolución muestre progreso); y armar el roster de alumnos en cada sesión (para tomar lista de verdad).
+(Login de Octavio: hecho el 2026-08-07 — los 5 del staff ya están.)
 **Auto-deploy YA montado** (GitHub + Netlify): ya no se arrastra `dist/`; alcanza con `git push`.
 
 Entorno: Node portátil en `~/.peak-tools/node` (no está en el PATH del sistema); la app
