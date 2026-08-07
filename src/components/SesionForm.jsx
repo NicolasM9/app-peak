@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import SesionAlumnos from './SesionAlumnos'
+import { syncHorasDesdeCalendario } from '../lib/syncTurnos'
 
 const DIAS = [
   { value: 'lunes', label: 'Lunes' },
@@ -70,6 +71,10 @@ export default function SesionForm({ sesion, profes, onDone, onCancel }) {
       setError('No se pudo guardar: ' + resp.error.message)
       return
     }
+    // Sincroniza Horas: el profe de una sesión Peak es el profe del turno
+    if (payload.tipo === 'peak') {
+      await syncHorasDesdeCalendario(payload.dia, payload.hora_inicio, payload.profe_id)
+    }
     onDone()
   }
 
@@ -78,6 +83,9 @@ export default function SesionForm({ sesion, profes, onDone, onCancel }) {
     if (error) {
       setError('No se pudo borrar: ' + error.message)
       return
+    }
+    if (sesion.tipo === 'peak') {
+      await syncHorasDesdeCalendario(sesion.dia, sesion.hora_inicio, null)
     }
     onDone()
   }

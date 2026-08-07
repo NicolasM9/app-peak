@@ -11,7 +11,7 @@ const DIAS = [
   { key: 'domingo', label: 'Dom' },
 ]
 const AM = ['08:00', '09:30']
-const PM = ['16:45', '18:15', '19:45']
+const PM = ['16:45', '18:00', '19:30']
 const SLOTS_STD = [...AM, ...PM]
 const LUNVIE = ['lunes', 'martes', 'miercoles', 'jueves', 'viernes']
 const TIPOS = [

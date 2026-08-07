@@ -2,17 +2,18 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatFecha } from '../lib/format'
 import { hoyISO } from '../lib/domain'
+import { syncCalendarioDesdeHoras } from '../lib/syncTurnos'
 
 const TURNOS = [
   { key: '08:00', label: '8:00' },
   { key: '09:30', label: '9:30' },
   { key: '16:45', label: '16:45' },
-  { key: '18:15', label: '18:15' },
-  { key: '19:45', label: '19:45' },
+  { key: '18:00', label: '18:00' },
+  { key: '19:30', label: '19:30' },
 ]
 const HORAS_TURNO = 1.5
 const AM = ['08:00', '09:30']
-const PM = ['16:45', '18:15', '19:45']
+const PM = ['16:45', '18:00', '19:30']
 const DIAS = [
   { key: 'lunes', label: 'Lun' },
   { key: 'martes', label: 'Mar' },
@@ -73,6 +74,9 @@ export default function Horas({ esAdmin }) {
     const ya = turnos.find((t) => t.dia === dia && t.horario === key && t.profe_id === profeId)
     if (ya) await supabase.from('turnos').delete().eq('id', ya.id)
     else await supabase.from('turnos').insert({ profe_id: profeId, dia, horario: key, horas: HORAS_TURNO })
+    // Sincroniza el Calendario con el profe resultante del turno (uno solo)
+    const { data: tu } = await supabase.from('turnos').select('profe_id').eq('dia', dia).eq('horario', key)
+    await syncCalendarioDesdeHoras(dia, key, tu && tu.length ? tu[0].profe_id : null)
     await load()
   }
 
@@ -106,6 +110,12 @@ export default function Horas({ esAdmin }) {
         }
       if (ids.length) await supabase.from('turnos').delete().in('id', ids)
     }
+    // Sincroniza el Calendario con el profe resultante de cada celda tocada
+    for (const dia of cargaDias)
+      for (const key of cargaTurnos) {
+        const { data: tu } = await supabase.from('turnos').select('profe_id').eq('dia', dia).eq('horario', key)
+        await syncCalendarioDesdeHoras(dia, key, tu && tu.length ? tu[0].profe_id : null)
+      }
     await load()
   }
 
