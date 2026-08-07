@@ -51,7 +51,8 @@ Las claves de Supabase van como variables de entorno en Netlify (`VITE_SUPABASE_
   (pegar nombres → registrar varios; crear alumno nuevo y saltar a su ficha). El gasto
   "pago a profe" sale solo del sueldo base del acuerdo.
 - **Calendario:** vista semanal de sesiones estilo Google (tabla `sesiones`), color por tipo,
-  permiso por sesión.
+  permiso por sesión. **Carga rápida** (`CargaSesiones.jsx`): crea muchas sesiones de la semana tipo
+  de una (título/tipo/profe + horarios AM/PM/sueltos + días → días×horarios, saltea las que ya existen).
 - **Horas:** grilla de rotaciones semanal + total por profe + vacaciones (tablas `turnos`/`vacaciones`).
 - **Acuerdos profes [admin]:** lo que cobra cada profe (base + personalizados 100%/60%); dueños excluidos.
 - **Planificaciones:** rutinas por mes/semana/día (148 sesiones importadas del Excel 2026),

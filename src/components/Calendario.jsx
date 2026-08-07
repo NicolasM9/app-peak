@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import SesionForm from './SesionForm'
+import CargaSesiones from './CargaSesiones'
 
 const DIAS = [
   { key: 'lunes', label: 'Lun' },
@@ -102,6 +103,19 @@ export default function Calendario({ esAdmin }) {
     )
   }
 
+  if (view.name === 'carga') {
+    return (
+      <CargaSesiones
+        profes={profes}
+        onDone={async () => {
+          await load()
+          setView({ name: 'grid' })
+        }}
+        onCancel={() => setView({ name: 'grid' })}
+      />
+    )
+  }
+
   const horas = []
   for (let h = START_HOUR; h <= END_HOUR; h++) horas.push(h)
   const altura = (END_HOUR - START_HOUR) * PXH
@@ -111,9 +125,14 @@ export default function Calendario({ esAdmin }) {
       <div className="section-head">
         <h1 className="section-title">Calendario</h1>
         {esAdmin && (
-          <button className="btn-primary" onClick={() => setView({ name: 'form' })}>
-            + Agregar sesión
-          </button>
+          <div className="section-head-actions">
+            <button className="btn-ghost" onClick={() => setView({ name: 'carga' })}>
+              ⚡ Carga rápida
+            </button>
+            <button className="btn-primary" onClick={() => setView({ name: 'form' })}>
+              + Agregar sesión
+            </button>
+          </div>
         )}
       </div>
       <p className="cal-sub">Semana tipo · horarios habituales del centro</p>

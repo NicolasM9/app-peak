@@ -2356,3 +2356,12 @@ textarea {
   padding: 3px 10px;
   font-size: 12px;
 }
+.cs-custom {
+  background: #1b2130;
+  border: 1px solid #2b3346;
+  color: #c3cad6;
+  border-radius: 8px;
+  padding: 5px 8px;
+  font-size: 13px;
+  max-width: 130px;
+}
