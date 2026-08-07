@@ -2813,6 +2813,12 @@ textarea {
   text-align: center;
 }
 
+@media (max-width: 480px) {
+  .informe-hoja { padding: 22px 18px; }
+  .inf-alumno-nombre { font-size: 22px; }
+  .inf-marca { font-size: 20px; }
+}
+
 @media print {
   body * { visibility: hidden !important; }
   #informe-print, #informe-print * { visibility: visible !important; }

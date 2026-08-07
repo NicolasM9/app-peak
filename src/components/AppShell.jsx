@@ -9,7 +9,6 @@ import Horas from './Horas'
 import Pagos from './Pagos'
 import Acuerdos from './Acuerdos'
 import Estadisticas from './Estadisticas'
-import Placeholder from './Placeholder'
 import { Menu } from 'lucide-react'
 
 const TITULOS = {
