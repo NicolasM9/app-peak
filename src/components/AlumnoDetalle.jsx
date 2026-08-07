@@ -6,6 +6,7 @@ import PagoForm from './PagoForm'
 import Mediciones from './Mediciones'
 import Testeos from './Testeos'
 import Evolucion from './Evolucion'
+import Informe from './Informe'
 
 const EST_FISICO = {
   sano: { label: 'Sano', color: '#4caf50' },
@@ -22,6 +23,7 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
   const [confirmando, setConfirmando] = useState(null)
   const [nuevaNota, setNuevaNota] = useState('')
   const [guardandoNota, setGuardandoNota] = useState(false)
+  const [showInforme, setShowInforme] = useState(false)
 
   async function loadPagos() {
     const { data } = await supabase
@@ -79,11 +81,16 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
   const precio = precioMensual(alumno)
   const ef = EST_FISICO[alumno.estado_fisico || 'sano']
 
+  if (showInforme) return <Informe alumno={alumno} onClose={() => setShowInforme(false)} />
+
   return (
     <div className="detalle">
       <div className="section-head">
         <button className="btn-back" onClick={onBack}>← Volver</button>
-        <button className="btn-ghost" onClick={onEdit}>Editar datos</button>
+        <div className="section-head-actions">
+          <button className="btn-ghost" onClick={() => setShowInforme(true)}>📄 Crear informe</button>
+          <button className="btn-ghost" onClick={onEdit}>Editar datos</button>
+        </div>
       </div>
 
       <h1 className="section-title">{alumno.nombre}</h1>
