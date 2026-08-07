@@ -8,6 +8,7 @@ import {
   Clock,
   Wallet,
   FileText,
+  BarChart3,
   Lock,
   LogOut,
   X,
@@ -23,6 +24,7 @@ const ITEMS = [
 
 const ADMIN_ITEMS = [
   { id: 'pagos', label: 'Pagos', Icon: Wallet },
+  { id: 'estadisticas', label: 'Estadísticas', Icon: BarChart3 },
   { id: 'acuerdos', label: 'Acuerdos profes', Icon: FileText },
 ]
 

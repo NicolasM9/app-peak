@@ -2582,3 +2582,94 @@ textarea {
   font-size: 15px;
   font-weight: 700;
 }
+
+/* ===== Estadísticas ===== */
+.estad-charts {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+  margin-top: 14px;
+}
+@media (min-width: 720px) {
+  .estad-charts { grid-template-columns: repeat(2, 1fr); }
+}
+.estad-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  width: 100%;
+  background: transparent;
+  border: none;
+  padding: 5px 0;
+  cursor: pointer;
+}
+.estad-bar:disabled { cursor: default; opacity: 0.55; }
+.estad-bar-lbl {
+  width: 96px;
+  flex: none;
+  font-size: 13px;
+  color: #c3cad6;
+  text-align: left;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.estad-bar-track {
+  flex: 1;
+  height: 14px;
+  background: #171c28;
+  border-radius: 999px;
+  overflow: hidden;
+}
+.estad-bar-fill {
+  display: block;
+  height: 100%;
+  background: #1a4fa3;
+  border-radius: 999px;
+  min-width: 2px;
+}
+.estad-bar:not(:disabled):hover .estad-bar-fill { background: #3a63a8; }
+.estad-bar-num {
+  width: 30px;
+  flex: none;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+}
+.estad-drill {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.55);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  z-index: 50;
+}
+.estad-drill-box {
+  background: #12161f;
+  border: 1px solid #2b3346;
+  border-radius: 14px;
+  width: 100%;
+  max-width: 420px;
+  max-height: 80vh;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+.estad-drill-head {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 16px;
+  border-bottom: 1px solid #232a39;
+}
+.estad-drill-head .btn-ghost { margin-left: auto; }
+.estad-drill-list {
+  overflow-y: auto;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}

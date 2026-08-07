@@ -8,14 +8,16 @@ import Planificaciones from './Planificaciones'
 import Horas from './Horas'
 import Pagos from './Pagos'
 import Acuerdos from './Acuerdos'
+import Estadisticas from './Estadisticas'
 import Placeholder from './Placeholder'
 import { Menu } from 'lucide-react'
 
 const TITULOS = {
   inicio: 'Inicio', calendario: 'Calendario', alumnos: 'Alumnos',
-  planificaciones: 'Planificaciones', horas: 'Horas', pagos: 'Pagos', acuerdos: 'Acuerdos profes',
+  planificaciones: 'Planificaciones', horas: 'Horas', pagos: 'Pagos',
+  estadisticas: 'Estadísticas', acuerdos: 'Acuerdos profes',
 }
-const ADMIN_SECC = new Set(['alumnos', 'pagos', 'acuerdos'])
+const ADMIN_SECC = new Set(['alumnos', 'pagos', 'acuerdos', 'estadisticas'])
 
 export default function AppShell({ profe, user }) {
   const nombre = profe?.nombre || user?.email
@@ -55,6 +57,9 @@ export default function AppShell({ profe, user }) {
 
       case 'acuerdos':
         return <Acuerdos />
+
+      case 'estadisticas':
+        return <Estadisticas onIrAlumno={irAlAlumno} />
 
       default:
         return esAdmin ? <Inicio onIrAlumno={irAlAlumno} /> : <MiPeak profe={profe} />
