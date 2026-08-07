@@ -20,7 +20,7 @@ export default function Inicio({ onIrAlumno }) {
       const [{ data: alumnos }, { data: pagos }] = await Promise.all([
         supabase
           .from('alumnos')
-          .select('id, nombre, estado, medicion_nutricional, paga_directo_profe, fecha_nacimiento, ajuste_monto, planes(precio_mensual)'),
+          .select('id, nombre, estado, medicion_nutricional, paga_directo_profe, fecha_nacimiento, fecha_alta, fecha_baja, ajuste_monto, planes(precio_mensual)'),
         supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
       ])
       setData({ alumnos: alumnos || [], pagos: pagos || [] })
@@ -53,6 +53,23 @@ export default function Inicio({ onIrAlumno }) {
     .sort((x, y) => x.nombre.localeCompare(y.nombre))
   const pendienteTotal = deudores.reduce((s, d) => s + d.monto, 0)
   const proximos = deudores.slice(0, 6)
+
+  // Altas y bajas del mes (vs mes anterior)
+  const enMes = (iso, y, m) => {
+    if (!iso) return false
+    const d = new Date(iso + 'T00:00:00')
+    return d.getFullYear() === y && d.getMonth() === m
+  }
+  const yA = ahora.getFullYear()
+  const mA = ahora.getMonth()
+  const prevMes = new Date(yA, mA - 1, 1)
+  const yP = prevMes.getFullYear()
+  const mP = prevMes.getMonth()
+  const altasMes = data.alumnos.filter((a) => enMes(a.fecha_alta, yA, mA)).length
+  const bajasMes = data.alumnos.filter((a) => enMes(a.fecha_baja, yA, mA)).length
+  const altasAnt = data.alumnos.filter((a) => enMes(a.fecha_alta, yP, mP)).length
+  const bajasAnt = data.alumnos.filter((a) => enMes(a.fecha_baja, yP, mP)).length
+  const neto = altasMes - bajasMes
 
   const cumples = activos
     .filter((a) => a.fecha_nacimiento && Number(a.fecha_nacimiento.split('-')[1]) === ahora.getMonth() + 1)
@@ -109,6 +126,26 @@ export default function Inicio({ onIrAlumno }) {
             )}
           </>
         )}
+      </div>
+
+      <div className="pk-card" style={{ marginTop: 14 }}>
+        <div className="card-title">Altas y bajas de {MESES[ahora.getMonth()]}</div>
+        <div className="ab-grid">
+          <div className="ab-item">
+            <span className="ab-num up">+{altasMes}</span>
+            <span className="ab-lbl">altas</span>
+            <span className="ab-prev">mes pasado: {altasAnt}</span>
+          </div>
+          <div className="ab-item">
+            <span className="ab-num down">−{bajasMes}</span>
+            <span className="ab-lbl">bajas</span>
+            <span className="ab-prev">mes pasado: {bajasAnt}</span>
+          </div>
+          <div className="ab-item">
+            <span className="ab-num">{neto >= 0 ? '+' : '−'}{Math.abs(neto)}</span>
+            <span className="ab-lbl">neto</span>
+          </div>
+        </div>
       </div>
 
       {cumples.length > 0 && (

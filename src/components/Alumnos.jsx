@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
-import { precioMensual, estadoAlumno, ESTADO_INFO } from '../lib/domain'
+import { precioMensual, estadoAlumno, ESTADO_INFO, hoyISO } from '../lib/domain'
 import AlumnoForm from './AlumnoForm'
 import AlumnoDetalle from './AlumnoDetalle'
 import CargaTelefonos from './CargaTelefonos'
@@ -56,9 +56,10 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
   // Alta/baja rápida desde la lista, sin entrar a editar (actualiza en el lugar)
   async function toggleEstado(a) {
     const nuevo = a.estado === 'activo' ? 'inactivo' : 'activo'
+    const patch = { estado: nuevo, fecha_baja: nuevo === 'inactivo' ? hoyISO() : null }
     setConfirmBaja(null)
-    const { error } = await supabase.from('alumnos').update({ estado: nuevo }).eq('id', a.id)
-    if (!error) setAlumnos((list) => list.map((x) => (x.id === a.id ? { ...x, estado: nuevo } : x)))
+    const { error } = await supabase.from('alumnos').update(patch).eq('id', a.id)
+    if (!error) setAlumnos((list) => list.map((x) => (x.id === a.id ? { ...x, ...patch } : x)))
   }
 
   if (view.name === 'form') {

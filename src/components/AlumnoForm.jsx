@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
+import { hoyISO } from '../lib/domain'
 
 const MODALIDADES = [
   { value: 'bloque_grupal', label: 'Bloque grupal' },
@@ -58,7 +59,7 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
     }
     const resp = editing
       ? await supabase.from('alumnos').update(payload).eq('id', alumno.id)
-      : await supabase.from('alumnos').insert(payload)
+      : await supabase.from('alumnos').insert({ ...payload, fecha_alta: hoyISO() })
     setSaving(false)
     if (resp.error) {
       setError('No se pudo guardar: ' + resp.error.message)

@@ -2436,3 +2436,37 @@ textarea {
   align-items: center;
   gap: 6px;
 }
+.ab-grid {
+  display: flex;
+  gap: 10px;
+}
+.ab-item {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #12161f;
+  border: 1px solid #202634;
+  border-radius: 12px;
+  padding: 12px 14px;
+}
+.ab-num {
+  font-size: 26px;
+  font-weight: 700;
+  color: #fff;
+  line-height: 1.15;
+}
+.ab-num.up {
+  color: #86d98f;
+}
+.ab-num.down {
+  color: #f4a0a0;
+}
+.ab-lbl {
+  font-size: 13px;
+  color: #c3cad6;
+}
+.ab-prev {
+  font-size: 11.5px;
+  color: #8b94a6;
+}
