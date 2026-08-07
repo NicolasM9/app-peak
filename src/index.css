@@ -2365,3 +2365,37 @@ textarea {
   font-size: 13px;
   max-width: 130px;
 }
+.alumno-estado {
+  flex: none;
+  margin-left: 6px;
+  display: flex;
+  align-items: center;
+}
+.estado-btn {
+  border: 1px solid #2b3346;
+  background: #1b2130;
+  border-radius: 8px;
+  padding: 5px 11px;
+  font-size: 12.5px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.estado-btn.baja {
+  color: #f4a0a0;
+  border-color: rgba(239, 68, 68, 0.35);
+}
+.estado-btn.baja:hover {
+  background: rgba(239, 68, 68, 0.14);
+}
+.estado-btn.alta {
+  color: #86d98f;
+  border-color: rgba(76, 175, 80, 0.4);
+}
+.estado-btn.alta:hover {
+  background: rgba(76, 175, 80, 0.14);
+}
+.baja-confirm {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}

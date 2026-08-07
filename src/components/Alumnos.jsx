@@ -14,6 +14,7 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
   const [q, setQ] = useState('')
   const [showInactivos, setShowInactivos] = useState(false)
   const [view, setView] = useState({ name: 'list' })
+  const [confirmBaja, setConfirmBaja] = useState(null)
 
   async function load() {
     setLoading(true)
@@ -50,6 +51,14 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
 
   function backTo(alumnoId) {
     return alumnoId ? { name: 'detalle', alumnoId } : { name: 'list' }
+  }
+
+  // Alta/baja rápida desde la lista, sin entrar a editar (actualiza en el lugar)
+  async function toggleEstado(a) {
+    const nuevo = a.estado === 'activo' ? 'inactivo' : 'activo'
+    setConfirmBaja(null)
+    const { error } = await supabase.from('alumnos').update({ estado: nuevo }).eq('id', a.id)
+    if (!error) setAlumnos((list) => list.map((x) => (x.id === a.id ? { ...x, estado: nuevo } : x)))
   }
 
   if (view.name === 'form') {
@@ -166,6 +175,18 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
                 <div className="alumno-right">
                   <span className="alumno-price">{formatARS(precioMensual(a))}</span>
                   {a.estado === 'inactivo' && <span className="tag-inactive">inactivo</span>}
+                </div>
+                <div className="alumno-estado" onClick={(e) => e.stopPropagation()}>
+                  {confirmBaja === a.id ? (
+                    <span className="baja-confirm">
+                      <button className="confirm-si" onClick={() => toggleEstado(a)}>Sí</button>
+                      <button className="confirm-no" onClick={() => setConfirmBaja(null)}>No</button>
+                    </span>
+                  ) : a.estado === 'activo' ? (
+                    <button className="estado-btn baja" title="Dar de baja" onClick={() => setConfirmBaja(a.id)}>Baja</button>
+                  ) : (
+                    <button className="estado-btn alta" title="Reactivar" onClick={() => toggleEstado(a)}>Alta</button>
+                  )}
                 </div>
               </li>
             )

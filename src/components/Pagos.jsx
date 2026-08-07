@@ -120,9 +120,9 @@ export default function Pagos({ irAlAlumno }) {
   const resultado = facturacion - totalGastos
 
   async function delGasto(id) {
-    await supabase.from('gastos').delete().eq('id', id)
+    const { error } = await supabase.from('gastos').delete().eq('id', id)
     setConfirmando(null)
-    await load()
+    if (!error) setGastos((list) => list.filter((g) => g.id !== id))
   }
 
   if (showCarga) {
@@ -232,10 +232,15 @@ export default function Pagos({ irAlAlumno }) {
             <GastoForm
               periodo={periodo}
               gasto={editGasto}
-              onDone={async () => {
+              onDone={(g) => {
                 setShowForm(false)
                 setEditGasto(null)
-                await load()
+                if (g)
+                  setGastos((list) => {
+                    const hay = list.some((x) => x.id === g.id)
+                    const next = hay ? list.map((x) => (x.id === g.id ? g : x)) : [...list, g]
+                    return next.sort((a, b) => Number(b.monto) - Number(a.monto))
+                  })
               }}
               onCancel={() => { setShowForm(false); setEditGasto(null) }}
             />
@@ -340,15 +345,15 @@ function GastoForm({ periodo, gasto, onDone, onCancel }) {
     }
     setSaving(true)
     const payload = { periodo, categoria, monto: Number(monto), descripcion: descripcion.trim() || null }
-    const { error } = editing
-      ? await supabase.from('gastos').update(payload).eq('id', gasto.id)
-      : await supabase.from('gastos').insert(payload)
+    const resp = editing
+      ? await supabase.from('gastos').update(payload).eq('id', gasto.id).select().single()
+      : await supabase.from('gastos').insert(payload).select().single()
     setSaving(false)
-    if (error) {
-      setError('No se pudo guardar: ' + error.message)
+    if (resp.error) {
+      setError('No se pudo guardar: ' + resp.error.message)
       return
     }
-    onDone()
+    onDone(resp.data)
   }
 
   return (
