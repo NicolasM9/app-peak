@@ -107,8 +107,18 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
   en cualquiera de las dos pestañas actualiza la otra (un profe por turno). Horarios PM emparejados a
   18:00/19:30. La cuenta Nico↔Eze no se toca.
 
-**Pendientes:** cargar los teléfonos de los alumnos (para WhatsApp) y mediciones/testeos (para que
-Evolución muestre progreso); y armar el roster de alumnos en cada sesión (para tomar lista de verdad).
+**Mejoras (2026-08-07, tanda 3):**
+- **Calendario rediseñado** (`Calendario.jsx`): cada día muestra un bloque **PEAK AM** y **PEAK PM** con el
+  profe grande, centrado y con su **color de Horas**. Tocar un bloque abre las clases de esa franja para editar.
+- **Pestaña Estadísticas [admin]** (`Estadisticas.jsx`): gráficos SVG de edades, deportes, franja AM/PM,
+  días/semana y antigüedad, con **drill-down** (tocar una barra → alumnos → ficha). Se llena con los datos
+  que se carguen (hoy casi vacía: 1/77 con fecha de nacimiento, 0 roster).
+- **"Crear informe" del alumno** (`Informe.jsx`): PDF limpio y profesional (`window.print`, `@media print`)
+  con objetivos + progreso de mediciones/testeos, para mandar por WhatsApp. Se completa con los datos cargados.
+
+**Pendientes:** cargar datos de los alumnos para que se llenen Estadísticas / Evolución / Informe /
+tomar lista: **fechas de nacimiento** y **deportes** (Estadísticas), **teléfonos** (WhatsApp),
+**mediciones/testeos** (Evolución e Informe) y el **roster** de cada sesión (AM/PM, días/semana, asistencia).
 (Login de Octavio: hecho el 2026-08-07 — los 5 del staff ya están.)
 **Auto-deploy YA montado** (GitHub + Netlify): ya no se arrastra `dist/`; alcanza con `git push`.
 
