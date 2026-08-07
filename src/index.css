@@ -1487,10 +1487,10 @@ html {
 /* ---- Planificaciones ---- */
 .mes-tabs {
   display: flex;
-  gap: 6px;
+  gap: 8px;
   overflow-x: auto;
-  padding-bottom: 6px;
-  margin-bottom: 14px;
+  padding-bottom: 8px;
+  margin-bottom: 22px;
 }
 
 .mes-tab {
@@ -1498,10 +1498,11 @@ html {
   background: #171c28;
   border: 1px solid #232a3a;
   color: var(--muted);
-  padding: 7px 12px;
+  padding: 9px 16px;
   border-radius: 999px;
-  font-size: 13px;
-  font-weight: 500;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
 }
 
 .mes-tab.on {
@@ -1511,36 +1512,64 @@ html {
 }
 
 .plan-semana {
-  margin-bottom: 18px;
+  margin-bottom: 24px;
+  background: #12161f;
+  border: 1px solid #202634;
+  border-radius: 16px;
+  padding: 16px 16px 20px;
 }
 
 .plan-semana-tit {
-  font-size: 14px;
-  font-weight: 600;
-  color: #c3cad6;
-  margin: 0 0 8px;
+  font-size: 17px;
+  font-weight: 700;
+  color: #fff;
+  margin: 0 0 16px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.plan-semana-tit::before {
+  content: '';
+  width: 4px;
+  height: 20px;
+  background: var(--cobalt, #1a4fa3);
+  border-radius: 2px;
 }
 
 .plan-dias {
   display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+@media (min-width: 640px) {
+  .plan-dias {
+    grid-template-columns: repeat(4, 1fr);
+  }
 }
 
 .plan-dia-card {
   display: flex;
   flex-direction: column;
-  gap: 4px;
+  gap: 10px;
   align-items: flex-start;
+  justify-content: space-between;
   text-align: left;
-  background: #171c28;
-  border: 1px solid #232a3a;
-  border-radius: 12px;
-  padding: 12px 14px;
+  background: #1a2030;
+  border: 1px solid #283245;
+  border-radius: 14px;
+  padding: 16px 18px;
+  min-height: 96px;
+  cursor: pointer;
+  transition: border-color 0.12s ease, transform 0.12s ease;
+}
+
+.plan-dia-card.lleno {
+  border-left: 3px solid var(--cobalt, #1a4fa3);
 }
 
 .plan-dia-card:hover {
-  border-color: #2f3a4f;
+  border-color: #3a63a8;
+  transform: translateY(-1px);
 }
 
 .plan-dia-card.vacio {
@@ -1549,22 +1578,30 @@ html {
 }
 
 .plan-dia-tit {
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 17px;
+  color: #fff;
 }
 
 .plan-dia-sub {
-  font-size: 12px;
+  font-size: 13px;
   color: var(--muted);
+}
+.plan-dia-card.lleno .plan-dia-sub {
+  color: #8fb4f0;
+  background: rgba(26, 79, 163, 0.18);
+  padding: 4px 11px;
+  border-radius: 999px;
+  font-weight: 600;
 }
 
 /* editor */
 .plan-bloque {
-  background: #171c28;
+  background: #151b26;
   border: 1px solid #232a3a;
-  border-radius: 12px;
-  padding: 12px 14px;
-  margin-bottom: 12px;
+  border-radius: 14px;
+  padding: 16px;
+  margin-bottom: 16px;
 }
 
 .plan-bloque-head {
@@ -1572,12 +1609,12 @@ html {
   align-items: center;
   justify-content: space-between;
   gap: 10px;
-  margin-bottom: 8px;
+  margin-bottom: 12px;
 }
 
 .plan-bloque-tit {
-  font-weight: 600;
-  font-size: 15px;
+  font-weight: 700;
+  font-size: 16px;
 }
 
 .plan-bloque-chip {
@@ -1591,8 +1628,8 @@ html {
 .ej-row {
   display: flex;
   align-items: center;
-  gap: 6px;
-  margin-bottom: 6px;
+  gap: 8px;
+  margin-bottom: 8px;
 }
 
 .ej-nombre { flex: 1; min-width: 0; }

@@ -128,7 +128,7 @@ export default function Planificaciones() {
                   return (
                     <button
                       key={d}
-                      className={`plan-dia-card ${item ? '' : 'vacio'}`}
+                      className={`plan-dia-card ${item ? 'lleno' : 'vacio'}`}
                       onClick={() => setView({ name: 'dia', semana: sem, dia: d, item })}
                     >
                       <span className="plan-dia-tit">Día {d}</span>
