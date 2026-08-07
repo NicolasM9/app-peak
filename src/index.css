@@ -1963,6 +1963,13 @@ html {
   letter-spacing: 0.6px;
   margin-bottom: 2px;
 }
+.mp-hoy {
+  border-color: #2f5aa8;
+  background: linear-gradient(180deg, rgba(26, 79, 163, 0.14), #12161f);
+}
+.mipeak-dia.es-hoy .mipeak-dia-tit {
+  color: #fff;
+}
 
 .txt-venc {
   color: #f0999a;
