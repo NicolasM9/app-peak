@@ -2811,6 +2811,11 @@ textarea {
   font-style: italic;
   margin: 0;
 }
+.cm-resultado {
+  font-size: 30px;
+  font-weight: 800;
+  color: #1f8f4d;
+}
 .inf-pie {
   margin-top: 24px;
   padding-top: 12px;

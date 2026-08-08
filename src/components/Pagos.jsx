@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
 import { precioMensual, hoyISO, vencimientoPorDefecto, estadoPago, ESTADO_INFO, waLink, MEDICION_MONTO } from '../lib/domain'
 import CargaPagos from './CargaPagos'
+import CierreMes from './CierreMes'
 import { exportarRespaldo } from '../lib/exportar'
 
 const CATEGORIAS = [
@@ -35,6 +36,7 @@ export default function Pagos({ irAlAlumno }) {
   const [marcando, setMarcando] = useState(null)
   const [recienPagados, setRecienPagados] = useState(() => new Set())
   const [exportando, setExportando] = useState(false)
+  const [showCierre, setShowCierre] = useState(false)
 
   async function respaldo() {
     setExportando(true)
@@ -147,11 +149,32 @@ export default function Pagos({ irAlAlumno }) {
     )
   }
 
+  if (showCierre) {
+    return (
+      <CierreMes
+        periodo={periodo}
+        datos={{
+          facturacion,
+          cobrado,
+          gastosManuales,
+          totalProfes,
+          diegoTotal,
+          totalGastos,
+          resultado,
+          deudoresN: deudores.length,
+          deudaTotal: deudores.reduce((s, c) => s + c.monto, 0),
+        }}
+        onClose={() => setShowCierre(false)}
+      />
+    )
+  }
+
   return (
     <div>
       <div className="section-head">
         <h1 className="section-title">Pagos</h1>
         <div className="section-head-actions">
+          <button className="btn-ghost" onClick={() => setShowCierre(true)}>📄 Cierre de mes</button>
           <button className="btn-ghost" onClick={respaldo} disabled={exportando}>
             {exportando ? 'Generando…' : '⬇ Respaldo Excel'}
           </button>
