@@ -5,6 +5,7 @@ import { precioMensual, hoyISO, vencimientoPorDefecto, estadoPago, ESTADO_INFO, 
 import CargaPagos from './CargaPagos'
 import CierreMes from './CierreMes'
 import HistorialFacturacion from './HistorialFacturacion'
+import AvisoDeudores from './AvisoDeudores'
 import { exportarRespaldo } from '../lib/exportar'
 
 const CATEGORIAS = [
@@ -39,6 +40,7 @@ export default function Pagos({ irAlAlumno }) {
   const [exportando, setExportando] = useState(false)
   const [showCierre, setShowCierre] = useState(false)
   const [showHistorial, setShowHistorial] = useState(false)
+  const [showAviso, setShowAviso] = useState(false)
 
   async function respaldo() {
     setExportando(true)
@@ -155,6 +157,10 @@ export default function Pagos({ irAlAlumno }) {
     return <HistorialFacturacion onClose={() => setShowHistorial(false)} />
   }
 
+  if (showAviso) {
+    return <AvisoDeudores deudores={deudoresPend} mes={mesTxt} onClose={() => setShowAviso(false)} />
+  }
+
   if (showCierre) {
     return (
       <CierreMes
@@ -219,11 +225,16 @@ export default function Pagos({ irAlAlumno }) {
 
           <div className="section-subhead">
             <h2>Cobros de {nombreMes(periodo)}</h2>
-            {deudores.length > 0 && (
-              <button className="btn-ghost" onClick={() => setShowPagados((s) => !s)}>
-                {showPagados ? 'Solo deudores' : 'Ver todos'}
-              </button>
-            )}
+            <div className="section-head-actions">
+              {deudoresPend.length > 0 && (
+                <button className="btn-ghost" onClick={() => setShowAviso(true)}>📣 Avisar a deudores</button>
+              )}
+              {deudores.length > 0 && (
+                <button className="btn-ghost" onClick={() => setShowPagados((s) => !s)}>
+                  {showPagados ? 'Solo deudores' : 'Ver todos'}
+                </button>
+              )}
+            </div>
           </div>
           <p className="cal-sub" style={{ marginTop: -4 }}>
             {cobros.length - deudoresPend.length} al día ·{' '}

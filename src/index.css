@@ -2667,6 +2667,9 @@ textarea {
   font-weight: 700;
   color: #fff;
 }
+/* Aviso a deudores: fila ya enviada */
+.pago-row.av-done { opacity: 0.55; }
+
 /* Historial de facturación: barra por mes con monto */
 .hf-row {
   display: flex;
