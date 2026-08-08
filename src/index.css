@@ -2667,6 +2667,34 @@ textarea {
   font-weight: 700;
   color: #fff;
 }
+/* Historial de facturación: barra por mes con monto */
+.hf-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 0;
+}
+.hf-lbl {
+  width: 62px;
+  flex: none;
+  font-size: 13px;
+  color: #c3cad6;
+  white-space: nowrap;
+}
+.hf-val {
+  width: 118px;
+  flex: none;
+  text-align: right;
+  font-size: 13px;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+.hf-val .hf-n {
+  color: #8b94a6;
+  font-weight: 500;
+}
+
 .estad-drill {
   position: fixed;
   inset: 0;

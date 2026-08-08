@@ -4,6 +4,7 @@ import { formatARS } from '../lib/format'
 import { precioMensual, hoyISO, vencimientoPorDefecto, estadoPago, ESTADO_INFO, waLink, MEDICION_MONTO } from '../lib/domain'
 import CargaPagos from './CargaPagos'
 import CierreMes from './CierreMes'
+import HistorialFacturacion from './HistorialFacturacion'
 import { exportarRespaldo } from '../lib/exportar'
 
 const CATEGORIAS = [
@@ -37,6 +38,7 @@ export default function Pagos({ irAlAlumno }) {
   const [recienPagados, setRecienPagados] = useState(() => new Set())
   const [exportando, setExportando] = useState(false)
   const [showCierre, setShowCierre] = useState(false)
+  const [showHistorial, setShowHistorial] = useState(false)
 
   async function respaldo() {
     setExportando(true)
@@ -149,6 +151,10 @@ export default function Pagos({ irAlAlumno }) {
     )
   }
 
+  if (showHistorial) {
+    return <HistorialFacturacion onClose={() => setShowHistorial(false)} />
+  }
+
   if (showCierre) {
     return (
       <CierreMes
@@ -174,6 +180,7 @@ export default function Pagos({ irAlAlumno }) {
       <div className="section-head">
         <h1 className="section-title">Pagos</h1>
         <div className="section-head-actions">
+          <button className="btn-ghost" onClick={() => setShowHistorial(true)}>📈 Historial</button>
           <button className="btn-ghost" onClick={() => setShowCierre(true)}>📄 Cierre de mes</button>
           <button className="btn-ghost" onClick={respaldo} disabled={exportando}>
             {exportando ? 'Generando…' : '⬇ Respaldo Excel'}
