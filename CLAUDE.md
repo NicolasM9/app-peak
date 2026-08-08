@@ -34,8 +34,8 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Fase 3:** armado de rutinas (bloque grupal).
 
 ## Estado del proyecto (al 2026-08-07)
-**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0014
-(0013 = asistencia; 0014 = `fecha_alta`/`fecha_baja` de alumnos, 2026-08-07). **App publicada** en `earnest-moonbeam-59f0d7.netlify.app`
+**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0015
+(0013 = asistencia; 0014 = `fecha_alta`/`fecha_baja` de alumnos, 2026-08-07; 0015 = `objetivos`/`foto_path`, 2026-08-08). **App publicada** en `earnest-moonbeam-59f0d7.netlify.app`
 con **auto-deploy activo** (2026-08-07): repo privado `github.com/NicolasM9/app-peak` enlazado a Netlify;
 cada `git push` a `main` buildea (`npm run build`→`dist`, Node 22 vía `netlify.toml`) y publica solo.
 Las claves de Supabase van como variables de entorno en Netlify (`VITE_SUPABASE_URL` /
@@ -122,11 +122,29 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
 - **Mi Peak** (profe) mejorado: tarjeta **"Hoy"** con las clases del día, "Mis días" resalta hoy, y card de
   próximas vacaciones.
 - Pulido: se sacó el import muerto `Placeholder` y se ajustó el padding del informe en mobile.
+- **Objetivos guardados** (migración 0015): campo en la ficha (AlumnoForm), se ven en el detalle y
+  pre-cargan el Informe (interconecta Alumnos↔Informe).
+
+**Mejoras (2026-08-08, tanda 5 — "todo lo otro sin foto"):** 5 pantallas listas-para-datos, todas
+interconectadas y verificadas en vivo:
+- **Carga masiva de fechas de nacimiento + deportes** (`CargaDatos.jsx`): botón "📋 Cargar datos" en
+  Alumnos; selector de campo, parser de fechas multi-formato, datalist de deportes, reusa `match.js`.
+  Enciende Estadísticas (edades/deportes) y los cumpleaños de Inicio.
+- **Historial de facturación** (`HistorialFacturacion.jsx`): botón "📈 Historial" en Pagos; barras de
+  cobrado por mes + total/promedio/mejor mes. Se llena solo con los pagos que se registran.
+- **Alumnos en riesgo** (tarjeta en `Inicio.jsx`): cruza asistencia (≥14 días sin venir) + deuda,
+  clickeable → ficha. Se enciende al tomar lista.
+- **Aviso masivo a deudores** (`AvisoDeudores.jsx`): botón "📣 Avisar a deudores" en los Cobros de
+  Pagos; plantilla editable ({nombre}/{monto}/{mes}), un WhatsApp por deudor que se marca como enviado,
+  y lista aparte de los que no tienen teléfono. Cruza deudores + teléfonos.
+- **Ocupación por turno** (sección en `Estadisticas.jsx`): cuenta el roster de cada sesión Peak,
+  ordenada por día/hora, con color y nombre del profe (de Horas/Calendario), drill → fichas.
 
 **Pendientes:** cargar datos de los alumnos para que se llenen Estadísticas / Evolución / Informe /
-tomar lista: **fechas de nacimiento** y **deportes** (Estadísticas), **teléfonos** (WhatsApp),
-**mediciones/testeos** (Evolución e Informe) y el **roster** de cada sesión (AM/PM, días/semana, asistencia).
-(Login de Octavio: hecho el 2026-08-07 — los 5 del staff ya están.)
+tomar lista / ocupación / WhatsApp: **fechas de nacimiento** y **deportes** (📋 Cargar datos → Estadísticas),
+**teléfonos** (☎ Teléfonos → WhatsApp y aviso a deudores), **mediciones/testeos** (Evolución e Informe) y
+el **roster** de cada sesión (Calendario → franja → alumnos → ocupación, AM/PM, días/semana y tomar lista).
+El historial de facturación se llena solo mes a mes. (Login de Octavio: hecho el 2026-08-07 — los 5 del staff ya están.)
 **Auto-deploy YA montado** (GitHub + Netlify): ya no se arrastra `dist/`; alcanza con `git push`.
 
 Entorno: Node portátil en `~/.peak-tools/node` (no está en el PATH del sistema); la app
