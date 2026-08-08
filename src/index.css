@@ -2659,6 +2659,19 @@ textarea {
   min-width: 2px;
 }
 .estad-bar:not(:disabled):hover .estad-bar-fill { background: #3a63a8; }
+.estad-ocupa { margin-top: 14px; }
+.estad-ocupa .estad-bar-lbl {
+  width: 120px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.ocupa-dot {
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+  flex: none;
+}
 .estad-bar-num {
   width: 30px;
   flex: none;
