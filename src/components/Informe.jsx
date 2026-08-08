@@ -9,7 +9,7 @@ function r1(n) {
 export default function Informe({ alumno, onClose }) {
   const [mediciones, setMediciones] = useState([])
   const [testeos, setTesteos] = useState([])
-  const [objetivos, setObjetivos] = useState('')
+  const [objetivos, setObjetivos] = useState(alumno.objetivos || '')
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {

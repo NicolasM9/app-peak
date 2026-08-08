@@ -24,6 +24,7 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
     estado_fisico: alumno?.estado_fisico || 'sano',
     lesion_detalle: alumno?.lesion_detalle || '',
     lesion_desde: alumno?.lesion_desde || '',
+    objetivos: alumno?.objetivos || '',
     estado: alumno?.estado || 'activo',
   })
   const [saving, setSaving] = useState(false)
@@ -55,6 +56,7 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
       estado_fisico: form.estado_fisico,
       lesion_detalle: form.lesion_detalle.trim() || null,
       lesion_desde: form.lesion_desde || null,
+      objetivos: form.objetivos.trim() || null,
       estado: form.estado,
     }
     const resp = editing
@@ -205,6 +207,16 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
             </label>
           </div>
         )}
+
+        <label className="field">
+          <span>Objetivos del alumno</span>
+          <textarea
+            rows={2}
+            value={form.objetivos}
+            onChange={(e) => set('objetivos', e.target.value)}
+            placeholder="Ej: bajar 2% de adiposa, mejorar sentadilla, volver a competir…"
+          />
+        </label>
 
         {editing && (
           <label className="field">

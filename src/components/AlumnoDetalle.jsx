@@ -136,6 +136,10 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
         </div>
       )}
 
+      {alumno.objetivos && (
+        <div className="asis-linea"><b>🎯 Objetivos:</b> {alumno.objetivos}</div>
+      )}
+
       <div className="section-subhead">
         <h2>Pagos</h2>
         {!showPagoForm && <button className="btn-primary" onClick={() => setShowPagoForm(true)}>+ Registrar</button>}
