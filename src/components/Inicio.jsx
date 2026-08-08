@@ -17,13 +17,14 @@ export default function Inicio({ onIrAlumno }) {
 
   useEffect(() => {
     ;(async () => {
-      const [{ data: alumnos }, { data: pagos }] = await Promise.all([
+      const [{ data: alumnos }, { data: pagos }, { data: asistencias }] = await Promise.all([
         supabase
           .from('alumnos')
           .select('id, nombre, estado, medicion_nutricional, paga_directo_profe, fecha_nacimiento, fecha_alta, fecha_baja, ajuste_monto, planes(precio_mensual)'),
         supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
+        supabase.from('asistencias').select('alumno_id, fecha, presente'),
       ])
-      setData({ alumnos: alumnos || [], pagos: pagos || [] })
+      setData({ alumnos: alumnos || [], pagos: pagos || [], asistencias: asistencias || [] })
     })()
   }, [])
 
@@ -53,6 +54,31 @@ export default function Inicio({ onIrAlumno }) {
     .sort((x, y) => x.nombre.localeCompare(y.nombre))
   const pendienteTotal = deudores.reduce((s, d) => s + d.monto, 0)
   const proximos = deudores.slice(0, 6)
+
+  // Alumnos en riesgo (retención): dejaron de venir. Cruza asistencia + deuda.
+  // Se enciende cuando se toma lista; hoy queda vacío si no hay asistencias.
+  const DIAS_RIESGO = 14
+  const hoyMs = Date.now()
+  const ultimaPresente = new Map() // alumnoId -> 'YYYY-MM-DD' más reciente con presente
+  const trackeados = new Set() // alumnos a los que alguna vez se les tomó lista
+  ;(data.asistencias || []).forEach((a) => {
+    trackeados.add(a.alumno_id)
+    if (a.presente && (!ultimaPresente.has(a.alumno_id) || a.fecha > ultimaPresente.get(a.alumno_id))) {
+      ultimaPresente.set(a.alumno_id, a.fecha)
+    }
+  })
+  const diasDesde = (iso) => Math.floor((hoyMs - new Date(iso + 'T00:00:00').getTime()) / 86400000)
+  const deudorSet = new Set(deudores.map((d) => d.id))
+  const enRiesgo = activos
+    .filter((a) => trackeados.has(a.id))
+    .map((a) => {
+      const ult = ultimaPresente.get(a.id)
+      const dias = ult ? diasDesde(ult) : Infinity
+      return { id: a.id, nombre: a.nombre, dias, ult, debe: deudorSet.has(a.id) }
+    })
+    .filter((r) => r.dias >= DIAS_RIESGO)
+    .sort((x, y) => (y.dias === Infinity ? 1e9 : y.dias) - (x.dias === Infinity ? 1e9 : x.dias))
+  const riesgoTop = enRiesgo.slice(0, 6)
 
   // Altas y bajas del mes (vs mes anterior)
   const enMes = (iso, y, m) => {
@@ -122,6 +148,37 @@ export default function Inicio({ onIrAlumno }) {
             {deudores.length > proximos.length && (
               <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>
                 y {deudores.length - proximos.length} más… (ver todos en Pagos)
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="pk-card" style={{ marginTop: 14 }}>
+        <div className="card-title">⚠️ Alumnos en riesgo</div>
+        {riesgoTop.length === 0 ? (
+          <p className="muted" style={{ margin: 0 }}>
+            {trackeados.size === 0
+              ? 'Se enciende cuando empieces a tomar lista: te marca a los que dejaron de venir.'
+              : '¡Nadie dejó de venir! 👌'}
+          </p>
+        ) : (
+          <>
+            {riesgoTop.map((r) => (
+              <button
+                key={r.id}
+                className="mini-row mini-row-btn"
+                onClick={() => onIrAlumno && onIrAlumno(r.id)}
+              >
+                <span>{r.nombre}</span>
+                <span className="txt-venc">
+                  {r.ult ? `hace ${r.dias} días` : 'no vino aún'}{r.debe ? ' · debe' : ''}
+                </span>
+              </button>
+            ))}
+            {enRiesgo.length > riesgoTop.length && (
+              <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>
+                y {enRiesgo.length - riesgoTop.length} más…
               </p>
             )}
           </>
