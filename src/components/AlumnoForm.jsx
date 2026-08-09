@@ -13,6 +13,7 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
   const [form, setForm] = useState({
     nombre: alumno?.nombre || '',
     telefono: alumno?.telefono || '',
+    email: alumno?.email || '',
     fecha_nacimiento: alumno?.fecha_nacimiento || '',
     deporte: alumno?.deporte || '',
     plan_id: alumno?.plan_id || '',
@@ -45,6 +46,7 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
     const payload = {
       nombre: form.nombre.trim(),
       telefono: form.telefono.trim() || null,
+      email: form.email.trim() || null,
       fecha_nacimiento: form.fecha_nacimiento || null,
       deporte: form.deporte.trim() || null,
       plan_id: form.plan_id ? Number(form.plan_id) : null,
@@ -96,6 +98,17 @@ export default function AlumnoForm({ alumno, planes, onDone, onCancel }) {
             onChange={(e) => set('telefono', e.target.value)}
             placeholder="11 5555-1234"
             inputMode="tel"
+          />
+        </label>
+
+        <label className="field">
+          <span>Email</span>
+          <input
+            type="email"
+            value={form.email}
+            onChange={(e) => set('email', e.target.value)}
+            placeholder="alumno@mail.com"
+            inputMode="email"
           />
         </label>
 

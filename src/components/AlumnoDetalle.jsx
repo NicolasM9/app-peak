@@ -131,6 +131,9 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
             </a>
           </span>
         )}
+        {alumno.email && (
+          <span><b>Email:</b> <a href={`mailto:${alumno.email}`}>{alumno.email}</a></span>
+        )}
         {alumno.deporte && <span><b>Deporte:</b> {alumno.deporte}</span>}
         {alumno.ajuste_monto ? (
           <span><b>Ajuste:</b> {formatARS(alumno.ajuste_monto)}{alumno.ajuste_motivo ? ` (${alumno.ajuste_motivo})` : ''}</span>
