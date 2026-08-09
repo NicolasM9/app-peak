@@ -38,6 +38,20 @@ export function estadoAlumno(pagos, today = new Date()) {
   return 'al_dia'
 }
 
+// Estado del MES ACTUAL (modelo virtual, igual que Pagos/Inicio): ¿pagó este mes?
+// Si pagó -> al_dia; si no, según la fecha de hoy vs el vencimiento del 6.
+export function estadoMesActual(pagos, today = new Date()) {
+  const y = today.getFullYear()
+  const m = today.getMonth()
+  const pagoEsteMes = (pagos || []).some((p) => {
+    if (!p.fecha_pago) return false
+    const d = new Date(p.fecha_pago)
+    return d.getFullYear() === y && d.getMonth() === m
+  })
+  if (pagoEsteMes) return 'al_dia'
+  return estadoPago({ vencimiento: vencimientoPorDefecto(today), fecha_pago: null }, today)
+}
+
 export const ESTADO_INFO = {
   al_dia: { label: 'Pagado', dot: '#4caf50', tint: 'rgba(76,175,80,0.16)', text: '#86d98f' },
   por_vencer: { label: 'Por vencer', dot: '#eab308', tint: 'rgba(234,179,8,0.16)', text: '#f2cd5c' },

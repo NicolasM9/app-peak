@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
-import { precioMensual, estadoAlumno, ESTADO_INFO, hoyISO } from '../lib/domain'
+import { precioMensual, estadoMesActual, ESTADO_INFO, hoyISO } from '../lib/domain'
 import AlumnoForm from './AlumnoForm'
 import AlumnoDetalle from './AlumnoDetalle'
 import CargaTelefonos from './CargaTelefonos'
@@ -14,6 +14,7 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
   const [loading, setLoading] = useState(true)
   const [q, setQ] = useState('')
   const [showInactivos, setShowInactivos] = useState(false)
+  const [soloDeudores, setSoloDeudores] = useState(false)
   const [view, setView] = useState({ name: 'list' })
   const [confirmBaja, setConfirmBaja] = useState(null)
 
@@ -118,10 +119,15 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
     )
   }
 
+  // Deudor del mes = alumno activo que paga a Peak y todavía no pagó este mes
+  const esDeudor = (a) =>
+    a.estado === 'activo' && !a.paga_directo_profe && estadoMesActual(pagosByAlumno[a.id]) !== 'al_dia'
   const filtrados = alumnos
     .filter((a) => showInactivos || a.estado === 'activo')
     .filter((a) => a.nombre.toLowerCase().includes(q.trim().toLowerCase()))
+    .filter((a) => !soloDeudores || esDeudor(a))
   const activos = alumnos.filter((a) => a.estado === 'activo').length
+  const deudoresCount = alumnos.filter(esDeudor).length
 
   return (
     <div className="alumnos">
@@ -148,15 +154,27 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
       />
 
       <div className="list-meta">
-        <span>{activos} activos</span>
-        <label className="switch-inline">
-          <input
-            type="checkbox"
-            checked={showInactivos}
-            onChange={(e) => setShowInactivos(e.target.checked)}
-          />
-          Ver inactivos
-        </label>
+        <span>{activos} activos{deudoresCount > 0 && <> · <b style={{ color: '#f0999a' }}>{deudoresCount} deben</b></>}</span>
+        <div style={{ display: 'flex', gap: 14, alignItems: 'center' }}>
+          {deudoresCount > 0 && (
+            <label className="switch-inline">
+              <input
+                type="checkbox"
+                checked={soloDeudores}
+                onChange={(e) => setSoloDeudores(e.target.checked)}
+              />
+              Solo deudores
+            </label>
+          )}
+          <label className="switch-inline">
+            <input
+              type="checkbox"
+              checked={showInactivos}
+              onChange={(e) => setShowInactivos(e.target.checked)}
+            />
+            Ver inactivos
+          </label>
+        </div>
       </div>
 
       {loading ? (
@@ -170,7 +188,10 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
       ) : (
         <ul className="alumno-list">
           {filtrados.map((a) => {
-            const info = ESTADO_INFO[estadoAlumno(pagosByAlumno[a.id])]
+            const estado = a.estado !== 'activo' || a.paga_directo_profe
+              ? 'sin_pagos'
+              : estadoMesActual(pagosByAlumno[a.id])
+            const info = ESTADO_INFO[estado]
             return (
               <li
                 key={a.id}
