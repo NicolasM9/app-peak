@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS, formatFecha } from '../lib/format'
-import { precioMensual, estadoPago, ESTADO_INFO, METODO_LABEL, hoyISO, waLink } from '../lib/domain'
+import { precioMensual, estadoPago, estadoMesActual, ESTADO_INFO, METODO_LABEL, hoyISO, waLink } from '../lib/domain'
 import PagoForm from './PagoForm'
 import Mediciones from './Mediciones'
 import Testeos from './Testeos'
@@ -58,6 +58,14 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
   const mesPrefix = hoyISO().slice(0, 7)
   const vinoMes = asistencias.filter((a) => a.presente && a.fecha.slice(0, 7) === mesPrefix).length
   const ultimaVez = asistencias.find((a) => a.presente)?.fecha
+
+  // Resumen de pagos + estado del mes actual
+  const anio = new Date().getFullYear()
+  const pagosDelAnio = pagos.filter((p) => p.fecha_pago && new Date(p.fecha_pago).getFullYear() === anio)
+  const totalAnio = pagosDelAnio.reduce((s, p) => s + Number(p.monto || 0), 0)
+  const ultimoPago = pagos.filter((p) => p.fecha_pago).sort((a, b) => (a.fecha_pago < b.fecha_pago ? 1 : -1))[0]
+  const estMes = estadoMesActual(pagos)
+  const infoMes = ESTADO_INFO[estMes]
 
   async function borrarPago(id) {
     const { error } = await supabase.from('pagos').delete().eq('id', id)
@@ -129,6 +137,26 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
         ) : null}
       </div>
 
+      {alumno.paga_directo_profe ? (
+        <div className="asis-linea"><b>Pago del mes:</b> <span className="muted">le paga 100% al profe (no a Peak)</span></div>
+      ) : (
+        <div className="asis-linea">
+          <b>Pago del mes:</b>{' '}
+          <span className="estado-chip" style={{ background: infoMes.tint, color: infoMes.text }}>{infoMes.label}</span>
+          {estMes !== 'al_dia' && alumno.telefono && (
+            <a
+              className="btn-wa"
+              style={{ marginLeft: 8 }}
+              href={waLink(alumno.telefono, `Hola ${alumno.nombre.split(' ')[0]}! Te recordamos la cuota de este mes de Peak Performance 💪`)}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              WhatsApp
+            </a>
+          )}
+        </div>
+      )}
+
       {asistencias.length > 0 && (
         <div className="asis-linea">
           <b>Asistencia:</b> vino <b>{vinoMes}</b> {vinoMes === 1 ? 'vez' : 'veces'} este mes
@@ -144,6 +172,12 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
         <h2>Pagos</h2>
         {!showPagoForm && <button className="btn-primary" onClick={() => setShowPagoForm(true)}>+ Registrar</button>}
       </div>
+      {pagos.length > 0 && (
+        <p className="cal-sub" style={{ marginTop: -4 }}>
+          Pagó {pagosDelAnio.length} {pagosDelAnio.length === 1 ? 'vez' : 'veces'} en {anio} · total {formatARS(totalAnio)}
+          {ultimoPago ? ` · último ${formatFecha(ultimoPago.fecha_pago)}` : ''}
+        </p>
+      )}
       {showPagoForm && (
         <PagoForm
           alumno={alumno}
