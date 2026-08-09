@@ -34,8 +34,11 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Fase 3:** armado de rutinas (bloque grupal).
 
 ## Estado del proyecto (al 2026-08-07)
-**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0015
-(0013 = asistencia; 0014 = `fecha_alta`/`fecha_baja` de alumnos, 2026-08-07; 0015 = `objetivos`/`foto_path`, 2026-08-08). **App publicada** en `earnest-moonbeam-59f0d7.netlify.app`
+**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0016
+(0013 = asistencia; 0014 = `fecha_alta`/`fecha_baja` de alumnos, 2026-08-07; 0015 = `objetivos`/`foto_path`, 2026-08-08;
+0016 = `alumnos.email`, 2026-08-09). **Datos de contacto cargados (2026-08-09):** 77/82 alumnos con **teléfono** y
+**email** (importados del CSV de Turnos Web `Peak Performance.csv`; ese archivo NO trae fecha de nacimiento →
+sigue pendiente). El WhatsApp a deudores quedó operativo. **App publicada** en `earnest-moonbeam-59f0d7.netlify.app`
 con **auto-deploy activo** (2026-08-07): repo privado `github.com/NicolasM9/app-peak` enlazado a Netlify;
 cada `git push` a `main` buildea (`npm run build`→`dist`, Node 22 vía `netlify.toml`) y publica solo.
 Las claves de Supabase van como variables de entorno en Netlify (`VITE_SUPABASE_URL` /
