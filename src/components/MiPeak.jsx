@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { formatARS, formatFecha } from '../lib/format'
-import { totalAcuerdo, hoyISO } from '../lib/domain'
+import { formatFecha } from '../lib/format'
+import { hoyISO } from '../lib/domain'
 
 const DIAS = [
   { key: 'lunes', label: 'Lunes' },
@@ -33,7 +33,6 @@ export default function MiPeak({ profe }) {
 
   if (!profe) return <p className="muted">Cargando…</p>
 
-  const liquidacion = totalAcuerdo(profe)
   const sesiones = data?.sesiones || []
   const vacaciones = data?.vacaciones || []
   const horasSemana = (data?.turnos || []).reduce((s, t) => s + Number(t.horas || 0), 0)
@@ -71,11 +70,6 @@ export default function MiPeak({ profe }) {
       </div>
 
       <div className="stat-grid" style={{ marginTop: 14 }}>
-        <div className="stat-card">
-          <div className="stat-label">Mi acuerdo del mes</div>
-          <div className="stat-value">{formatARS(liquidacion)}</div>
-          <div className="stat-sub">base + personalizados</div>
-        </div>
         <div className="stat-card">
           <div className="stat-label">Mis horas / semana</div>
           <div className="stat-value">{horasSemana}</div>
