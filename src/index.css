@@ -2683,6 +2683,17 @@ textarea {
 /* Aviso a deudores: fila ya enviada */
 .pago-row.av-done { opacity: 0.55; }
 
+/* Barra "cobrado vs esperado" en Pagos */
+.cobro-prog { margin: 16px 0 4px; }
+.cobro-prog-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 10px;
+  font-size: 14px;
+  margin-bottom: 6px;
+}
+
 /* Historial de facturación: barra por mes con monto */
 .hf-row {
   display: flex;

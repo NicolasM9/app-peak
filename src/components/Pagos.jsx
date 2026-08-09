@@ -136,6 +136,7 @@ export default function Pagos({ irAlAlumno }) {
   const diegoTotal = conMedicion * MEDICION_MONTO
   const totalGastos = gastosManuales + totalProfes + diegoTotal
   const resultado = facturacion - totalGastos
+  const pctCobrado = facturacion > 0 ? Math.round((cobrado / facturacion) * 100) : 0
 
   async function delGasto(id) {
     const { error } = await supabase.from('gastos').delete().eq('id', id)
@@ -220,6 +221,16 @@ export default function Pagos({ irAlAlumno }) {
               <div className="stat-label">Resultado (esperado)</div>
               <div className="stat-value" style={{ color: '#86d98f' }}>{formatARS(resultado)}</div>
               <div className="stat-sub">{formatARS(resultado / 2)} c/u (vos y Eze)</div>
+            </div>
+          </div>
+
+          <div className="cobro-prog">
+            <div className="cobro-prog-top">
+              <span><b>{pctCobrado}%</b> cobrado de lo esperado</span>
+              <span className="muted">{formatARS(cobrado)} / {formatARS(facturacion)}</span>
+            </div>
+            <div className="estad-bar-track" style={{ height: 12 }}>
+              <span className="estad-bar-fill" style={{ width: Math.min(100, pctCobrado) + '%', background: '#1f8f78' }} />
             </div>
           </div>
 
