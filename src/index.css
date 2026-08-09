@@ -1892,6 +1892,17 @@ html {
   border-radius: 12px;
   padding: 14px 16px;
 }
+.stat-card-btn {
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  width: 100%;
+  cursor: pointer;
+  transition: border-color 0.12s;
+}
+.stat-card-btn:hover {
+  border-color: #3a63a8;
+}
 
 .stat-label {
   font-size: 12px;

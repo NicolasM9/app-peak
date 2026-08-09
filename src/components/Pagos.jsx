@@ -138,6 +138,14 @@ export default function Pagos({ irAlAlumno }) {
   const resultado = facturacion - totalGastos
   const pctCobrado = facturacion > 0 ? Math.round((cobrado / facturacion) * 100) : 0
 
+  // Cobrado vs promedio de meses anteriores (con datos)
+  const mesKey = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`
+  const totMes = {}
+  pagos.forEach((p) => { if (p.fecha_pago) { const k = p.fecha_pago.slice(0, 7); totMes[k] = (totMes[k] || 0) + Number(p.monto || 0) } })
+  const prevVals = Object.entries(totMes).filter(([k, v]) => k < mesKey && v > 0).map(([, v]) => v)
+  const promCobrado = prevVals.length ? prevVals.reduce((a, b) => a + b, 0) / prevVals.length : 0
+  const deltaCobrado = promCobrado > 0 ? Math.round(((cobrado - promCobrado) / promCobrado) * 100) : null
+
   async function delGasto(id) {
     const { error } = await supabase.from('gastos').delete().eq('id', id)
     setConfirmando(null)
@@ -212,6 +220,11 @@ export default function Pagos({ irAlAlumno }) {
             <div className="stat-card">
               <div className="stat-label">Cobrado este mes</div>
               <div className="stat-value">{formatARS(cobrado)}</div>
+              {deltaCobrado != null && (
+                <div className="stat-sub" style={{ color: deltaCobrado >= 0 ? '#86d98f' : '#f0999a' }}>
+                  {deltaCobrado >= 0 ? '▲' : '▼'} {Math.abs(deltaCobrado)}% vs promedio
+                </div>
+              )}
             </div>
             <div className="stat-card">
               <div className="stat-label">Gastos</div>

@@ -12,7 +12,7 @@ import {
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 
-export default function Inicio({ onIrAlumno }) {
+export default function Inicio({ onIrAlumno, onIr }) {
   const [data, setData] = useState(null)
 
   useEffect(() => {
@@ -45,6 +45,18 @@ export default function Inicio({ onIrAlumno }) {
   const ingresosMes = data.pagos
     .filter((p) => esteMes(p.fecha_pago))
     .reduce((s, p) => s + Number(p.monto || 0), 0)
+
+  // Ingresos vs promedio de los meses anteriores (con datos)
+  const mesKey = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}`
+  const totMes = {}
+  data.pagos.forEach((p) => {
+    if (!p.fecha_pago) return
+    const k = p.fecha_pago.slice(0, 7)
+    totMes[k] = (totMes[k] || 0) + Number(p.monto || 0)
+  })
+  const prevVals = Object.entries(totMes).filter(([k, v]) => k < mesKey && v > 0).map(([, v]) => v)
+  const promIngresos = prevVals.length ? prevVals.reduce((a, b) => a + b, 0) / prevVals.length : 0
+  const deltaIngresos = promIngresos > 0 ? Math.round(((ingresosMes - promIngresos) / promIngresos) * 100) : null
 
   const venc6 = vencimientoPorDefecto()
   const estadoDeuda = estadoPago({ vencimiento: venc6, fecha_pago: null })
@@ -112,14 +124,24 @@ export default function Inicio({ onIrAlumno }) {
       </p>
 
       <div className="stat-grid">
-        <Stat label="Alumnos activos" value={activosPeak.length} />
+        <Stat label="Alumnos activos" value={activosPeak.length} onClick={() => onIr && onIr('alumnos')} />
         <Stat
           label="Deben este mes"
           value={formatARS(pendienteTotal)}
           sub={`${deudores.length} alumno${deudores.length === 1 ? '' : 's'}`}
           accent="#f2cd5c"
+          onClick={() => onIr && onIr('pagos')}
         />
-        <Stat label="Ingresos del mes" value={formatARS(ingresosMes)} />
+        <Stat
+          label="Ingresos del mes"
+          value={formatARS(ingresosMes)}
+          sub={deltaIngresos != null
+            ? <span style={{ color: deltaIngresos >= 0 ? '#86d98f' : '#f0999a' }}>
+                {deltaIngresos >= 0 ? '▲' : '▼'} {Math.abs(deltaIngresos)}% vs promedio
+              </span>
+            : null}
+          onClick={() => onIr && onIr('pagos')}
+        />
         <Stat
           label="Medición (Diego)"
           value={conMedicion}
@@ -224,14 +246,18 @@ export default function Inicio({ onIrAlumno }) {
   )
 }
 
-function Stat({ label, value, sub, accent }) {
-  return (
-    <div className="stat-card">
+function Stat({ label, value, sub, accent, onClick }) {
+  const inner = (
+    <>
       <div className="stat-label">{label}</div>
       <div className="stat-value" style={accent ? { color: accent } : null}>
         {value}
       </div>
       {sub && <div className="stat-sub">{sub}</div>}
-    </div>
+    </>
   )
+  if (onClick) {
+    return <button className="stat-card stat-card-btn" onClick={onClick}>{inner}</button>
+  }
+  return <div className="stat-card">{inner}</div>
 }

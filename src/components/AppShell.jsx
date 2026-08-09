@@ -61,7 +61,7 @@ export default function AppShell({ profe, user }) {
         return <Estadisticas onIrAlumno={irAlAlumno} />
 
       default:
-        return esAdmin ? <Inicio onIrAlumno={irAlAlumno} /> : <MiPeak profe={profe} />
+        return esAdmin ? <Inicio onIrAlumno={irAlAlumno} onIr={ir} /> : <MiPeak profe={profe} />
     }
   }
 
