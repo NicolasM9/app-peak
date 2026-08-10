@@ -9,14 +9,18 @@ import Horas from './Horas'
 import Pagos from './Pagos'
 import Acuerdos from './Acuerdos'
 import Estadisticas from './Estadisticas'
+import MiAcuerdo from './MiAcuerdo'
+import MisPersonalizados from './MisPersonalizados'
 import { Menu } from 'lucide-react'
 
 const TITULOS = {
   inicio: 'Inicio', calendario: 'Calendario', alumnos: 'Alumnos',
   planificaciones: 'Planificaciones', horas: 'Horas', pagos: 'Pagos',
   estadisticas: 'Estadísticas', acuerdos: 'Acuerdos profes',
+  miacuerdo: 'Mi acuerdo', personalizados: 'Personalizados',
 }
 const ADMIN_SECC = new Set(['alumnos', 'pagos', 'acuerdos', 'estadisticas'])
+const PROFE_SECC = new Set(['miacuerdo', 'personalizados'])
 
 export default function AppShell({ profe, user }) {
   const nombre = profe?.nombre || user?.email
@@ -27,6 +31,7 @@ export default function AppShell({ profe, user }) {
 
   let sec = seccion
   if (ADMIN_SECC.has(sec) && !esAdmin) sec = 'inicio'
+  if (PROFE_SECC.has(sec) && esAdmin) sec = 'inicio'
 
   function ir(id) {
     setSeccion(id)
@@ -59,6 +64,12 @@ export default function AppShell({ profe, user }) {
 
       case 'estadisticas':
         return <Estadisticas onIrAlumno={irAlAlumno} />
+
+      case 'miacuerdo':
+        return <MiAcuerdo profe={profe} />
+
+      case 'personalizados':
+        return <MisPersonalizados profe={profe} />
 
       default:
         return esAdmin ? <Inicio onIrAlumno={irAlAlumno} onIr={ir} /> : <MiPeak profe={profe} />

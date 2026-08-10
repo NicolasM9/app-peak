@@ -9,6 +9,7 @@ import {
   Wallet,
   FileText,
   BarChart3,
+  UserPlus,
   Lock,
   LogOut,
   X,
@@ -20,6 +21,8 @@ const ITEMS = [
   { id: 'alumnos', label: 'Alumnos', Icon: Users, admin: true },
   { id: 'planificaciones', label: 'Planificaciones', Icon: ClipboardList },
   { id: 'horas', label: 'Horas', Icon: Clock },
+  { id: 'miacuerdo', label: 'Mi acuerdo', Icon: FileText, soloProfe: true },
+  { id: 'personalizados', label: 'Personalizados', Icon: UserPlus, soloProfe: true },
 ]
 
 const ADMIN_ITEMS = [
@@ -45,7 +48,7 @@ export default function Sidebar({ seccion, onIr, esAdmin, nombre, open, onClose 
         </div>
 
         <nav className="sidebar-nav">
-          {ITEMS.filter((it) => !it.admin || esAdmin).map((it) => {
+          {ITEMS.filter((it) => (!it.admin || esAdmin) && (!it.soloProfe || !esAdmin)).map((it) => {
             const Icon = it.Icon
             const label = !esAdmin && it.labelProfe ? it.labelProfe : it.label
             return (

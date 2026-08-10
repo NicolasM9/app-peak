@@ -1,7 +1,6 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { formatFecha } from '../lib/format'
-import { hoyISO } from '../lib/domain'
+import MisVacaciones from './MisVacaciones'
 
 const DIAS = [
   { key: 'lunes', label: 'Lunes' },
@@ -22,19 +21,17 @@ export default function MiPeak({ profe }) {
   useEffect(() => {
     if (!profe?.id) return
     ;(async () => {
-      const [{ data: ses }, { data: tur }, { data: vac }] = await Promise.all([
+      const [{ data: ses }, { data: tur }] = await Promise.all([
         supabase.from('sesiones').select('id, dia, hora_inicio, hora_fin, titulo').eq('profe_id', profe.id),
         supabase.from('turnos').select('horas').eq('profe_id', profe.id),
-        supabase.from('vacaciones').select('inicio, fin, exceso').eq('profe_id', profe.id).gte('fin', hoyISO()).order('inicio'),
       ])
-      setData({ sesiones: ses || [], turnos: tur || [], vacaciones: vac || [] })
+      setData({ sesiones: ses || [], turnos: tur || [] })
     })()
   }, [profe?.id])
 
   if (!profe) return <p className="muted">Cargando…</p>
 
   const sesiones = data?.sesiones || []
-  const vacaciones = data?.vacaciones || []
   const horasSemana = (data?.turnos || []).reduce((s, t) => s + Number(t.horas || 0), 0)
 
   const hoyKey = KEY_POR_GETDAY[new Date().getDay()]
@@ -100,17 +97,7 @@ export default function MiPeak({ profe }) {
         )}
       </div>
 
-      {vacaciones.length > 0 && (
-        <div className="pk-card" style={{ marginTop: 14 }}>
-          <div className="card-title">🏖️ Mis próximas vacaciones</div>
-          {vacaciones.map((v, i) => (
-            <div key={i} className="mini-row">
-              <span>{formatFecha(v.inicio)} → {formatFecha(v.fin)}</span>
-              {v.exceso ? <span className="muted">{v.exceso}</span> : null}
-            </div>
-          ))}
-        </div>
-      )}
+      <MisVacaciones profeId={profe.id} />
     </div>
   )
 }
