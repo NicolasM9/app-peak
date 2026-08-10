@@ -48,11 +48,16 @@ tipo **`bloqueo`** (migración **0019**) para marcar turnos no disponibles. Fix 
 **Fase C — Planificaciones más pro (2026-08-10, HECHO):** editor `PlanDia.jsx` rediseñado — cada ejercicio en tarjeta legible
 (nombre + Series×Reps) con reordenar/duplicar/borrar; **autocompletado** de ejercicios (datalist con la biblioteca de todos los
 usados); bloques con **nombre editable** + reordenar/quitar; **"Copiar de…"** trae otro día. En la lista, **"Copiar mes"** duplica
-toda la planificación de un mes a otro. Sin migración (mismo modelo `ec`/`bloques`). Posible extra futuro: guardar un bloque como
-plantilla reutilizable (necesitaría tabla nueva). **Las 3 fases (A/B/C) que pidió Nico están hechas.**
+toda la planificación de un mes a otro. Sin migración (mismo modelo `ec`/`bloques`). **Las 3 fases (A/B/C) que pidió Nico están hechas.**
+**Extras (2026-08-10, HECHOS — migración 0020):** (1) **Plantillas de bloque** en `PlanDia.jsx`: cada bloque tiene 💾 "Guardar como
+plantilla" (nombre+ejercicios → tabla `plantillas_bloque`, la usan todos los profes); botón "📁 Desde plantilla" lista las guardadas
+e inserta una como bloque nuevo; se borran desde el panel. (2) **Horario del gimnasio** en la Grilla (`GrillaSemanal.jsx`): la línea de
+tiempo arranca/termina en el horario activo (default 7:00–22:00, se estira si hay una sesión fuera para no cortarla); admin lo edita
+con "✏️ Editar horario" (se guarda en `config` clave `horario_gimnasio`); los profes lo ven read-only. CRUD de ambas verificado en vivo.
 **⚠️ Deploy 2026-08-10:** Netlify pausó los deploys (créditos del ciclo agotados, se destraba ~4/sept). Puente en **GitHub Pages**
-(`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0019**
-(0019 = tipo `bloqueo`, aplicada 2026-08-10). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
+(`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0020**
+(0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff, aplicada 2026-08-10).
+Pendiente operativo: cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
 **Lesiones (2026-08-09):** historial por alumno en tabla `lesiones` (admin-only). En la ficha se agregan/marcan "recuperada"
 (sincroniza `estado_fisico`); Inicio muestra "Alumnos lesionados" (quién/tipo/hace cuánto) y Estadísticas cuenta
 activas/recuperadas + duración promedio + por tipo. **Profes: sin plata** — Mi Peak ya no muestra el acuerdo/sueldo del profe. **Datos de contacto cargados (2026-08-09):** 77/82 alumnos con **teléfono** y
