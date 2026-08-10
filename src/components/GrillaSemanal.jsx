@@ -18,19 +18,41 @@ const toMin = (t) => { const [h, m] = (t || '00:00').split(':'); return Number(h
 const fmtHora = (t) => (t || '').slice(0, 5).replace(/^0/, '')
 const hhmm = (min) => `${String(Math.floor(min / 60) % 24).padStart(2, '0')}:${String(min % 60).padStart(2, '0')}`
 
-export default function GrillaSemanal({ sesiones, colorOf, nombreOf, esAdmin, onEdit, onCreate }) {
+export default function GrillaSemanal({ sesiones, colorOf, nombreOf, esAdmin, onEdit, onCreate, horario, onSaveHorario }) {
   const hoy = KEY_POR_GETDAY[new Date().getDay()]
   const [sel, setSel] = useState(hoy === 'domingo' ? 'lunes' : hoy)
+  const [editH, setEditH] = useState(false)
+  const [hIni, setHIni] = useState('07:00')
+  const [hFin, setHFin] = useState('22:00')
+  const [savingH, setSavingH] = useState(false)
 
   const conData = new Set(sesiones.map((s) => s.dia))
   const dias = DIAS.filter((d) => BASE.includes(d.key) || conData.has(d.key))
 
-  // Rango horario de la grilla (a partir de todas las sesiones)
-  const mins = sesiones.length ? sesiones.flatMap((s) => [toMin(s.hora_inicio), toMin(s.hora_fin)]) : [480, 1260]
-  const startMin = Math.floor(Math.min(...mins) / 60) * 60
-  const endMin = Math.ceil(Math.max(...mins) / 60) * 60
+  // Rango horario: arranca/termina en el horario del gimnasio, pero se estira
+  // si hay alguna sesión fuera de ese rango (para no cortar ningún turno).
+  const gymIni = toMin(horario?.inicio || '07:00')
+  const gymFin = toMin(horario?.fin || '22:00')
+  const sMins = sesiones.flatMap((s) => [toMin(s.hora_inicio), toMin(s.hora_fin)])
+  const lo = sMins.length ? Math.min(gymIni, ...sMins) : gymIni
+  const hi = sMins.length ? Math.max(gymFin, ...sMins) : gymFin
+  const startMin = Math.floor(lo / 60) * 60
+  const endMin = Math.ceil(hi / 60) * 60
   const totalMin = Math.max(120, endMin - startMin)
   const H = (totalMin / 60) * PX_H
+
+  function abrirEditH() {
+    setHIni((horario?.inicio || '07:00').slice(0, 5))
+    setHFin((horario?.fin || '22:00').slice(0, 5))
+    setEditH(true)
+  }
+  async function guardarH() {
+    if (hFin <= hIni) return
+    setSavingH(true)
+    await onSaveHorario({ inicio: hIni, fin: hFin })
+    setSavingH(false)
+    setEditH(false)
+  }
 
   const delDia = sesiones.filter((s) => s.dia === sel)
 
@@ -68,6 +90,26 @@ export default function GrillaSemanal({ sesiones, colorOf, nombreOf, esAdmin, on
             {d.label}{d.key === hoy ? ' ·' : ''}
           </button>
         ))}
+      </div>
+
+      <div className="grilla-horario">
+        {editH ? (
+          <>
+            <span className="grilla-horario-lbl">Gimnasio activo de</span>
+            <input type="time" className="grilla-horario-in" value={hIni} onChange={(e) => setHIni(e.target.value)} />
+            <span className="grilla-horario-lbl">a</span>
+            <input type="time" className="grilla-horario-in" value={hFin} onChange={(e) => setHFin(e.target.value)} />
+            <button type="button" className="btn-primary btn-mini" onClick={guardarH} disabled={savingH || hFin <= hIni}>
+              {savingH ? '…' : 'Guardar'}
+            </button>
+            <button type="button" className="btn-ghost btn-mini" onClick={() => setEditH(false)}>Cancelar</button>
+          </>
+        ) : (
+          <>
+            <span className="grilla-horario-lbl">🕗 Gimnasio activo {fmtHora(horario?.inicio || '07:00')}–{fmtHora(horario?.fin || '22:00')}</span>
+            {esAdmin && <button type="button" className="btn-link" onClick={abrirEditH}>✏️ Editar horario</button>}
+          </>
+        )}
       </div>
 
       {esAdmin && <p className="grilla-hint">Tocá un hueco para agregar o bloquear un turno · tocá un bloque para editarlo</p>}

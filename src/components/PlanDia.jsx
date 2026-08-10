@@ -3,6 +3,12 @@ import { supabase } from '../lib/supabase'
 
 const emptyEj = () => ({ nombre: '', series: '', reps: '' })
 const clone = (arr) => (arr || []).map((e) => ({ nombre: e.nombre || '', series: e.series || '', reps: e.reps || '' }))
+const limpiarEj = (arr) =>
+  (arr || []).filter((e) => (e.nombre || '').trim()).map((e) => ({
+    nombre: e.nombre.trim(),
+    series: (e.series || '').toString().trim(),
+    reps: (e.reps || '').toString().trim(),
+  }))
 const move = (list, i, dir) => {
   const j = i + dir
   if (j < 0 || j >= list.length) return list
@@ -63,6 +69,9 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
   const [tv, setTv] = useState(false)
   const [lib, setLib] = useState([])
   const [copiar, setCopiar] = useState(null) // { mes, semana, dia } | null
+  const [plantillas, setPlantillas] = useState([])
+  const [picker, setPicker] = useState(false)
+  const [tplMsg, setTplMsg] = useState('')
 
   // Biblioteca de ejercicios ya usados (autocompletado dinámico)
   useEffect(() => {
@@ -77,6 +86,33 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
       setLib([...set].sort((a, b) => a.localeCompare(b)))
     })
   }, [])
+
+  // Plantillas de bloque guardadas (reutilizables)
+  async function loadPlantillas() {
+    const { data } = await supabase.from('plantillas_bloque').select('id, nombre, ejercicios').order('nombre')
+    setPlantillas(data || [])
+  }
+  useEffect(() => { loadPlantillas() }, [])
+
+  async function guardarPlantilla(b) {
+    const ejercicios = limpiarEj(b.ejercicios)
+    if (!ejercicios.length) { setTplMsg('Ese bloque no tiene ejercicios para guardar.'); return }
+    const nombre = (b.nombre || 'Bloque').trim()
+    const { error } = await supabase.from('plantillas_bloque').insert({ nombre, ejercicios })
+    if (error) { setTplMsg('No se pudo guardar la plantilla.'); return }
+    await loadPlantillas()
+    setPicker(true)
+    setTplMsg(`Guardaste “${nombre}” como plantilla ✓`)
+  }
+  function usarPlantilla(t) {
+    setBloques((l) => [...l, { nombre: t.nombre, ejercicios: clone(t.ejercicios) }])
+    setPicker(false)
+    setTplMsg('')
+  }
+  async function borrarPlantilla(id) {
+    await supabase.from('plantillas_bloque').delete().eq('id', id)
+    await loadPlantillas()
+  }
 
   const setBloque = (bi, patch) => setBloques((l) => l.map((b, idx) => (idx === bi ? { ...b, ...patch } : b)))
   const addBloque = () => setBloques((l) => [...l, { nombre: 'Bloque ' + (l.length + 1), ejercicios: [emptyEj()] }])
@@ -98,18 +134,12 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
   async function guardar() {
     setSaving(true)
     setError('')
-    const limpiar = (arr) =>
-      (arr || []).filter((e) => (e.nombre || '').trim()).map((e) => ({
-        nombre: e.nombre.trim(),
-        series: (e.series || '').toString().trim(),
-        reps: (e.reps || '').toString().trim(),
-      }))
     const payload = {
       mes,
       semana,
       dia,
-      ec: limpiar(ec),
-      bloques: bloques.map((b) => ({ nombre: (b.nombre || 'Bloque').trim(), ejercicios: limpiar(b.ejercicios) })).filter((b) => b.ejercicios.length),
+      ec: limpiarEj(ec),
+      bloques: bloques.map((b) => ({ nombre: (b.nombre || 'Bloque').trim(), ejercicios: limpiarEj(b.ejercicios) })).filter((b) => b.ejercicios.length),
       updated_at: new Date().toISOString(),
     }
     const { error } = await supabase.from('planificaciones').upsert(payload, { onConflict: 'mes,semana,dia' })
@@ -205,6 +235,7 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
             <div className="plan-bloque-acc">
               <button type="button" title="Subir bloque" onClick={() => moveBloque(bi, -1)} disabled={bi === 0}>↑</button>
               <button type="button" title="Bajar bloque" onClick={() => moveBloque(bi, 1)} disabled={bi === bloques.length - 1}>↓</button>
+              <button type="button" title="Guardar como plantilla" onClick={() => guardarPlantilla(b)}>💾</button>
               <button type="button" className="btn-del-text" onClick={() => delBloque(bi)}>Quitar</button>
             </div>
           </div>
@@ -212,7 +243,33 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
         </div>
       ))}
 
-      <button type="button" className="btn-ghost" onClick={addBloque}>+ Agregar bloque</button>
+      <div className="plan-add-row">
+        <button type="button" className="btn-ghost" onClick={addBloque}>+ Agregar bloque</button>
+        <button type="button" className="btn-ghost" onClick={() => { setPicker((v) => !v); setTplMsg('') }}>📁 Desde plantilla</button>
+      </div>
+
+      {tplMsg && <p className="plan-ok">{tplMsg}</p>}
+
+      {picker && (
+        <div className="plan-copiar">
+          <span className="plan-copiar-tit">Insertar un bloque guardado:</span>
+          {plantillas.length === 0 ? (
+            <p className="cal-sub" style={{ margin: 0 }}>Todavía no guardaste ninguna plantilla. Cargá los ejercicios de un bloque y tocá 💾.</p>
+          ) : (
+            <div className="tpl-list">
+              {plantillas.map((t) => (
+                <div key={t.id} className="tpl-row">
+                  <button type="button" className="tpl-use" onClick={() => usarPlantilla(t)}>
+                    <span className="tpl-nombre">{t.nombre}</span>
+                    <span className="tpl-meta">{(t.ejercicios || []).length} ejercicio{(t.ejercicios || []).length === 1 ? '' : 's'} · insertar</span>
+                  </button>
+                  <button type="button" className="tpl-del" title="Borrar plantilla" onClick={() => borrarPlantilla(t.id)}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {error && <p className="login-error">{error}</p>}
       <div className="form-actions" style={{ marginTop: 18 }}>

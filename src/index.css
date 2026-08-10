@@ -2513,6 +2513,14 @@ textarea {
 }
 .grilla-ev-tit { font-weight: 600; display: block; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .grilla-ev-sub { opacity: 0.9; font-size: 10px; }
+.grilla-horario { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin: 0 0 10px; font-size: 13px; color: #c3cad6; }
+.grilla-horario-lbl { color: #8b94a6; }
+.grilla-horario-in {
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 7px; color: #fff; font: inherit; font-size: 13px; padding: 5px 8px;
+}
+.btn-mini { padding: 6px 11px; font-size: 12px; }
+.btn-link { background: none; border: none; color: #6ea0e6; font: inherit; font-size: 13px; cursor: pointer; padding: 0; text-decoration: underline; }
 
 /* ===== Fase C: editor de rutinas pro ===== */
 .plan-copiar {
@@ -2528,6 +2536,23 @@ textarea {
 .plan-copiar-tit { font-size: 14px; font-weight: 600; }
 .plan-copiar-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
 .plan-copiar-row select { flex: 1; min-width: 84px; }
+.plan-add-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.plan-ok { color: #3ecf8e; font-size: 13px; margin: 8px 0 0; }
+.tpl-list { display: flex; flex-direction: column; gap: 6px; }
+.tpl-row { display: flex; gap: 6px; align-items: stretch; }
+.tpl-use {
+  flex: 1; display: flex; flex-direction: column; gap: 2px; text-align: left;
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px; padding: 8px 10px; color: #e7ebf2; font: inherit; cursor: pointer;
+}
+.tpl-use:hover { border-color: #1a4fa3; }
+.tpl-nombre { font-weight: 600; font-size: 14px; }
+.tpl-meta { font-size: 12px; color: #8b94a6; }
+.tpl-del {
+  flex: none; width: 38px; border-radius: 8px; border: 1px solid rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.04); color: #d98a8a; font: inherit; font-size: 14px; cursor: pointer;
+}
+.tpl-del:hover { background: rgba(180, 60, 60, 0.18); }
 .plan-bloque-head { display: flex; align-items: center; gap: 8px; }
 .ejp-lista { display: flex; flex-direction: column; gap: 8px; margin: 6px 0; }
 .ejp-row {

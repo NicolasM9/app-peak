@@ -40,16 +40,24 @@ export default function Calendario({ esAdmin }) {
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState({ name: 'grid' })
   const [modo, setModo] = useState('bloques') // 'bloques' | 'grilla'
+  const [horario, setHorario] = useState(null)
 
   async function load() {
     setLoading(true)
-    const [{ data: ses }, { data: pr }] = await Promise.all([
+    const [{ data: ses }, { data: pr }, { data: cfg }] = await Promise.all([
       supabase.from('sesiones').select('*'),
       supabase.from('profes_publico').select('id, nombre').order('id'),
+      supabase.from('config').select('valor').eq('clave', 'horario_gimnasio').maybeSingle(),
     ])
     setSesiones(ses || [])
     setProfes(pr || [])
+    setHorario(cfg?.valor || { inicio: '07:00', fin: '22:00' })
     setLoading(false)
+  }
+
+  async function guardarHorario(v) {
+    setHorario(v)
+    await supabase.from('config').upsert({ clave: 'horario_gimnasio', valor: v, updated_at: new Date().toISOString() })
   }
 
   useEffect(() => {
@@ -146,6 +154,8 @@ export default function Calendario({ esAdmin }) {
           colorOf={colorOf}
           nombreOf={nombreOf}
           esAdmin={esAdmin}
+          horario={horario}
+          onSaveHorario={guardarHorario}
           onEdit={(s) => setView({ name: 'form', sesion: s, volver: { name: 'grid' } })}
           onCreate={(pre) => setView({ name: 'form', sesion: { ...pre, tipo: 'otro' }, volver: { name: 'grid' } })}
         />
