@@ -17,6 +17,10 @@ export default function Planificaciones() {
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState({ name: 'mes' })
   const [stats, setStats] = useState(null)
+  const [copiarPanel, setCopiarPanel] = useState(false)
+  const [origen, setOrigen] = useState(1)
+  const [copiaMsg, setCopiaMsg] = useState('')
+  const [copiando, setCopiando] = useState(false)
 
   async function loadMes(m) {
     setLoading(true)
@@ -33,6 +37,21 @@ export default function Planificaciones() {
   useEffect(() => {
     loadMes(mes)
   }, [mes])
+
+  async function copiarMes() {
+    setCopiaMsg('')
+    if (origen === mes) { setCopiaMsg('Elegí un mes distinto al actual.'); return }
+    setCopiando(true)
+    const { data } = await supabase.from('planificaciones').select('semana, dia, ec, bloques').eq('mes', origen)
+    if (!data || !data.length) { setCopiando(false); setCopiaMsg(`${MESES_LARGO[origen - 1]} está vacío.`); return }
+    const rows = data.map((r) => ({ mes, semana: r.semana, dia: r.dia, ec: r.ec || [], bloques: r.bloques || [], updated_at: new Date().toISOString() }))
+    const { error } = await supabase.from('planificaciones').upsert(rows, { onConflict: 'mes,semana,dia' })
+    setCopiando(false)
+    if (error) { setCopiaMsg('No se pudo copiar: ' + error.message); return }
+    setCopiarPanel(false)
+    setCopiaMsg('')
+    await loadMes(mes)
+  }
 
   async function verDatos() {
     const { data } = await supabase.from('planificaciones').select('ec, bloques')
@@ -100,9 +119,28 @@ export default function Planificaciones() {
     <div className="planif">
       <div className="section-head">
         <h1 className="section-title">Planificaciones</h1>
-        <button className="btn-primary" onClick={verDatos}>Ver datos</button>
+        <div className="section-head-actions">
+          <button className="btn-ghost" onClick={() => { setCopiarPanel((v) => !v); setCopiaMsg('') }}>⧉ Copiar mes</button>
+          <button className="btn-ghost" onClick={verDatos}>Ver datos</button>
+        </div>
       </div>
       <p className="cal-sub">Planificación {MESES_LARGO[mes - 1]} · la editan todos los profes</p>
+
+      {copiarPanel && (
+        <div className="plan-copiar">
+          <span className="plan-copiar-tit">Traer toda la planificación de otro mes a {MESES_LARGO[mes - 1]}:</span>
+          <div className="plan-copiar-row">
+            <select value={origen} onChange={(e) => setOrigen(Number(e.target.value))}>
+              {MESES_LARGO.map((m, i) => <option key={m} value={i + 1}>{m}</option>)}
+            </select>
+            <button type="button" className="btn-primary" onClick={copiarMes} disabled={copiando}>
+              {copiando ? 'Copiando…' : `Copiar a ${MESES_LARGO[mes - 1]}`}
+            </button>
+          </div>
+          <p className="cal-sub" style={{ margin: 0 }}>Reemplaza los días de {MESES_LARGO[mes - 1]} que ya existan en el mes de origen.</p>
+          {copiaMsg && <p className="login-error" style={{ margin: '4px 0 0' }}>{copiaMsg}</p>}
+        </div>
+      )}
 
       <div className="mes-tabs">
         {MESES.map((m, i) => (

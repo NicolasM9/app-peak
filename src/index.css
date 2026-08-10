@@ -2513,6 +2513,71 @@ textarea {
 }
 .grilla-ev-tit { font-weight: 600; display: block; line-height: 1.2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .grilla-ev-sub { opacity: 0.9; font-size: 10px; }
+
+/* ===== Fase C: editor de rutinas pro ===== */
+.plan-copiar {
+  background: rgba(26, 79, 163, 0.1);
+  border: 1px solid rgba(26, 79, 163, 0.35);
+  border-radius: 10px;
+  padding: 12px;
+  margin: 4px 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.plan-copiar-tit { font-size: 14px; font-weight: 600; }
+.plan-copiar-row { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+.plan-copiar-row select { flex: 1; min-width: 84px; }
+.plan-bloque-head { display: flex; align-items: center; gap: 8px; }
+.ejp-lista { display: flex; flex-direction: column; gap: 8px; margin: 6px 0; }
+.ejp-row {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 9px;
+  padding: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+.ejp-nombre { width: 100%; }
+.ejp-meta { display: flex; align-items: center; gap: 6px; }
+.ejp-num { width: 62px; flex: none; text-align: center; }
+.ejp-x { color: #8b94a6; }
+.ejp-acc { display: flex; gap: 3px; margin-left: auto; }
+.ejp-acc button {
+  width: 30px;
+  height: 30px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #c3cad6;
+  border-radius: 7px;
+  font-size: 13px;
+  cursor: pointer;
+}
+.ejp-acc button:disabled { opacity: 0.35; cursor: default; }
+.ejp-acc .ejp-del { color: #f0999a; }
+.plan-bloque-nombre {
+  flex: 1;
+  min-width: 0;
+  font-weight: 600;
+  background: transparent;
+  border: none;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 0;
+  color: #fff;
+  padding: 4px 2px;
+}
+.plan-bloque-acc { display: flex; align-items: center; gap: 4px; flex: none; }
+.plan-bloque-acc button:not(.btn-del-text) {
+  width: 28px;
+  height: 28px;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: #c3cad6;
+  border-radius: 7px;
+  cursor: pointer;
+}
+.plan-bloque-acc button:disabled { opacity: 0.35; }
 .ct-actual {
   flex: none;
   font-size: 11px;
