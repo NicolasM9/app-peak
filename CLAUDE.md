@@ -40,9 +40,15 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 0018 = self-service de profes (RLS: el profe escribe SUS vacaciones y SUS personalizados), 2026-08-09).
 **Profes self-service (Fase A, 2026-08-09):** el profe carga **sus vacaciones** (en Mi Peak), tiene pestaña **"Mi acuerdo"**
 (ve solo el suyo, read-only) y pestaña **"Personalizados"** (nombre+días+horario → crea sesiones tipo personalizado que
-aparecen en el Calendario). Permisos acotados por `mi_profe_id()`: el profe solo toca lo suyo. Pendiente (pedido de Nico):
-**Fase B** = calendario interactivo estilo Google (quién está cada día/hora, crear eventos, bloquear turnos); **Fase C** =
-Planificaciones más pro (carga de rutinas dinámica, guardar bloques/meses).
+aparecen en el Calendario). Permisos acotados por `mi_profe_id()`: el profe solo toca lo suyo.
+**Fase B — calendario interactivo (2026-08-10, HECHO):** en Calendario, toggle **Bloques/🗓 Grilla**. La Grilla (`GrillaSemanal.jsx`)
+es una vista día-por-día estilo Google Calendar: línea de tiempo a escala, sesiones posicionadas por hora (carriles para las que
+se solapan), color por profe; admin toca un hueco→crea (día/hora precargados) o un bloque→edita; profes la ven read-only. Nuevo
+tipo **`bloqueo`** (migración **0019**) para marcar turnos no disponibles. Fix en `SesionForm`: `editing = !!sesion?.id`.
+Pendiente (pedido de Nico): **Fase C** = Planificaciones más pro (carga de rutinas dinámica, guardar bloques/meses).
+**⚠️ Deploy 2026-08-10:** Netlify pausó los deploys (créditos del ciclo agotados, se destraba ~4/sept). Puente en **GitHub Pages**
+(`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: 0001–0018;
+**0019** (tipo `bloqueo`) queda **pendiente de que Nico corra el SQL**.
 **Lesiones (2026-08-09):** historial por alumno en tabla `lesiones` (admin-only). En la ficha se agregan/marcan "recuperada"
 (sincroniza `estado_fisico`); Inicio muestra "Alumnos lesionados" (quién/tipo/hace cuánto) y Estadísticas cuenta
 activas/recuperadas + duración promedio + por tipo. **Profes: sin plata** — Mi Peak ya no muestra el acuerdo/sueldo del profe. **Datos de contacto cargados (2026-08-09):** 77/82 alumnos con **teléfono** y
