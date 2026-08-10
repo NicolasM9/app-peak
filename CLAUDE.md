@@ -61,6 +61,8 @@ y "+ Agregar acá". Tabla **`eventos`** (id, titulo, tipo, fecha, fecha_fin, pro
 partido/evento/otro** con color; `profe_id` = "a quién le toca" (feriados rotativos, campamento de Eze, partido de alguien, etc.);
 soporta rango multi-día (puntito en cada día). CRUD verificado en vivo. Botón **"🇦🇷 Feriados 2026"** carga los 16 feriados nacionales
 de una (tipo feriado, sin profe → Nico asigna después; anti-duplicados por fecha). Los 16 quedaron cargados en `eventos` el 2026-08-10.
+En **Inicio** (admin) una tarjeta **"📅 Próximo feriado"** muestra el feriado más cercano (fecha + "en N días") y **a quién le toca**
+(o "sin asignar" en rojo); clickeable → lleva a la Agenda para asignarlo. Sale del mismo `eventos` (admin-only), así que los profes no lo ven.
 **⚠️ Deploy 2026-08-10:** Netlify pausó los deploys (créditos del ciclo agotados, se destraba ~4/sept). Puente en **GitHub Pages**
 (`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0021**
 (0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff; 0021 = tabla `eventos`
@@ -112,8 +114,11 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
 - **"Mi Peak"** (inicio propio del profe): su acuerdo del mes, sus horas/semana y sus días/sesiones;
   solo ve lo suyo. Sidebar muestra "Mi Peak" (profe) / "Inicio" (admin).
 - **Horas:** "carga rápida de la semana" (elegir profe + AM/PM o turnos sueltos + días → agregar/quitar
-  todo junto) y tarjeta **Diferencia Nico↔Eze** (solo admin) con arrastre editable — migración 0012,
-  tabla `config` (clave/valor, admin-only); arrastre actual = Eze +14 turnos.
+  todo junto) y tarjeta **Acumulado histórico Nico↔Eze** (solo admin) — migración 0012, tabla `config`
+  clave `dif_nico_eze` (admin-only). **(2026-08-10)** dejó de ser "arrastre + esta semana" (quedaba trabado
+  con la grilla de la semana) y pasó a ser un **acumulado histórico puro** que se ajusta a mano: botones
+  **+1 Nico / +1 Eze** (nudge de a un turno, upsert optimista) y **"fijar total"** (setear favor+turnos).
+  Actual = Eze +14 turnos.
 - **Asistencia [admin]** (migración 0013, tablas `sesion_alumnos` + `asistencias`): dentro de cada
   sesión del Calendario se arma el **roster** (alumnos reales, reemplaza el texto libre) y se **toma
   lista** por fecha (✓ Vino / ✕ Faltó, upsert por `sesion_id+alumno_id+fecha`). La ficha del alumno
