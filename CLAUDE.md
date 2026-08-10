@@ -54,10 +54,17 @@ plantilla" (nombre+ejercicios → tabla `plantillas_bloque`, la usan todos los p
 e inserta una como bloque nuevo; se borran desde el panel. (2) **Horario del gimnasio** en la Grilla (`GrillaSemanal.jsx`): la línea de
 tiempo arranca/termina en el horario activo (default 7:00–22:00, se estira si hay una sesión fuera para no cortarla); admin lo edita
 con "✏️ Editar horario" (se guarda en `config` clave `horario_gimnasio`); los profes lo ven read-only. CRUD de ambas verificado en vivo.
+**Agenda mensual privada (2026-08-10, HECHA — migración 0021):** pestaña **admin-only** `AgendaMes.jsx` (bloque "Solo admins" del
+Sidebar + `ADMIN_SECC` + RLS `es_admin()` → los profes no la ven ni por pantalla ni por base). Grilla del mes estilo calendario
+(lunes primero), puntitos de color por tipo en cada día, navegación ← →, "Ir a hoy". Tocás un día → panel con sus eventos (editar/borrar)
+y "+ Agregar acá". Tabla **`eventos`** (id, titulo, tipo, fecha, fecha_fin, profe_id, nota): tipos **feriado/campamento/vacaciones/
+partido/evento/otro** con color; `profe_id` = "a quién le toca" (feriados rotativos, campamento de Eze, partido de alguien, etc.);
+soporta rango multi-día (puntito en cada día). CRUD verificado en vivo. Posible extra: botón "Cargar feriados 2026" (insertar los
+feriados del año de una, después Nico asigna el profe).
 **⚠️ Deploy 2026-08-10:** Netlify pausó los deploys (créditos del ciclo agotados, se destraba ~4/sept). Puente en **GitHub Pages**
-(`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0020**
-(0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff, aplicada 2026-08-10).
-Pendiente operativo: cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
+(`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0021**
+(0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff; 0021 = tabla `eventos`
+para la Agenda admin, aplicada 2026-08-10). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
 **Lesiones (2026-08-09):** historial por alumno en tabla `lesiones` (admin-only). En la ficha se agregan/marcan "recuperada"
 (sincroniza `estado_fisico`); Inicio muestra "Alumnos lesionados" (quién/tipo/hace cuánto) y Estadísticas cuenta
 activas/recuperadas + duración promedio + por tipo. **Profes: sin plata** — Mi Peak ya no muestra el acuerdo/sueldo del profe. **Datos de contacto cargados (2026-08-09):** 77/82 alumnos con **teléfono** y
