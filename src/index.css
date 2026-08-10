@@ -1249,6 +1249,24 @@ html {
   cursor: pointer;
   text-decoration: underline;
 }
+.ht-dif-ajuste {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+}
+.ht-adj {
+  background: #1b2130;
+  border: 1px solid #2b3346;
+  border-radius: 7px;
+  color: #e7ecf4;
+  font: inherit;
+  font-size: 13px;
+  padding: 6px 12px;
+  cursor: pointer;
+}
+.ht-adj:hover { border-color: #3a5a9a; }
 .ht-dif-total {
   margin-top: 10px;
   padding-top: 10px;

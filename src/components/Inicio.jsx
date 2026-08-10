@@ -18,15 +18,19 @@ export default function Inicio({ onIrAlumno, onIr }) {
 
   useEffect(() => {
     ;(async () => {
-      const [{ data: alumnos }, { data: pagos }, { data: asistencias }, { data: lesiones }] = await Promise.all([
+      const now = new Date()
+      const hoy = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}`
+      const [{ data: alumnos }, { data: pagos }, { data: asistencias }, { data: lesiones }, { data: feriado }, { data: profes }] = await Promise.all([
         supabase
           .from('alumnos')
           .select('id, nombre, estado, medicion_nutricional, paga_directo_profe, fecha_nacimiento, fecha_alta, fecha_baja, ajuste_monto, planes(precio_mensual)'),
         supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
         supabase.from('asistencias').select('alumno_id, fecha, presente'),
         supabase.from('lesiones').select('alumno_id, tipo, desde').is('hasta', null),
+        supabase.from('eventos').select('titulo, fecha, profe_id').eq('tipo', 'feriado').gte('fecha', hoy).order('fecha').limit(1).maybeSingle(),
+        supabase.from('profes_publico').select('id, nombre'),
       ])
-      setData({ alumnos: alumnos || [], pagos: pagos || [], asistencias: asistencias || [], lesiones: lesiones || [] })
+      setData({ alumnos: alumnos || [], pagos: pagos || [], asistencias: asistencias || [], lesiones: lesiones || [], feriado: feriado || null, profes: profes || [] })
     })()
   }, [])
 
@@ -123,6 +127,14 @@ export default function Inicio({ onIrAlumno, onIr }) {
     .map((a) => ({ id: a.id, nombre: a.nombre, dia: Number(a.fecha_nacimiento.split('-')[2]) }))
     .sort((x, y) => x.dia - y.dia)
 
+  // Próximo feriado y a quién le toca (se carga/edita en Agenda, solo admin)
+  const feriado = data.feriado
+  const profeNombre = (id) => data.profes.find((p) => p.id === id)?.nombre
+  const fmtFeriado = (f) => { const [, m, d] = f.split('-').map(Number); return `${d} de ${MESES[m - 1]}` }
+  const hoyISO = `${ahora.getFullYear()}-${String(ahora.getMonth() + 1).padStart(2, '0')}-${String(ahora.getDate()).padStart(2, '0')}`
+  const diasFeriado = feriado ? Math.round((new Date(feriado.fecha + 'T00:00:00') - new Date(hoyISO + 'T00:00:00')) / 86400000) : null
+  const sufFeriado = diasFeriado == null ? '' : diasFeriado <= 0 ? ' · hoy' : diasFeriado === 1 ? ' · mañana' : ` · en ${diasFeriado} días`
+
   return (
     <div>
       <div className="section-head">
@@ -156,6 +168,20 @@ export default function Inicio({ onIrAlumno, onIr }) {
           value={conMedicion}
           sub={`${formatARS(conMedicion * MEDICION_MONTO)} a Diego`}
         />
+      </div>
+
+      <div className="pk-card" style={{ marginTop: 14 }}>
+        <div className="card-title">📅 Próximo feriado</div>
+        {feriado ? (
+          <button className="mini-row mini-row-btn" onClick={() => onIr && onIr('agenda')}>
+            <span><b>{feriado.titulo}</b> <span className="muted">· {fmtFeriado(feriado.fecha)}{sufFeriado}</span></span>
+            <span className={feriado.profe_id ? '' : 'txt-venc'}>
+              {feriado.profe_id ? `le toca a ${profeNombre(feriado.profe_id) || '—'}` : 'sin asignar'}
+            </span>
+          </button>
+        ) : (
+          <p className="muted" style={{ margin: 0 }}>No hay feriados próximos cargados. Cargalos en Agenda.</p>
+        )}
       </div>
 
       <div className="pk-card" style={{ marginTop: 14 }}>

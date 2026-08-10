@@ -119,11 +119,27 @@ export default function Horas({ esAdmin }) {
     await load()
   }
 
+  function normaliza(signed) {
+    return signed === 0
+      ? { favor: 'iguales', turnos: 0 }
+      : signed > 0
+        ? { favor: 'Eze', turnos: signed }
+        : { favor: 'Nico', turnos: -signed }
+  }
+
   async function guardarBaseline() {
-    const valor = { favor: baseForm.favor, turnos: Number(baseForm.turnos || 0) }
+    const n = Number(baseForm.turnos || 0)
+    const valor = baseForm.favor === 'iguales' || !n ? { favor: 'iguales', turnos: 0 } : { favor: baseForm.favor, turnos: n }
     await supabase.from('config').upsert({ clave: 'dif_nico_eze', valor, updated_at: new Date().toISOString() })
     setBaseline({ favor: valor.favor, turnos: valor.turnos })
     setEditBase(false)
+  }
+
+  async function ajustarAcumulado(delta) {
+    const actual = baseline.favor === 'Eze' ? baseline.turnos : baseline.favor === 'Nico' ? -baseline.turnos : 0
+    const valor = normaliza(actual + delta)
+    setBaseline({ favor: valor.favor, turnos: valor.turnos }) // optimista
+    await supabase.from('config').upsert({ clave: 'dif_nico_eze', valor, updated_at: new Date().toISOString() })
   }
 
   async function guardarVac(e) {
@@ -154,7 +170,6 @@ export default function Horas({ esAdmin }) {
   })
   const nicoP = profes.find((p) => p.nombre === 'Nico')
   const ezeP = profes.find((p) => p.nombre === 'Eze')
-  const turnosDe = (id) => turnos.filter((t) => t.profe_id === id).length
 
   return (
     <div className="horas">
@@ -291,42 +306,29 @@ export default function Horas({ esAdmin }) {
           </div>
 
           {esAdmin && nicoP && ezeP && (() => {
-            const nT = turnosDe(nicoP.id)
-            const eT = turnosDe(ezeP.id)
-            const semana = eT - nT // + = Eze adelante esta semana
-            const base = baseline.favor === 'Eze' ? baseline.turnos : baseline.favor === 'Nico' ? -baseline.turnos : 0
-            const total = base + semana
-            const fmt = (signed) => ({
-              quien: signed === 0 ? null : signed > 0 ? 'Eze' : 'Nico',
-              t: Math.abs(signed),
-              h: Math.round(Math.abs(signed) * HORAS_TURNO * 10) / 10,
-            })
-            const S = fmt(semana)
-            const T = fmt(total)
+            const bal = baseline.favor === 'Eze' ? baseline.turnos : baseline.favor === 'Nico' ? -baseline.turnos : 0
+            const T = {
+              quien: bal === 0 ? null : bal > 0 ? 'Eze' : 'Nico',
+              t: Math.abs(bal),
+              h: Math.round(Math.abs(bal) * HORAS_TURNO * 10) / 10,
+            }
             return (
               <div className="ht-dif">
                 <div className="ht-dif-head">
-                  Diferencia Nico ↔ Eze <span className="ht-dif-priv">🔒 privado</span>
-                </div>
-                <div className="ht-dif-row">
-                  <span>Nico: <b>{nT} turnos</b></span>
-                  <span>Eze: <b>{eT} turnos</b></span>
+                  Acumulado histórico Nico ↔ Eze <span className="ht-dif-priv">🔒 privado</span>
                 </div>
 
-                <div className="ht-dif-linea">
-                  <span className="ht-dif-lbl">Esta semana</span>
-                  <span>
-                    {S.quien ? (
-                      <><b>{S.quien}</b> +{S.t} turnos <span className="muted">({S.h} h)</span></>
-                    ) : (
-                      <b>iguales</b>
-                    )}
-                  </span>
+                <div className="ht-dif-total">
+                  {T.quien === null ? (
+                    <>Están <b>iguales</b> 🤝</>
+                  ) : (
+                    <><b>{T.quien}</b> hizo <b>+{T.t} turno{T.t === 1 ? '' : 's'}</b> en total <span className="muted">({T.h} h reloj)</span></>
+                  )}
                 </div>
 
-                <div className="ht-dif-linea">
-                  <span className="ht-dif-lbl">Arrastre previo</span>
-                  {editBase ? (
+                {editBase ? (
+                  <div className="ht-dif-linea">
+                    <span className="ht-dif-lbl">Fijar total</span>
                     <span className="ht-base-form">
                       <select value={baseForm.favor} onChange={(e) => setBaseForm({ ...baseForm, favor: e.target.value })}>
                         <option value="Eze">Eze +</option>
@@ -345,26 +347,17 @@ export default function Horas({ esAdmin }) {
                       <button className="confirm-si" onClick={guardarBaseline}>OK</button>
                       <button className="confirm-no" onClick={() => setEditBase(false)}>✕</button>
                     </span>
-                  ) : (
-                    <span>
-                      {baseline.favor === 'iguales' || !baseline.turnos ? (
-                        <b>iguales</b>
-                      ) : (
-                        <><b>{baseline.favor}</b> +{baseline.turnos} turnos</>
-                      )}
-                      <button className="ht-base-edit" onClick={() => { setBaseForm(baseline); setEditBase(true) }}>editar</button>
-                    </span>
-                  )}
-                </div>
+                  </div>
+                ) : (
+                  <div className="ht-dif-ajuste">
+                    <span className="ht-dif-lbl">Sumar un turno:</span>
+                    <button className="ht-adj" onClick={() => ajustarAcumulado(-1)}>+1 Nico</button>
+                    <button className="ht-adj" onClick={() => ajustarAcumulado(1)}>+1 Eze</button>
+                    <button className="ht-base-edit" onClick={() => { setBaseForm(baseline); setEditBase(true) }}>fijar total</button>
+                  </div>
+                )}
 
-                <div className="ht-dif-total">
-                  {T.quien === null ? (
-                    <>Total: están <b>iguales</b> 🤝</>
-                  ) : (
-                    <>Total: <b>{T.quien}</b> +<b>{T.t} turno{T.t === 1 ? '' : 's'}</b> = <b>{T.h} h reloj</b></>
-                  )}
-                </div>
-                <p className="ht-dif-nota">"Esta semana" sale de la grilla · el "arrastre" lo ajustás vos.</p>
+                <p className="ht-dif-nota">Es el acumulado de siempre (no depende de esta semana). Cuando uno cubre un turno del otro, tocá "+1".</p>
               </div>
             )
           })()}
