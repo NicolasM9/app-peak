@@ -59,8 +59,8 @@ Sidebar + `ADMIN_SECC` + RLS `es_admin()` → los profes no la ven ni por pantal
 (lunes primero), puntitos de color por tipo en cada día, navegación ← →, "Ir a hoy". Tocás un día → panel con sus eventos (editar/borrar)
 y "+ Agregar acá". Tabla **`eventos`** (id, titulo, tipo, fecha, fecha_fin, profe_id, nota): tipos **feriado/campamento/vacaciones/
 partido/evento/otro** con color; `profe_id` = "a quién le toca" (feriados rotativos, campamento de Eze, partido de alguien, etc.);
-soporta rango multi-día (puntito en cada día). CRUD verificado en vivo. Posible extra: botón "Cargar feriados 2026" (insertar los
-feriados del año de una, después Nico asigna el profe).
+soporta rango multi-día (puntito en cada día). CRUD verificado en vivo. Botón **"🇦🇷 Feriados 2026"** carga los 16 feriados nacionales
+de una (tipo feriado, sin profe → Nico asigna después; anti-duplicados por fecha). Los 16 quedaron cargados en `eventos` el 2026-08-10.
 **⚠️ Deploy 2026-08-10:** Netlify pausó los deploys (créditos del ciclo agotados, se destraba ~4/sept). Puente en **GitHub Pages**
 (`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0021**
 (0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff; 0021 = tabla `eventos`
