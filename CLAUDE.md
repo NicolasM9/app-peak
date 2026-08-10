@@ -34,9 +34,12 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 - **Fase 3:** armado de rutinas (bloque grupal).
 
 ## Estado del proyecto (al 2026-08-07)
-**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0016
+**Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0017
 (0013 = asistencia; 0014 = `fecha_alta`/`fecha_baja` de alumnos, 2026-08-07; 0015 = `objetivos`/`foto_path`, 2026-08-08;
-0016 = `alumnos.email`, 2026-08-09). **Datos de contacto cargados (2026-08-09):** 77/82 alumnos con **teléfono** y
+0016 = `alumnos.email`, 2026-08-09; 0017 = tabla `lesiones` (historial), 2026-08-09).
+**Lesiones (2026-08-09):** historial por alumno en tabla `lesiones` (admin-only). En la ficha se agregan/marcan "recuperada"
+(sincroniza `estado_fisico`); Inicio muestra "Alumnos lesionados" (quién/tipo/hace cuánto) y Estadísticas cuenta
+activas/recuperadas + duración promedio + por tipo. **Profes: sin plata** — Mi Peak ya no muestra el acuerdo/sueldo del profe. **Datos de contacto cargados (2026-08-09):** 77/82 alumnos con **teléfono** y
 **email** (importados del CSV de Turnos Web `Peak Performance.csv`; ese archivo NO trae fecha de nacimiento →
 sigue pendiente). El WhatsApp a deudores quedó operativo. **App publicada** en `earnest-moonbeam-59f0d7.netlify.app`
 con **auto-deploy activo** (2026-08-07): repo privado `github.com/NicolasM9/app-peak` enlazado a Netlify;
