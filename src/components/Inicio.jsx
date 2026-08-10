@@ -8,6 +8,7 @@ import {
   MEDICION_MONTO,
   ESTADO_INFO,
 } from '../lib/domain'
+import { haceCuanto } from './Lesiones'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -17,14 +18,15 @@ export default function Inicio({ onIrAlumno, onIr }) {
 
   useEffect(() => {
     ;(async () => {
-      const [{ data: alumnos }, { data: pagos }, { data: asistencias }] = await Promise.all([
+      const [{ data: alumnos }, { data: pagos }, { data: asistencias }, { data: lesiones }] = await Promise.all([
         supabase
           .from('alumnos')
           .select('id, nombre, estado, medicion_nutricional, paga_directo_profe, fecha_nacimiento, fecha_alta, fecha_baja, ajuste_monto, planes(precio_mensual)'),
         supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
         supabase.from('asistencias').select('alumno_id, fecha, presente'),
+        supabase.from('lesiones').select('alumno_id, tipo, desde').is('hasta', null),
       ])
-      setData({ alumnos: alumnos || [], pagos: pagos || [], asistencias: asistencias || [] })
+      setData({ alumnos: alumnos || [], pagos: pagos || [], asistencias: asistencias || [], lesiones: lesiones || [] })
     })()
   }, [])
 
@@ -91,6 +93,13 @@ export default function Inicio({ onIrAlumno, onIr }) {
     .filter((r) => r.dias >= DIAS_RIESGO)
     .sort((x, y) => (y.dias === Infinity ? 1e9 : y.dias) - (x.dias === Infinity ? 1e9 : x.dias))
   const riesgoTop = enRiesgo.slice(0, 6)
+
+  // Alumnos lesionados (lesión activa), del más antiguo al más nuevo
+  const nombrePorId = new Map(data.alumnos.map((a) => [a.id, a.nombre]))
+  const lesionados = (data.lesiones || [])
+    .map((l) => ({ id: l.alumno_id, nombre: nombrePorId.get(l.alumno_id) || '—', tipo: l.tipo, desde: l.desde }))
+    .sort((a, b) => (a.desde < b.desde ? -1 : 1))
+  const lesionadosTop = lesionados.slice(0, 8)
 
   // Altas y bajas del mes (vs mes anterior)
   const enMes = (iso, y, m) => {
@@ -201,6 +210,31 @@ export default function Inicio({ onIrAlumno, onIr }) {
             {enRiesgo.length > riesgoTop.length && (
               <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>
                 y {enRiesgo.length - riesgoTop.length} más…
+              </p>
+            )}
+          </>
+        )}
+      </div>
+
+      <div className="pk-card" style={{ marginTop: 14 }}>
+        <div className="card-title">🩹 Alumnos lesionados</div>
+        {lesionadosTop.length === 0 ? (
+          <p className="muted" style={{ margin: 0 }}>Nadie lesionado ahora 💪</p>
+        ) : (
+          <>
+            {lesionadosTop.map((l, i) => (
+              <button
+                key={`${l.id}-${i}`}
+                className="mini-row mini-row-btn"
+                onClick={() => onIrAlumno && onIrAlumno(l.id)}
+              >
+                <span>{l.nombre} <span className="muted">· {l.tipo}</span></span>
+                <span className="txt-venc">{haceCuanto(l.desde)}</span>
+              </button>
+            ))}
+            {lesionados.length > lesionadosTop.length && (
+              <p className="muted" style={{ margin: '8px 0 0', fontSize: 13 }}>
+                y {lesionados.length - lesionadosTop.length} más…
               </p>
             )}
           </>

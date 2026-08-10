@@ -34,19 +34,20 @@ export default function Estadisticas({ onIrAlumno }) {
 
   useEffect(() => {
     ;(async () => {
-      const [{ data: al }, { data: ra }, { data: se }, { data: pr }] = await Promise.all([
+      const [{ data: al }, { data: ra }, { data: se }, { data: pr }, { data: les }] = await Promise.all([
         supabase.from('alumnos').select('id, nombre, deporte, fecha_nacimiento, fecha_alta, medicion_nutricional').eq('estado', 'activo').order('nombre'),
         supabase.from('sesion_alumnos').select('alumno_id, sesion_id'),
         supabase.from('sesiones').select('id, dia, hora_inicio, tipo, profe_id'),
         supabase.from('profes_publico').select('id, nombre').order('id'),
+        supabase.from('lesiones').select('alumno_id, tipo, desde, hasta'),
       ])
-      setData({ alumnos: al || [], roster: ra || [], sesiones: se || [], profes: pr || [] })
+      setData({ alumnos: al || [], roster: ra || [], sesiones: se || [], profes: pr || [], lesiones: les || [] })
     })()
   }, [])
 
   const stats = useMemo(() => {
     if (!data) return null
-    const { alumnos, roster, sesiones, profes } = data
+    const { alumnos, roster, sesiones, profes, lesiones } = data
     const sesById = new Map(sesiones.map((s) => [s.id, s]))
     const colorProfe = (id) => COLORS[Math.max(0, profes.findIndex((p) => p.id === id)) % COLORS.length]
     const nombreProfe = new Map(profes.map((p) => [p.id, p.nombre]))
@@ -149,6 +150,22 @@ export default function Estadisticas({ onIrAlumno }) {
     const ocupTotal = turnos.reduce((s, t) => s + t.n, 0)
     const turnoLleno = turnos.reduce((a, b) => (b.n > (a?.n || 0) ? b : a), null)
 
+    // Lesiones: activas, recuperadas, duración promedio, por tipo (con drill)
+    const tipoMap = new Map()
+    let lesActivas = 0, lesRecuperadas = 0, sumaDur = 0, nDur = 0
+    ;(lesiones || []).forEach((l) => {
+      const k = (l.tipo || '').toLowerCase().trim()
+      if (!tipoMap.has(k)) tipoMap.set(k, { label: l.tipo, ids: new Set() })
+      tipoMap.get(k).ids.add(l.alumno_id)
+      if (l.hasta) {
+        lesRecuperadas++
+        sumaDur += Math.max(0, Math.round((new Date(l.hasta + 'T00:00:00') - new Date(l.desde + 'T00:00:00')) / 86400000))
+        nDur++
+      } else lesActivas++
+    })
+    const lesionPorTipo = [...tipoMap.values()].map((v) => ({ label: v.label, n: v.ids.size, ids: [...v.ids] })).sort((a, b) => b.n - a.n)
+    const lesion = { total: (lesiones || []).length, activas: lesActivas, recuperadas: lesRecuperadas, durProm: nDur ? Math.round(sumaDur / nDur) : null, porTipo: lesionPorTipo }
+
     return {
       total: alumnos.length,
       edadesCargadas,
@@ -159,6 +176,7 @@ export default function Estadisticas({ onIrAlumno }) {
       turnos,
       ocupTotal,
       turnoLleno,
+      lesion,
     }
   }, [data])
 
@@ -220,6 +238,31 @@ export default function Estadisticas({ onIrAlumno }) {
                     <span className="estad-bar-fill" style={{ width: (t.n / max) * 100 + '%' }} />
                   </span>
                   <span className="estad-bar-num">{t.n}</span>
+                </button>
+              ))
+            })()}
+          </>
+        )}
+      </div>
+
+      <div className="pk-card estad-ocupa">
+        <div className="card-title">Lesiones</div>
+        {stats.lesion.total === 0 ? (
+          <p className="muted" style={{ margin: 0 }}>Sin lesiones registradas. Se cargan desde la ficha del alumno (sección Lesiones).</p>
+        ) : (
+          <>
+            <div className="stat-grid" style={{ marginBottom: 10 }}>
+              <Stat label="Activas" value={stats.lesion.activas} />
+              <Stat label="Recuperadas" value={stats.lesion.recuperadas} />
+              <Stat label="Duración prom." value={stats.lesion.durProm != null ? stats.lesion.durProm + ' días' : '—'} sub="las recuperadas" />
+            </div>
+            {(() => {
+              const maxLes = Math.max(1, ...stats.lesion.porTipo.map((x) => x.n))
+              return stats.lesion.porTipo.map((d) => (
+                <button key={d.label} className="estad-bar" onClick={() => abrir('Lesión', d)} disabled={!d.ids.length}>
+                  <span className="estad-bar-lbl" title={d.label}>{d.label}</span>
+                  <span className="estad-bar-track"><span className="estad-bar-fill" style={{ width: (d.n / maxLes) * 100 + '%' }} /></span>
+                  <span className="estad-bar-num">{d.n}</span>
                 </button>
               ))
             })()}

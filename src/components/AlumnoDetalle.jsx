@@ -6,6 +6,7 @@ import PagoForm from './PagoForm'
 import Mediciones from './Mediciones'
 import Testeos from './Testeos'
 import Evolucion from './Evolucion'
+import Lesiones from './Lesiones'
 import Informe from './Informe'
 
 const EST_FISICO = {
@@ -233,6 +234,8 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
       <Testeos alumnoId={alumno.id} />
 
       <Evolucion alumnoId={alumno.id} />
+
+      <Lesiones alumnoId={alumno.id} onEstadoChange={onChanged} />
 
       <div className="section-subhead"><h2>Notas de los profes</h2></div>
       <form className="nota-add" onSubmit={agregarNota}>
