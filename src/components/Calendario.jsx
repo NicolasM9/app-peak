@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import SesionForm from './SesionForm'
 import CargaSesiones from './CargaSesiones'
+import GrillaSemanal from './GrillaSemanal'
 
 const DIAS = [
   { key: 'lunes', label: 'Lunes' },
@@ -21,6 +22,7 @@ export const TIPO_INFO = {
   personalizado: { label: 'Personalizado', bg: '#6d4bd0' },
   grupo: { label: 'Grupo', bg: '#1f8f63' },
   filmacion: { label: 'Filmación', bg: '#5b6675' },
+  bloqueo: { label: 'Bloqueo', bg: '#7a2f2f' },
   otro: { label: 'Otro', bg: '#33455f' },
 }
 
@@ -37,6 +39,7 @@ export default function Calendario({ esAdmin }) {
   const [profes, setProfes] = useState([])
   const [loading, setLoading] = useState(true)
   const [view, setView] = useState({ name: 'grid' })
+  const [modo, setModo] = useState('bloques') // 'bloques' | 'grilla'
 
   async function load() {
     setLoading(true)
@@ -130,10 +133,22 @@ export default function Calendario({ esAdmin }) {
           </div>
         )}
       </div>
-      <p className="cal-sub">Semana tipo · quién viene cada turno</p>
+      <div className="cal-modo">
+        <button className={`cal-modo-btn ${modo === 'bloques' ? 'on' : ''}`} onClick={() => setModo('bloques')}>Bloques</button>
+        <button className={`cal-modo-btn ${modo === 'grilla' ? 'on' : ''}`} onClick={() => setModo('grilla')}>🗓 Grilla</button>
+      </div>
 
       {loading ? (
         <p className="muted">Cargando…</p>
+      ) : modo === 'grilla' ? (
+        <GrillaSemanal
+          sesiones={sesiones}
+          colorOf={colorOf}
+          nombreOf={nombreOf}
+          esAdmin={esAdmin}
+          onEdit={(s) => setView({ name: 'form', sesion: s, volver: { name: 'grid' } })}
+          onCreate={(pre) => setView({ name: 'form', sesion: { ...pre, tipo: 'otro' }, volver: { name: 'grid' } })}
+        />
       ) : diasConData.length === 0 ? (
         <p className="muted">No hay sesiones cargadas. {esAdmin ? 'Usá “⚡ Carga rápida” para armar la semana.' : ''}</p>
       ) : (

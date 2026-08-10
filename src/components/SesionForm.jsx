@@ -18,11 +18,12 @@ const TIPOS = [
   { value: 'personalizado', label: 'Personalizado' },
   { value: 'grupo', label: 'Grupo con alumnos' },
   { value: 'filmacion', label: 'Filmación / contenido' },
+  { value: 'bloqueo', label: 'Bloqueo (turno no disponible)' },
   { value: 'otro', label: 'Otro' },
 ]
 
 export default function SesionForm({ sesion, profes, onDone, onCancel }) {
-  const editing = !!sesion
+  const editing = !!sesion?.id // sin id = sesión nueva pre-cargada (día/hora)
   const [form, setForm] = useState({
     dia: sesion?.dia || 'lunes',
     hora_inicio: (sesion?.hora_inicio || '08:00').slice(0, 5),
