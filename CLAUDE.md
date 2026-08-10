@@ -36,7 +36,13 @@ No hacerlas todas juntas. Un commit de Git al terminar cada fase.
 ## Estado del proyecto (al 2026-08-07)
 **Las 7 solapas están hechas y funcionando.** Migraciones aplicadas en Supabase: 0001–0017
 (0013 = asistencia; 0014 = `fecha_alta`/`fecha_baja` de alumnos, 2026-08-07; 0015 = `objetivos`/`foto_path`, 2026-08-08;
-0016 = `alumnos.email`, 2026-08-09; 0017 = tabla `lesiones` (historial), 2026-08-09).
+0016 = `alumnos.email`, 2026-08-09; 0017 = tabla `lesiones` (historial), 2026-08-09;
+0018 = self-service de profes (RLS: el profe escribe SUS vacaciones y SUS personalizados), 2026-08-09).
+**Profes self-service (Fase A, 2026-08-09):** el profe carga **sus vacaciones** (en Mi Peak), tiene pestaña **"Mi acuerdo"**
+(ve solo el suyo, read-only) y pestaña **"Personalizados"** (nombre+días+horario → crea sesiones tipo personalizado que
+aparecen en el Calendario). Permisos acotados por `mi_profe_id()`: el profe solo toca lo suyo. Pendiente (pedido de Nico):
+**Fase B** = calendario interactivo estilo Google (quién está cada día/hora, crear eventos, bloquear turnos); **Fase C** =
+Planificaciones más pro (carga de rutinas dinámica, guardar bloques/meses).
 **Lesiones (2026-08-09):** historial por alumno en tabla `lesiones` (admin-only). En la ficha se agregan/marcan "recuperada"
 (sincroniza `estado_fisico`); Inicio muestra "Alumnos lesionados" (quién/tipo/hace cuánto) y Estadísticas cuenta
 activas/recuperadas + duración promedio + por tipo. **Profes: sin plata** — Mi Peak ya no muestra el acuerdo/sueldo del profe. **Datos de contacto cargados (2026-08-09):** 77/82 alumnos con **teléfono** y
