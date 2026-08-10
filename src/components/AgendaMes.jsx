@@ -14,6 +14,27 @@ const TIPOS = [
 ]
 const tinfo = (t) => TIPOS.find((x) => x.value === t) || TIPOS[5]
 
+// Feriados nacionales de Argentina 2026 (los movibles ya calculados).
+// Carnaval, Viernes Santo, Güemes y Soberanía son trasladables → conviene chequearlos.
+const FERIADOS_2026 = [
+  { f: '2026-01-01', t: 'Año Nuevo' },
+  { f: '2026-02-16', t: 'Carnaval' },
+  { f: '2026-02-17', t: 'Carnaval' },
+  { f: '2026-03-24', t: 'Día de la Memoria' },
+  { f: '2026-04-02', t: 'Día del Veterano (Malvinas)' },
+  { f: '2026-04-03', t: 'Viernes Santo' },
+  { f: '2026-05-01', t: 'Día del Trabajador' },
+  { f: '2026-05-25', t: 'Revolución de Mayo' },
+  { f: '2026-06-17', t: 'Paso a la Inmortalidad de Güemes' },
+  { f: '2026-06-20', t: 'Día de la Bandera' },
+  { f: '2026-07-09', t: 'Día de la Independencia' },
+  { f: '2026-08-17', t: 'Paso a la Inmortalidad de San Martín' },
+  { f: '2026-10-12', t: 'Día del Respeto a la Diversidad Cultural' },
+  { f: '2026-11-20', t: 'Día de la Soberanía Nacional' },
+  { f: '2026-12-08', t: 'Inmaculada Concepción de María' },
+  { f: '2026-12-25', t: 'Navidad' },
+]
+
 const pad = (n) => String(n).padStart(2, '0')
 const ymd = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}` // m 0-indexed
 const todayYmd = () => { const d = new Date(); return ymd(d.getFullYear(), d.getMonth(), d.getDate()) }
@@ -30,6 +51,8 @@ export default function AgendaMes() {
   const [sel, setSel] = useState(null) // ymd string | null
   const [form, setForm] = useState(null) // evento agregando/editando | null
   const [saving, setSaving] = useState(false)
+  const [cargandoFer, setCargandoFer] = useState(false)
+  const [ferMsg, setFerMsg] = useState('')
 
   const mStart = ymd(year, month, 1)
   const mEnd = ymd(year, month, new Date(year, month + 1, 0).getDate())
@@ -80,6 +103,22 @@ export default function AgendaMes() {
     await load()
   }
 
+  async function cargarFeriados() {
+    setCargandoFer(true)
+    setFerMsg('')
+    const { data: exist } = await supabase.from('eventos').select('fecha')
+      .eq('tipo', 'feriado').gte('fecha', '2026-01-01').lte('fecha', '2026-12-31')
+    const ya = new Set((exist || []).map((e) => e.fecha))
+    const faltan = FERIADOS_2026.filter((x) => !ya.has(x.f))
+      .map((x) => ({ titulo: x.t, tipo: 'feriado', fecha: x.f, fecha_fin: null, profe_id: null, nota: null }))
+    if (!faltan.length) { setCargandoFer(false); setFerMsg('Los feriados 2026 ya estaban cargados.'); return }
+    const { error } = await supabase.from('eventos').insert(faltan)
+    setCargandoFer(false)
+    if (error) { setFerMsg('No se pudieron cargar los feriados.'); return }
+    setFerMsg(`Cargué ${faltan.length} feriado${faltan.length === 1 ? '' : 's'} 2026. Tocá cada uno para asignar quién trabaja.`)
+    await load()
+  }
+
   async function borrar() {
     if (!form?.id) return
     setSaving(true)
@@ -103,9 +142,15 @@ export default function AgendaMes() {
     <div className="agenda">
       <div className="section-head">
         <h1 className="section-title">Agenda</h1>
-        <button className="btn-primary" onClick={() => nuevo(sel)}>+ Agregar</button>
+        <div className="section-head-actions">
+          <button className="btn-ghost" onClick={cargarFeriados} disabled={cargandoFer}>
+            {cargandoFer ? 'Cargando…' : '🇦🇷 Feriados 2026'}
+          </button>
+          <button className="btn-primary" onClick={() => nuevo(sel)}>+ Agregar</button>
+        </div>
       </div>
       <p className="cal-sub">Feriados, campamentos, vacaciones, partidos y eventos del staff · privado (solo admins)</p>
+      {ferMsg && <p className="plan-ok" style={{ marginTop: 0 }}>{ferMsg}</p>}
 
       {form && (
         <div className="agenda-form">
