@@ -45,7 +45,11 @@ aparecen en el Calendario). Permisos acotados por `mi_profe_id()`: el profe solo
 es una vista día-por-día estilo Google Calendar: línea de tiempo a escala, sesiones posicionadas por hora (carriles para las que
 se solapan), color por profe; admin toca un hueco→crea (día/hora precargados) o un bloque→edita; profes la ven read-only. Nuevo
 tipo **`bloqueo`** (migración **0019**) para marcar turnos no disponibles. Fix en `SesionForm`: `editing = !!sesion?.id`.
-Pendiente (pedido de Nico): **Fase C** = Planificaciones más pro (carga de rutinas dinámica, guardar bloques/meses).
+**Fase C — Planificaciones más pro (2026-08-10, HECHO):** editor `PlanDia.jsx` rediseñado — cada ejercicio en tarjeta legible
+(nombre + Series×Reps) con reordenar/duplicar/borrar; **autocompletado** de ejercicios (datalist con la biblioteca de todos los
+usados); bloques con **nombre editable** + reordenar/quitar; **"Copiar de…"** trae otro día. En la lista, **"Copiar mes"** duplica
+toda la planificación de un mes a otro. Sin migración (mismo modelo `ec`/`bloques`). Posible extra futuro: guardar un bloque como
+plantilla reutilizable (necesitaría tabla nueva). **Las 3 fases (A/B/C) que pidió Nico están hechas.**
 **⚠️ Deploy 2026-08-10:** Netlify pausó los deploys (créditos del ciclo agotados, se destraba ~4/sept). Puente en **GitHub Pages**
 (`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: 0001–0018;
 **0019** (tipo `bloqueo`) queda **pendiente de que Nico corra el SQL**.
