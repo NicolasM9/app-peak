@@ -3,6 +3,7 @@ import Logo from './Logo'
 import {
   Home,
   Calendar,
+  CalendarDays,
   Users,
   ClipboardList,
   Clock,
@@ -26,6 +27,7 @@ const ITEMS = [
 ]
 
 const ADMIN_ITEMS = [
+  { id: 'agenda', label: 'Agenda', Icon: CalendarDays },
   { id: 'pagos', label: 'Pagos', Icon: Wallet },
   { id: 'estadisticas', label: 'Estadísticas', Icon: BarChart3 },
   { id: 'acuerdos', label: 'Acuerdos profes', Icon: FileText },
