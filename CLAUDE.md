@@ -51,8 +51,8 @@ usados); bloques con **nombre editable** + reordenar/quitar; **"Copiar de…"** 
 toda la planificación de un mes a otro. Sin migración (mismo modelo `ec`/`bloques`). Posible extra futuro: guardar un bloque como
 plantilla reutilizable (necesitaría tabla nueva). **Las 3 fases (A/B/C) que pidió Nico están hechas.**
 **⚠️ Deploy 2026-08-10:** Netlify pausó los deploys (créditos del ciclo agotados, se destraba ~4/sept). Puente en **GitHub Pages**
-(`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: 0001–0018;
-**0019** (tipo `bloqueo`) queda **pendiente de que Nico corra el SQL**.
+(`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0019**
+(0019 = tipo `bloqueo`, aplicada 2026-08-10). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
 **Lesiones (2026-08-09):** historial por alumno en tabla `lesiones` (admin-only). En la ficha se agregan/marcan "recuperada"
 (sincroniza `estado_fisico`); Inicio muestra "Alumnos lesionados" (quién/tipo/hace cuánto) y Estadísticas cuenta
 activas/recuperadas + duración promedio + por tipo. **Profes: sin plata** — Mi Peak ya no muestra el acuerdo/sueldo del profe. **Datos de contacto cargados (2026-08-09):** 77/82 alumnos con **teléfono** y
