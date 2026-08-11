@@ -12,15 +12,16 @@ import Estadisticas from './Estadisticas'
 import MiAcuerdo from './MiAcuerdo'
 import MisPersonalizados from './MisPersonalizados'
 import AgendaMes from './AgendaMes'
+import Redes from './Redes'
 import { Menu } from 'lucide-react'
 
 const TITULOS = {
   inicio: 'Inicio', calendario: 'Calendario', alumnos: 'Alumnos',
   planificaciones: 'Planificaciones', horas: 'Horas', pagos: 'Pagos',
   estadisticas: 'Estadísticas', acuerdos: 'Acuerdos profes',
-  miacuerdo: 'Mi acuerdo', personalizados: 'Personalizados', agenda: 'Agenda',
+  miacuerdo: 'Mi acuerdo', personalizados: 'Personalizados', agenda: 'Agenda', redes: 'Redes',
 }
-const ADMIN_SECC = new Set(['alumnos', 'pagos', 'acuerdos', 'estadisticas', 'agenda'])
+const ADMIN_SECC = new Set(['alumnos', 'pagos', 'acuerdos', 'estadisticas', 'agenda', 'redes'])
 const PROFE_SECC = new Set(['miacuerdo', 'personalizados'])
 
 export default function AppShell({ profe, user }) {
@@ -74,6 +75,9 @@ export default function AppShell({ profe, user }) {
 
       case 'agenda':
         return <AgendaMes />
+
+      case 'redes':
+        return <Redes />
 
       default:
         return esAdmin ? <Inicio onIrAlumno={irAlAlumno} onIr={ir} /> : <MiPeak profe={profe} />

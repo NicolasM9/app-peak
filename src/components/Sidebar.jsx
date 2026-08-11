@@ -11,6 +11,7 @@ import {
   FileText,
   BarChart3,
   UserPlus,
+  Share2,
   Lock,
   LogOut,
   X,
@@ -28,6 +29,7 @@ const ITEMS = [
 
 const ADMIN_ITEMS = [
   { id: 'agenda', label: 'Agenda', Icon: CalendarDays },
+  { id: 'redes', label: 'Redes', Icon: Share2 },
   { id: 'pagos', label: 'Pagos', Icon: Wallet },
   { id: 'estadisticas', label: 'Estadísticas', Icon: BarChart3 },
   { id: 'acuerdos', label: 'Acuerdos profes', Icon: FileText },

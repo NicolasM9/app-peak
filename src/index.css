@@ -2641,17 +2641,17 @@ textarea {
 .agenda-dow { margin-bottom: 4px; }
 .agenda-dow-c { text-align: center; font-size: 11px; color: #8b94a6; padding: 2px 0; }
 .agenda-cell {
-  min-height: 56px; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07);
-  border-radius: 8px; padding: 4px 5px; display: flex; flex-direction: column; align-items: flex-start;
-  gap: 3px; color: #e7ebf2; font: inherit; cursor: pointer; text-align: left;
+  min-height: max(80px, 13.5vh); background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 8px; padding: 6px 7px; display: flex; flex-direction: column; align-items: flex-start;
+  gap: 4px; color: #e7ebf2; font: inherit; cursor: pointer; text-align: left;
 }
 .agenda-cell.empty { background: transparent; border: none; cursor: default; }
 .agenda-cell.hoy { border-color: #1a4fa3; box-shadow: inset 0 0 0 1px #1a4fa3; }
 .agenda-cell.sel { background: rgba(26, 79, 163, 0.2); border-color: #1a4fa3; }
-.agenda-daynum { font-size: 12px; color: #c3cad6; }
+.agenda-daynum { font-size: 15px; color: #c3cad6; font-weight: 600; }
 .agenda-cell.hoy .agenda-daynum { color: #fff; font-weight: 700; }
-.agenda-dots { display: flex; flex-wrap: wrap; gap: 3px; margin-top: auto; align-items: center; }
-.agenda-dot { width: 8px; height: 8px; border-radius: 50%; display: inline-block; flex: none; }
+.agenda-dots { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; align-items: center; }
+.agenda-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
 .agenda-more { font-size: 10px; color: #8b94a6; }
 .agenda-legend { display: flex; flex-wrap: wrap; gap: 10px 14px; margin: 12px 0; }
 .agenda-leg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #a9b2c0; }
@@ -2680,6 +2680,29 @@ textarea {
   width: 100%; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 7px; color: #fff; font: inherit; font-size: 14px; padding: 8px 10px;
 }
+
+/* ===== Redes: KPIs ===== */
+.kpi-grid {
+  display: grid; grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
+  gap: 8px; margin: 4px 0 14px;
+}
+.kpi {
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px; padding: 10px 12px; display: flex; flex-direction: column; gap: 2px;
+  position: relative;
+}
+.kpi-num { font-size: 24px; font-weight: 700; color: #fff; line-height: 1.1; }
+.kpi-lbl { font-size: 12px; color: #8b94a6; }
+.kpi-edit { border-color: rgba(26, 79, 163, 0.35); background: rgba(26, 79, 163, 0.08); }
+.kpi-editbtn {
+  position: absolute; top: 8px; right: 10px; background: none; border: none;
+  color: #6ea0e6; font: inherit; font-size: 11px; cursor: pointer; text-decoration: underline;
+}
+.kpi-in {
+  width: 90px; background: #1b2130; border: 1px solid #2b3346; border-radius: 6px;
+  color: #fff; font: inherit; font-size: 22px; font-weight: 700; padding: 2px 8px;
+}
+.kpi-acc { display: inline-flex; gap: 6px; margin-top: 6px; }
 .plan-bloque-head { display: flex; align-items: center; gap: 8px; }
 .ejp-lista { display: flex; flex-direction: column; gap: 8px; margin: 6px 0; }
 .ejp-row {
