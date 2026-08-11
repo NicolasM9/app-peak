@@ -140,9 +140,7 @@ export default function Inicio({ onIrAlumno, onIr }) {
       <div className="section-head">
         <h1 className="section-title">Inicio</h1>
       </div>
-      <p className="muted" style={{ marginTop: -8, marginBottom: 16 }}>
-        Resumen rápido de cómo viene todo
-      </p>
+      <p className="cal-sub">Resumen rápido de cómo viene todo</p>
 
       <div className="stat-grid">
         <Stat label="Alumnos activos" value={activosPeak.length} onClick={() => onIr && onIr('alumnos')} />

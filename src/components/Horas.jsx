@@ -44,6 +44,7 @@ export default function Horas({ esAdmin }) {
   const [cargaTurnos, setCargaTurnos] = useState([])
   const [cargaDias, setCargaDias] = useState([])
   const [difSemanal, setDifSemanal] = useState([])
+  const [ajuste, setAjuste] = useState(null) // { favor, turnos, nota } | null
 
   async function load(showLoading) {
     if (showLoading) setLoading(true)
@@ -134,6 +135,15 @@ export default function Horas({ esAdmin }) {
 
   async function borrarSemana(id) {
     await supabase.from('dif_semanal').delete().eq('id', id)
+    await load()
+  }
+
+  async function guardarAjuste() {
+    const n = Number(ajuste.turnos || 0)
+    if (!n) { setAjuste(null); return }
+    const signed = ajuste.favor === 'Nico' ? -Math.abs(n) : Math.abs(n)
+    await supabase.from('dif_semanal').insert({ fecha: hoyISO(), turnos: signed, nota: ajuste.nota.trim() || 'Ajuste' })
+    setAjuste(null)
     await load()
   }
 
@@ -340,6 +350,21 @@ export default function Horas({ esAdmin }) {
                     {yaEsta ? '↻ Actualizar esta semana' : '➕ Registrar esta semana'}
                   </button>
                 </div>
+
+                {ajuste ? (
+                  <div className="ht-ajuste-form">
+                    <select value={ajuste.favor} onChange={(e) => setAjuste({ ...ajuste, favor: e.target.value })}>
+                      <option value="Eze">Eze +</option>
+                      <option value="Nico">Nico +</option>
+                    </select>
+                    <input type="number" inputMode="numeric" value={ajuste.turnos} onChange={(e) => setAjuste({ ...ajuste, turnos: e.target.value })} placeholder="turnos" style={{ width: 74 }} />
+                    <input className="ht-ajuste-nota" value={ajuste.nota} onChange={(e) => setAjuste({ ...ajuste, nota: e.target.value })} placeholder="nota (ej: arrastre)" />
+                    <button className="confirm-si" onClick={guardarAjuste}>OK</button>
+                    <button className="confirm-no" onClick={() => setAjuste(null)}>✕</button>
+                  </div>
+                ) : (
+                  <button className="ht-base-edit" onClick={() => setAjuste({ favor: 'Eze', turnos: '', nota: '' })}>+ ajuste manual</button>
+                )}
 
                 {difSemanal.length > 0 && (
                   <div className="ht-dif-hist">

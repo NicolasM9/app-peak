@@ -843,7 +843,14 @@ html {
 .cal-sub {
   color: var(--muted);
   font-size: 13px;
-  margin: -6px 0 14px;
+  line-height: 1.35;
+  margin: 4px 0 16px;
+}
+/* Cuando un subtítulo va justo debajo del encabezado, el section-head no suma su
+   margen inferior: el gap título→subtítulo lo da solo el .cal-sub (queda parejo
+   esté el título suelto o dentro de un .section-head). */
+.section-head:has(+ .cal-sub) {
+  margin-bottom: 0;
 }
 
 .cal-scroll {
@@ -1316,6 +1323,26 @@ html {
   cursor: pointer;
   font-size: 13px;
   padding: 0 2px;
+}
+.ht-ajuste-form {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+  margin-top: 10px;
+}
+.ht-ajuste-form select,
+.ht-ajuste-form input {
+  padding: 5px 8px;
+  font-size: 13px;
+  background: #1b2130;
+  border: 1px solid #2b3346;
+  border-radius: 6px;
+  color: #e7ecf4;
+}
+.ht-ajuste-nota {
+  flex: 1;
+  min-width: 120px;
 }
 
 /* ---- Acuerdos profes ---- */
