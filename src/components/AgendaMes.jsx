@@ -47,6 +47,8 @@ export default function AgendaMes() {
   const [month, setMonth] = useState(now.getMonth()) // 0-indexed
   const [eventos, setEventos] = useState([])
   const [profes, setProfes] = useState([])
+  const [vacaciones, setVacaciones] = useState([])
+  const [filtro, setFiltro] = useState(null) // tipo | null
   const [loading, setLoading] = useState(true)
   const [sel, setSel] = useState(null) // ymd string | null
   const [form, setForm] = useState(null) // evento agregando/editando | null
@@ -59,21 +61,30 @@ export default function AgendaMes() {
 
   async function load() {
     setLoading(true)
-    const [{ data: ev }, { data: pr }] = await Promise.all([
+    const [{ data: ev }, { data: pr }, { data: va }] = await Promise.all([
       supabase.from('eventos').select('*')
         .lte('fecha', mEnd)
         .or(`fecha_fin.gte.${mStart},fecha.gte.${mStart}`)
         .order('fecha'),
       supabase.from('profes_publico').select('id, nombre').order('id'),
+      supabase.from('vacaciones').select('id, profe_id, inicio, fin').lte('inicio', mEnd).gte('fin', mStart),
     ])
     setEventos(ev || [])
     setProfes(pr || [])
+    setVacaciones(va || [])
     setLoading(false)
   }
   useEffect(() => { load() }, [year, month]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const nombreProfe = (id) => profes.find((p) => p.id === id)?.nombre || ''
-  const eventosDe = (f) => eventos.filter((e) => e.fecha <= f && (e.fecha_fin || e.fecha) >= f)
+  // Vacaciones de Horas → eventos read-only en el calendario (no se editan acá)
+  const vacEventos = vacaciones.map((v) => ({
+    id: 'vac' + v.id, titulo: `Vacaciones ${nombreProfe(v.profe_id)}`.trim(),
+    tipo: 'vacaciones', fecha: v.inicio, fecha_fin: v.fin, profe_id: v.profe_id, _vac: true,
+  }))
+  const todos = [...eventos, ...vacEventos]
+  const visibles = filtro ? todos.filter((e) => e.tipo === filtro) : todos
+  const eventosDe = (f) => visibles.filter((e) => e.fecha <= f && (e.fecha_fin || e.fecha) >= f)
 
   function prevMes() { setSel(null); if (month === 0) { setYear(year - 1); setMonth(11) } else setMonth(month - 1) }
   function nextMes() { setSel(null); if (month === 11) { setYear(year + 1); setMonth(0) } else setMonth(month + 1) }
@@ -204,6 +215,15 @@ export default function AgendaMes() {
         <button className="btn-ghost btn-mini" onClick={nextMes}>→</button>
       </div>
 
+      <div className="agenda-filtros">
+        <button className={`agenda-filtro ${!filtro ? 'on' : ''}`} onClick={() => setFiltro(null)}>Todos</button>
+        {TIPOS.map((t) => (
+          <button key={t.value} className={`agenda-filtro ${filtro === t.value ? 'on' : ''}`} onClick={() => setFiltro(filtro === t.value ? null : t.value)}>
+            <span className="agenda-dot" style={{ background: t.bg }} /> {t.label}
+          </button>
+        ))}
+      </div>
+
       {loading ? (
         <p className="muted">Cargando…</p>
       ) : (
@@ -219,9 +239,11 @@ export default function AgendaMes() {
               return (
                 <button key={i} className={`agenda-cell ${f === hoy ? 'hoy' : ''} ${sel === f ? 'sel' : ''}`} onClick={() => setSel(f)}>
                   <span className="agenda-daynum">{d}</span>
-                  <span className="agenda-dots">
-                    {evs.slice(0, 4).map((e) => <span key={e.id} className="agenda-dot" style={{ background: tinfo(e.tipo).bg }} />)}
-                    {evs.length > 4 && <span className="agenda-more">+{evs.length - 4}</span>}
+                  <span className="agenda-evs">
+                    {evs.slice(0, 3).map((e) => (
+                      <span key={e.id} className="agenda-chip" style={{ background: tinfo(e.tipo).bg }} title={e.titulo}>{e.titulo}</span>
+                    ))}
+                    {evs.length > 3 && <span className="agenda-more">+{evs.length - 3}</span>}
                   </span>
                 </button>
               )
@@ -243,7 +265,12 @@ export default function AgendaMes() {
               {eventosDe(sel).length === 0 ? (
                 <p className="muted" style={{ margin: 0 }}>Nada este día.</p>
               ) : (
-                eventosDe(sel).map((e) => (
+                eventosDe(sel).map((e) => e._vac ? (
+                  <div key={e.id} className="agenda-ev agenda-ev-ro" style={{ borderLeftColor: tinfo(e.tipo).bg }}>
+                    <span className="agenda-ev-tit">{e.titulo}</span>
+                    <span className="agenda-ev-meta">Vacaciones · {cortita(e.fecha)}→{cortita(e.fecha_fin)} · se edita en Horas</span>
+                  </div>
+                ) : (
                   <button key={e.id} className="agenda-ev" style={{ borderLeftColor: tinfo(e.tipo).bg }} onClick={() => editar(e)}>
                     <span className="agenda-ev-tit">{e.titulo}</span>
                     <span className="agenda-ev-meta">

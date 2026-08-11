@@ -2652,6 +2652,19 @@ textarea {
 .agenda-cell.hoy .agenda-daynum { color: #fff; font-weight: 700; }
 .agenda-dots { display: flex; flex-wrap: wrap; gap: 4px; margin-top: auto; align-items: center; }
 .agenda-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex: none; }
+.agenda-evs { display: flex; flex-direction: column; gap: 2px; width: 100%; margin-top: auto; overflow: hidden; }
+.agenda-chip {
+  font-size: 10.5px; line-height: 1.3; color: #fff; border-radius: 4px; padding: 1px 5px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%;
+}
+.agenda-filtros { display: flex; flex-wrap: wrap; gap: 6px; margin: 0 0 12px; }
+.agenda-filtro {
+  display: inline-flex; align-items: center; gap: 5px; font-size: 12px; padding: 5px 9px;
+  border-radius: 999px; border: 1px solid rgba(255, 255, 255, 0.14); background: rgba(255, 255, 255, 0.04);
+  color: #c3cad6; cursor: pointer;
+}
+.agenda-filtro.on { background: #1a4fa3; border-color: #1a4fa3; color: #fff; }
+.agenda-ev-ro { cursor: default; opacity: 0.85; }
 .agenda-more { font-size: 10px; color: #8b94a6; }
 .agenda-legend { display: flex; flex-wrap: wrap; gap: 10px 14px; margin: 12px 0; }
 .agenda-leg { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #a9b2c0; }
@@ -2703,6 +2716,42 @@ textarea {
   color: #fff; font: inherit; font-size: 22px; font-weight: 700; padding: 2px 8px;
 }
 .kpi-acc { display: inline-flex; gap: 6px; margin-top: 6px; }
+
+/* Meta mensual */
+.meta-box {
+  background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 10px; padding: 12px; margin-bottom: 14px; display: flex; flex-direction: column; gap: 8px;
+}
+.meta-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; font-size: 14px; color: #e7ebf2; }
+.meta-bar { height: 8px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.meta-fill { display: block; height: 100%; background: #1f8f63; border-radius: 999px; }
+.meta-nota { font-size: 12px; color: #8b94a6; }
+
+/* Contenido: item con checklist */
+.cont-item {
+  background: rgba(255, 255, 255, 0.04); border: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 3px solid #5b6675; border-radius: 8px; padding: 8px 10px; display: flex; flex-direction: column; gap: 8px;
+}
+.cont-item-main { background: none; border: none; text-align: left; color: #e7ebf2; font: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 2px; padding: 0; }
+.cont-pasos { display: flex; flex-wrap: wrap; gap: 6px; }
+.cont-paso {
+  font-size: 11.5px; padding: 4px 9px; border-radius: 999px; cursor: pointer;
+  border: 1px solid rgba(255, 255, 255, 0.16); background: rgba(255, 255, 255, 0.03); color: #a9b2c0;
+}
+.cont-paso.on { background: #1f8f63; border-color: #1f8f63; color: #fff; }
+
+/* Backlog de ideas */
+.backlog-list { display: flex; flex-direction: column; gap: 6px; }
+.backlog-row {
+  display: flex; align-items: center; gap: 8px; background: rgba(255, 255, 255, 0.04);
+  border: 1px solid rgba(255, 255, 255, 0.08); border-left: 3px solid #5b6675; border-radius: 8px; padding: 6px 10px;
+}
+.backlog-main { flex: 1; min-width: 0; background: none; border: none; text-align: left; color: #e7ebf2; font: inherit; cursor: pointer; display: flex; flex-direction: column; gap: 2px; padding: 0; }
+.backlog-date {
+  flex: none; width: 40px; background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 6px; color: #c3cad6; font: inherit; font-size: 12px; padding: 4px; color-scheme: dark;
+}
+.backlog-del { flex: none; background: none; border: none; color: #c76b6b; cursor: pointer; font-size: 13px; }
 .plan-bloque-head { display: flex; align-items: center; gap: 8px; }
 .ejp-lista { display: flex; flex-direction: column; gap: 8px; margin: 6px 0; }
 .ejp-row {

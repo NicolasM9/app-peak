@@ -9,31 +9,34 @@ const TIPOS = [
   { value: 'publicacion', label: 'Publicación', bg: '#2f6fb0' },
   { value: 'ambas', label: 'Historia + Publicación', bg: '#6d4bd0' },
 ]
-const ESTADOS = [
-  { value: 'idea', label: 'Idea' },
-  { value: 'listo', label: 'Listo p/ subir' },
-  { value: 'subido', label: 'Subido ✓' },
+const PASOS = [
+  { key: 'grabar', label: 'Grabar' },
+  { key: 'editar', label: 'Editar' },
+  { key: 'copy', label: 'Copy' },
+  { key: 'subir', label: 'Subir' },
 ]
 const tinfo = (t) => TIPOS.find((x) => x.value === t) || TIPOS[1]
-const einfo = (e) => ESTADOS.find((x) => x.value === e) || ESTADOS[0]
 
 const pad = (n) => String(n).padStart(2, '0')
 const ymd = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}`
 const todayYmd = () => { const d = new Date(); return ymd(d.getFullYear(), d.getMonth(), d.getDate()) }
 function diaLargo(f) { const [y, m, d] = f.split('-').map(Number); const dt = new Date(y, m - 1, d); return `${DOWL[dt.getDay()]} ${d} de ${MESES[m - 1]}` }
+const diasEntre = (a, b) => Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000)
 
 export default function Redes() {
   const now = new Date()
   const [year, setYear] = useState(now.getFullYear())
   const [month, setMonth] = useState(now.getMonth())
   const [items, setItems] = useState([])
+  const [backlog, setBacklog] = useState([])
   const [metrica, setMetrica] = useState(null)
+  const [altasMes, setAltasMes] = useState(0)
   const [loading, setLoading] = useState(true)
   const [sel, setSel] = useState(null)
   const [form, setForm] = useState(null)
   const [saving, setSaving] = useState(false)
-  const [editConsultas, setEditConsultas] = useState(false)
-  const [consultasVal, setConsultasVal] = useState('')
+  const [edit, setEdit] = useState(null) // 'consultas' | 'meta' | null
+  const [editVal, setEditVal] = useState('')
 
   const mStart = ymd(year, month, 1)
   const mEnd = ymd(year, month, new Date(year, month + 1, 0).getDate())
@@ -41,12 +44,16 @@ export default function Redes() {
 
   async function load() {
     setLoading(true)
-    const [{ data: c }, { data: m }] = await Promise.all([
+    const [{ data: c }, { data: bk }, { data: m }, { data: al }] = await Promise.all([
       supabase.from('contenidos').select('*').gte('fecha', mStart).lte('fecha', mEnd).order('fecha'),
+      supabase.from('contenidos').select('*').is('fecha', null).order('created_at', { ascending: false }),
       supabase.from('redes_metricas').select('*').eq('mes', mesKey).maybeSingle(),
+      supabase.from('alumnos').select('id').gte('fecha_alta', mStart).lte('fecha_alta', mEnd),
     ])
     setItems(c || [])
+    setBacklog(bk || [])
     setMetrica(m || null)
+    setAltasMes((al || []).length)
     setLoading(false)
   }
   useEffect(() => { load() }, [year, month]) // eslint-disable-line react-hooks/exhaustive-deps
@@ -57,19 +64,20 @@ export default function Redes() {
   function nextMes() { setSel(null); if (month === 11) { setYear(year + 1); setMonth(0) } else setMonth(month + 1) }
   function hoyMes() { setSel(null); setYear(now.getFullYear()); setMonth(now.getMonth()) }
 
-  function nuevo(fecha) { setForm({ titulo: '', tipo: 'publicacion', estado: 'idea', fecha: fecha || todayYmd(), nota: '' }) }
-  function editar(c) { setForm({ id: c.id, titulo: c.titulo, tipo: c.tipo, estado: c.estado, fecha: c.fecha, nota: c.nota || '' }) }
+  function nuevo(fecha) { setForm({ titulo: '', tipo: 'publicacion', fecha: fecha || todayYmd(), nota: '' }) }
+  function nuevaIdea() { setForm({ titulo: '', tipo: 'publicacion', fecha: '', nota: '' }) }
+  function editar(c) { setForm({ id: c.id, titulo: c.titulo, tipo: c.tipo, fecha: c.fecha || '', nota: c.nota || '' }) }
 
   async function guardar() {
     if (!form.titulo.trim()) return
     setSaving(true)
-    const payload = { titulo: form.titulo.trim(), tipo: form.tipo, estado: form.estado, fecha: form.fecha, nota: (form.nota || '').trim() || null }
+    const payload = { titulo: form.titulo.trim(), tipo: form.tipo, fecha: form.fecha || null, nota: (form.nota || '').trim() || null }
     const { error } = form.id
       ? await supabase.from('contenidos').update(payload).eq('id', form.id)
       : await supabase.from('contenidos').insert(payload)
     setSaving(false)
     if (error) return
-    setSel(form.fecha)
+    if (form.fecha) setSel(form.fecha)
     setForm(null)
     await load()
   }
@@ -83,19 +91,42 @@ export default function Redes() {
     await load()
   }
 
-  async function guardarConsultas() {
-    const n = Number(consultasVal || 0)
-    await supabase.from('redes_metricas').upsert({ mes: mesKey, consultas: n, updated_at: new Date().toISOString() })
-    setEditConsultas(false)
+  async function togglePaso(c, key) {
+    const pasos = { ...(c.pasos || {}), [key]: !(c.pasos || {})[key] }
+    await supabase.from('contenidos').update({ pasos }).eq('id', c.id)
+    await load()
+  }
+  async function programar(c, fecha) {
+    if (!fecha) return
+    await supabase.from('contenidos').update({ fecha }).eq('id', c.id)
+    await load()
+  }
+  async function borrarItem(id) {
+    await supabase.from('contenidos').delete().eq('id', id)
+    await load()
+  }
+
+  async function guardarMetrica(campo) {
+    const n = Number(editVal || 0)
+    const base = { mes: mesKey, consultas: metrica?.consultas || 0, meta: metrica?.meta || 0, updated_at: new Date().toISOString() }
+    base[campo] = n
+    await supabase.from('redes_metricas').upsert(base)
+    setEdit(null)
     await load()
   }
 
   // KPIs del mes
-  const subidos = items.filter((c) => c.estado === 'subido').length
+  const subidos = items.filter((c) => c.pasos?.subir).length
   const historias = items.filter((c) => c.tipo === 'historia' || c.tipo === 'ambas').length
   const publicaciones = items.filter((c) => c.tipo === 'publicacion' || c.tipo === 'ambas').length
-  const ideas = items.filter((c) => c.estado === 'idea').length
   const consultas = metrica?.consultas || 0
+  const meta = metrica?.meta || 0
+  const conversion = consultas > 0 ? Math.round((altasMes / consultas) * 100) : null
+  const metaPct = meta > 0 ? Math.min(100, Math.round((subidos / meta) * 100)) : 0
+  const esMesActual = year === now.getFullYear() && month === now.getMonth()
+  const subidasFechas = items.filter((c) => c.pasos?.subir).map((c) => c.fecha).sort()
+  const ultSubida = subidasFechas.length ? subidasFechas[subidasFechas.length - 1] : null
+  const diasSinPostear = esMesActual && ultSubida ? diasEntre(ultSubida, todayYmd()) : null
 
   // celdas del mes (lunes primero)
   const primerDow = (new Date(year, month, 1).getDay() + 6) % 7
@@ -105,6 +136,26 @@ export default function Redes() {
   for (let d = 1; d <= diasMes; d++) celdas.push(d)
   while (celdas.length % 7 !== 0) celdas.push(null)
   const hoy = todayYmd()
+
+  const kpiEdit = (campo, valor, label) => (
+    <div className="kpi kpi-edit">
+      {edit === campo ? (
+        <>
+          <input className="kpi-in" type="number" inputMode="numeric" value={editVal} autoFocus onChange={(e) => setEditVal(e.target.value)} />
+          <span className="kpi-acc">
+            <button className="confirm-si" onClick={() => guardarMetrica(campo)}>OK</button>
+            <button className="confirm-no" onClick={() => setEdit(null)}>✕</button>
+          </span>
+        </>
+      ) : (
+        <>
+          <span className="kpi-num">{valor}</span>
+          <span className="kpi-lbl">{label}</span>
+          <button className="kpi-editbtn" onClick={() => { setEditVal(String(valor)); setEdit(campo) }}>editar</button>
+        </>
+      )}
+    </div>
+  )
 
   return (
     <div className="agenda">
@@ -118,30 +169,35 @@ export default function Redes() {
         <div className="kpi"><span className="kpi-num">{subidos}</span><span className="kpi-lbl">subidos este mes</span></div>
         <div className="kpi"><span className="kpi-num">{historias}</span><span className="kpi-lbl">historias</span></div>
         <div className="kpi"><span className="kpi-num">{publicaciones}</span><span className="kpi-lbl">publicaciones</span></div>
-        <div className="kpi"><span className="kpi-num">{ideas}</span><span className="kpi-lbl">ideas pendientes</span></div>
-        <div className="kpi kpi-edit">
-          {editConsultas ? (
-            <>
-              <input className="kpi-in" type="number" inputMode="numeric" value={consultasVal} autoFocus
-                onChange={(e) => setConsultasVal(e.target.value)} />
-              <span className="kpi-acc">
-                <button className="confirm-si" onClick={guardarConsultas}>OK</button>
-                <button className="confirm-no" onClick={() => setEditConsultas(false)}>✕</button>
-              </span>
-            </>
+        {kpiEdit('consultas', consultas, 'consultas p/ entrenar')}
+        <div className="kpi"><span className="kpi-num">{altasMes}</span><span className="kpi-lbl">altas del mes</span></div>
+        <div className="kpi"><span className="kpi-num">{conversion == null ? '—' : conversion + '%'}</span><span className="kpi-lbl">conversión (altas/consultas)</span></div>
+      </div>
+
+      <div className="meta-box">
+        <div className="meta-head">
+          <span>Meta del mes: {meta > 0 ? <b>{subidos}/{meta} subidos</b> : <span className="muted">sin meta</span>}</span>
+          {edit === 'meta' ? (
+            <span className="ht-base-form">
+              <input className="kpi-in" style={{ fontSize: 15, width: 70 }} type="number" inputMode="numeric" value={editVal} autoFocus onChange={(e) => setEditVal(e.target.value)} />
+              <button className="confirm-si" onClick={() => guardarMetrica('meta')}>OK</button>
+              <button className="confirm-no" onClick={() => setEdit(null)}>✕</button>
+            </span>
           ) : (
-            <>
-              <span className="kpi-num">{consultas}</span>
-              <span className="kpi-lbl">consultas p/ entrenar</span>
-              <button className="kpi-editbtn" onClick={() => { setConsultasVal(String(consultas)); setEditConsultas(true) }}>editar</button>
-            </>
+            <button className="btn-link" onClick={() => { setEditVal(String(meta)); setEdit('meta') }}>editar meta</button>
           )}
         </div>
+        {meta > 0 && <div className="meta-bar"><span className="meta-fill" style={{ width: metaPct + '%' }} /></div>}
+        {esMesActual && (
+          <span className="meta-nota">
+            {ultSubida ? (diasSinPostear === 0 ? 'Subiste algo hoy 👍' : `Hace ${diasSinPostear} día${diasSinPostear === 1 ? '' : 's'} que no subís`) : 'No subiste nada este mes todavía'}
+          </span>
+        )}
       </div>
 
       {form && (
         <div className="agenda-form">
-          <span className="plan-copiar-tit">{form.id ? 'Editar contenido' : 'Nuevo contenido'}</span>
+          <span className="plan-copiar-tit">{form.id ? 'Editar contenido' : (form.fecha ? 'Nuevo contenido' : 'Nueva idea suelta')}</span>
           <div className="agenda-form-row">
             <input className="agenda-in" value={form.titulo} autoFocus
               onChange={(e) => setForm({ ...form, titulo: e.target.value })}
@@ -153,14 +209,7 @@ export default function Redes() {
                 {TIPOS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
               </select>
             </label>
-            <label>Estado
-              <select value={form.estado} onChange={(e) => setForm({ ...form, estado: e.target.value })}>
-                {ESTADOS.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
-              </select>
-            </label>
-          </div>
-          <div className="agenda-form-row two">
-            <label>Día
+            <label>Día (vacío = idea suelta)
               <input type="date" value={form.fecha} onChange={(e) => setForm({ ...form, fecha: e.target.value })} />
             </label>
           </div>
@@ -202,7 +251,7 @@ export default function Redes() {
                   <span className="agenda-daynum">{d}</span>
                   <span className="agenda-dots">
                     {evs.slice(0, 6).map((e) => (
-                      <span key={e.id} className="agenda-dot" style={{ background: tinfo(e.tipo).bg, opacity: e.estado === 'subido' ? 1 : 0.5 }} />
+                      <span key={e.id} className="agenda-dot" style={{ background: tinfo(e.tipo).bg, opacity: e.pasos?.subir ? 1 : 0.45 }} />
                     ))}
                   </span>
                 </button>
@@ -214,7 +263,7 @@ export default function Redes() {
             {TIPOS.map((t) => (
               <span key={t.value} className="agenda-leg"><span className="agenda-dot" style={{ background: t.bg }} /> {t.label}</span>
             ))}
-            <span className="agenda-leg"><span className="agenda-dot" style={{ background: '#8b94a6', opacity: 0.5 }} /> sin subir</span>
+            <span className="agenda-leg"><span className="agenda-dot" style={{ background: '#8b94a6', opacity: 0.45 }} /> sin subir</span>
           </div>
 
           {sel && (
@@ -227,13 +276,42 @@ export default function Redes() {
                 <p className="muted" style={{ margin: 0 }}>Nada este día. Cargá una idea o el contenido del día.</p>
               ) : (
                 itemsDe(sel).map((c) => (
-                  <button key={c.id} className="agenda-ev" style={{ borderLeftColor: tinfo(c.tipo).bg }} onClick={() => editar(c)}>
-                    <span className="agenda-ev-tit">{c.titulo}</span>
-                    <span className="agenda-ev-meta">{tinfo(c.tipo).label} · {einfo(c.estado).label}</span>
-                    {c.nota ? <span className="agenda-ev-nota">{c.nota}</span> : null}
-                  </button>
+                  <div key={c.id} className="cont-item" style={{ borderLeftColor: tinfo(c.tipo).bg }}>
+                    <button className="cont-item-main" onClick={() => editar(c)}>
+                      <span className="agenda-ev-tit">{c.titulo}</span>
+                      <span className="agenda-ev-meta">{tinfo(c.tipo).label}{c.nota ? ` · ${c.nota}` : ''}</span>
+                    </button>
+                    <div className="cont-pasos">
+                      {PASOS.map((p) => (
+                        <button key={p.key} className={`cont-paso ${c.pasos?.[p.key] ? 'on' : ''}`} onClick={() => togglePaso(c, p.key)}>
+                          {c.pasos?.[p.key] ? '✓ ' : ''}{p.label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
                 ))
               )}
+            </div>
+          )}
+
+          <div className="section-subhead" style={{ marginTop: 22 }}>
+            <h2>💡 Ideas sueltas</h2>
+            <button className="btn-ghost btn-mini" onClick={nuevaIdea}>+ Idea</button>
+          </div>
+          {backlog.length === 0 ? (
+            <p className="muted" style={{ margin: 0 }}>Sin ideas sueltas. Tirá ideas acá y después les ponés fecha.</p>
+          ) : (
+            <div className="backlog-list">
+              {backlog.map((c) => (
+                <div key={c.id} className="backlog-row" style={{ borderLeftColor: tinfo(c.tipo).bg }}>
+                  <button className="backlog-main" onClick={() => editar(c)}>
+                    <span className="agenda-ev-tit">{c.titulo}</span>
+                    <span className="agenda-ev-meta">{tinfo(c.tipo).label}{c.nota ? ` · ${c.nota}` : ''}</span>
+                  </button>
+                  <input type="date" className="backlog-date" title="Programar" onChange={(e) => programar(c, e.target.value)} />
+                  <button className="agenda-ev-nota backlog-del" title="Borrar" onClick={() => borrarItem(c.id)}>✕</button>
+                </div>
+              ))}
             </div>
           )}
         </>
