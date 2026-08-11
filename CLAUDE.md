@@ -66,7 +66,11 @@ En **Inicio** (admin) una tarjeta **"📅 Próximo feriado"** muestra el feriado
 **⚠️ Deploy 2026-08-10:** Netlify pausó los deploys (créditos del ciclo agotados, se destraba ~4/sept). Puente en **GitHub Pages**
 (`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0021**
 (0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff; 0021 = tabla `eventos`
-para la Agenda admin, aplicada 2026-08-10). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
+para la Agenda admin; 0022 = tabla `dif_semanal` para el registro semanal Nico↔Eze, aplicada 2026-08-11). Pendiente operativo:
+cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
+**UI (2026-08-11):** interlineado título→subtítulo unificado en toda la app — `.cal-sub` pasó de margen negativo a `margin: 4px 0 16px`
++ `.section-head:has(+ .cal-sub) { margin-bottom: 0 }` (el gap queda parejo en ~4px esté el título suelto o dentro del section-head);
+Inicio dejó de usar `.muted` con margen inline y usa `.cal-sub`.
 **Lesiones (2026-08-09):** historial por alumno en tabla `lesiones` (admin-only). En la ficha se agregan/marcan "recuperada"
 (sincroniza `estado_fisico`); Inicio muestra "Alumnos lesionados" (quién/tipo/hace cuánto) y Estadísticas cuenta
 activas/recuperadas + duración promedio + por tipo. **Profes: sin plata** — Mi Peak ya no muestra el acuerdo/sueldo del profe. **Datos de contacto cargados (2026-08-09):** 77/82 alumnos con **teléfono** y
@@ -114,11 +118,13 @@ vista `profes_publico` (sin sueldos). Verificado impersonando a un profe vía RL
 - **"Mi Peak"** (inicio propio del profe): su acuerdo del mes, sus horas/semana y sus días/sesiones;
   solo ve lo suyo. Sidebar muestra "Mi Peak" (profe) / "Inicio" (admin).
 - **Horas:** "carga rápida de la semana" (elegir profe + AM/PM o turnos sueltos + días → agregar/quitar
-  todo junto) y tarjeta **Acumulado histórico Nico↔Eze** (solo admin) — migración 0012, tabla `config`
-  clave `dif_nico_eze` (admin-only). **(2026-08-10)** dejó de ser "arrastre + esta semana" (quedaba trabado
-  con la grilla de la semana) y pasó a ser un **acumulado histórico puro** que se ajusta a mano: botones
-  **+1 Nico / +1 Eze** (nudge de a un turno, upsert optimista) y **"fijar total"** (setear favor+turnos).
-  Actual = Eze +14 turnos.
+  todo junto) y tarjeta **Diferencia de horas Nico↔Eze** (solo admin). **(2026-08-11, migración 0022)** pasó a un
+  **registro semana a semana** (tabla `dif_semanal`, admin-only): cada fila = una semana con su diferencia en
+  turnos (signo: + Eze / − Nico). El **acumulado = suma de todas las filas**; botón **"Registrar esta semana"**
+  toma la diferencia de la grilla (Eze−Nico turnos) y la inserta (una por semana, keyed por lunes → re-registrar
+  actualiza), **"+ ajuste manual"** (Eze/Nico + turnos + nota) para corregir el arrastre o sumar sueltos, y ✕ por
+  fila. Sirve para emparejar con vacaciones. Semilla: la primera fila migró el valor viejo de `config.dif_nico_eze`.
+  (Antes era arrastre+semana en `config`, quedaba trabado con la grilla de la semana.)
 - **Asistencia [admin]** (migración 0013, tablas `sesion_alumnos` + `asistencias`): dentro de cada
   sesión del Calendario se arma el **roster** (alumnos reales, reemplaza el texto libre) y se **toma
   lista** por fecha (✓ Vino / ✕ Faltó, upsert por `sesion_id+alumno_id+fecha`). La ficha del alumno
