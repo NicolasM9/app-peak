@@ -43,22 +43,20 @@ export default function Horas({ esAdmin }) {
   const [cargaProfe, setCargaProfe] = useState('')
   const [cargaTurnos, setCargaTurnos] = useState([])
   const [cargaDias, setCargaDias] = useState([])
-  const [baseline, setBaseline] = useState({ favor: 'iguales', turnos: 0 })
-  const [editBase, setEditBase] = useState(false)
-  const [baseForm, setBaseForm] = useState({ favor: 'Eze', turnos: 0 })
+  const [difSemanal, setDifSemanal] = useState([])
 
   async function load(showLoading) {
     if (showLoading) setLoading(true)
-    const [{ data: pr }, { data: tu }, { data: va }, { data: cfg }] = await Promise.all([
+    const [{ data: pr }, { data: tu }, { data: va }, { data: ds }] = await Promise.all([
       supabase.from('profes_publico').select('id, nombre').order('id'),
       supabase.from('turnos').select('id, profe_id, dia, horario, horas'),
       supabase.from('vacaciones').select('*').order('inicio', { ascending: false }),
-      supabase.from('config').select('valor').eq('clave', 'dif_nico_eze').maybeSingle(),
+      supabase.from('dif_semanal').select('*').order('fecha', { ascending: false }),
     ])
     setProfes(pr || [])
     setTurnos(tu || [])
     setVacaciones(va || [])
-    if (cfg?.valor) setBaseline({ favor: cfg.valor.favor || 'iguales', turnos: Number(cfg.valor.turnos || 0) })
+    setDifSemanal(ds || [])
     setLoading(false)
   }
 
@@ -119,27 +117,24 @@ export default function Horas({ esAdmin }) {
     await load()
   }
 
-  function normaliza(signed) {
-    return signed === 0
-      ? { favor: 'iguales', turnos: 0 }
-      : signed > 0
-        ? { favor: 'Eze', turnos: signed }
-        : { favor: 'Nico', turnos: -signed }
+  function lunesISO() {
+    const d = new Date()
+    const dow = (d.getDay() + 6) % 7 // 0 = lunes
+    d.setDate(d.getDate() - dow)
+    return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
   }
 
-  async function guardarBaseline() {
-    const n = Number(baseForm.turnos || 0)
-    const valor = baseForm.favor === 'iguales' || !n ? { favor: 'iguales', turnos: 0 } : { favor: baseForm.favor, turnos: n }
-    await supabase.from('config').upsert({ clave: 'dif_nico_eze', valor, updated_at: new Date().toISOString() })
-    setBaseline({ favor: valor.favor, turnos: valor.turnos })
-    setEditBase(false)
+  async function registrarSemana(difTurnos) {
+    const fecha = lunesISO()
+    const yaEsta = difSemanal.find((x) => x.fecha === fecha)
+    if (yaEsta) await supabase.from('dif_semanal').update({ turnos: difTurnos }).eq('id', yaEsta.id)
+    else await supabase.from('dif_semanal').insert({ fecha, turnos: difTurnos, nota: null })
+    await load()
   }
 
-  async function ajustarAcumulado(delta) {
-    const actual = baseline.favor === 'Eze' ? baseline.turnos : baseline.favor === 'Nico' ? -baseline.turnos : 0
-    const valor = normaliza(actual + delta)
-    setBaseline({ favor: valor.favor, turnos: valor.turnos }) // optimista
-    await supabase.from('config').upsert({ clave: 'dif_nico_eze', valor, updated_at: new Date().toISOString() })
+  async function borrarSemana(id) {
+    await supabase.from('dif_semanal').delete().eq('id', id)
+    await load()
   }
 
   async function guardarVac(e) {
@@ -170,6 +165,8 @@ export default function Horas({ esAdmin }) {
   })
   const nicoP = profes.find((p) => p.nombre === 'Nico')
   const ezeP = profes.find((p) => p.nombre === 'Eze')
+  const turnosDe = (id) => turnos.filter((t) => t.profe_id === id).length
+  const cortaFecha = (iso) => { const [, m, d] = iso.split('-').map(Number); return `${d}/${m}` }
 
   return (
     <div className="horas">
@@ -306,58 +303,60 @@ export default function Horas({ esAdmin }) {
           </div>
 
           {esAdmin && nicoP && ezeP && (() => {
-            const bal = baseline.favor === 'Eze' ? baseline.turnos : baseline.favor === 'Nico' ? -baseline.turnos : 0
-            const T = {
-              quien: bal === 0 ? null : bal > 0 ? 'Eze' : 'Nico',
-              t: Math.abs(bal),
-              h: Math.round(Math.abs(bal) * HORAS_TURNO * 10) / 10,
-            }
+            const fmt = (signed) => ({
+              quien: signed === 0 ? null : signed > 0 ? 'Eze' : 'Nico',
+              t: Math.abs(signed),
+              h: Math.round(Math.abs(signed) * HORAS_TURNO * 10) / 10,
+            })
+            const semanaTurnos = turnosDe(ezeP.id) - turnosDe(nicoP.id) // + = Eze hizo más esta semana
+            const totalTurnos = difSemanal.reduce((s, r) => s + Number(r.turnos || 0), 0)
+            const S = fmt(semanaTurnos)
+            const T = fmt(totalTurnos)
+            const yaEsta = difSemanal.find((x) => x.fecha === lunesISO())
             return (
               <div className="ht-dif">
                 <div className="ht-dif-head">
-                  Acumulado histórico Nico ↔ Eze <span className="ht-dif-priv">🔒 privado</span>
+                  Diferencia de horas Nico ↔ Eze <span className="ht-dif-priv">🔒 privado</span>
                 </div>
 
                 <div className="ht-dif-total">
                   {T.quien === null ? (
-                    <>Están <b>iguales</b> 🤝</>
+                    <>Acumulado: están <b>iguales</b> 🤝</>
                   ) : (
-                    <><b>{T.quien}</b> hizo <b>+{T.t} turno{T.t === 1 ? '' : 's'}</b> en total <span className="muted">({T.h} h reloj)</span></>
+                    <>Acumulado: <b>{T.quien}</b> hizo <b>+{T.h} h</b> de más <span className="muted">({T.t} turno{T.t === 1 ? '' : 's'})</span></>
                   )}
                 </div>
 
-                {editBase ? (
-                  <div className="ht-dif-linea">
-                    <span className="ht-dif-lbl">Fijar total</span>
-                    <span className="ht-base-form">
-                      <select value={baseForm.favor} onChange={(e) => setBaseForm({ ...baseForm, favor: e.target.value })}>
-                        <option value="Eze">Eze +</option>
-                        <option value="Nico">Nico +</option>
-                        <option value="iguales">iguales</option>
-                      </select>
-                      {baseForm.favor !== 'iguales' && (
-                        <input
-                          type="number"
-                          value={baseForm.turnos}
-                          onChange={(e) => setBaseForm({ ...baseForm, turnos: e.target.value })}
-                          style={{ width: 60 }}
-                          inputMode="numeric"
-                        />
-                      )}
-                      <button className="confirm-si" onClick={guardarBaseline}>OK</button>
-                      <button className="confirm-no" onClick={() => setEditBase(false)}>✕</button>
-                    </span>
-                  </div>
-                ) : (
-                  <div className="ht-dif-ajuste">
-                    <span className="ht-dif-lbl">Sumar un turno:</span>
-                    <button className="ht-adj" onClick={() => ajustarAcumulado(-1)}>+1 Nico</button>
-                    <button className="ht-adj" onClick={() => ajustarAcumulado(1)}>+1 Eze</button>
-                    <button className="ht-base-edit" onClick={() => { setBaseForm(baseline); setEditBase(true) }}>fijar total</button>
+                <div className="ht-dif-semana">
+                  <span>
+                    Esta semana (de la grilla):{' '}
+                    {S.quien ? (
+                      <><b>{S.quien}</b> +{S.h} h <span className="muted">({S.t} t)</span></>
+                    ) : (
+                      <b>iguales</b>
+                    )}
+                  </span>
+                  <button className="btn-primary btn-mini" onClick={() => registrarSemana(semanaTurnos)}>
+                    {yaEsta ? '↻ Actualizar esta semana' : '➕ Registrar esta semana'}
+                  </button>
+                </div>
+
+                {difSemanal.length > 0 && (
+                  <div className="ht-dif-hist">
+                    {difSemanal.map((r) => {
+                      const f = fmt(Number(r.turnos || 0))
+                      return (
+                        <div key={r.id} className="ht-dif-hrow">
+                          <span className="ht-dif-hsem">{r.nota || `Semana del ${cortaFecha(r.fecha)}`}</span>
+                          <span>{f.quien ? <><b>{f.quien}</b> +{f.h} h</> : <span className="muted">iguales</span>}</span>
+                          <button className="ht-dif-hdel" onClick={() => borrarSemana(r.id)} aria-label="Borrar">✕</button>
+                        </div>
+                      )
+                    })}
                   </div>
                 )}
 
-                <p className="ht-dif-nota">Es el acumulado de siempre (no depende de esta semana). Cuando uno cubre un turno del otro, tocá "+1".</p>
+                <p className="ht-dif-nota">Cada semana tocás "Registrar" y suma la diferencia de esa semana al total. El acumulado sirve para emparejar con vacaciones.</p>
               </div>
             )
           })()}
