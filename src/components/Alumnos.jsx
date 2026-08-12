@@ -64,6 +64,13 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
     if (!error) setAlumnos((list) => list.map((x) => (x.id === a.id ? { ...x, ...patch } : x)))
   }
 
+  // Franja horaria rápida desde la lista (AM/PM/Ambas; tocar la activa la limpia)
+  async function setFranjaRow(a, value) {
+    const nueva = a.franja === value ? null : value
+    const { error } = await supabase.from('alumnos').update({ franja: nueva }).eq('id', a.id)
+    if (!error) setAlumnos((list) => list.map((x) => (x.id === a.id ? { ...x, franja: nueva } : x)))
+  }
+
   if (view.name === 'form') {
     return (
       <AlumnoForm
@@ -222,6 +229,18 @@ export default function Alumnos({ autor, abrir, onAbierto }) {
                   ) : (
                     <button className="estado-btn alta" title="Reactivar" onClick={() => toggleEstado(a)}>Alta</button>
                   )}
+                </div>
+                <div className="alumno-franja" onClick={(e) => e.stopPropagation()}>
+                  {[['am', 'AM'], ['pm', 'PM'], ['ambas', 'Ambas']].map(([v, lbl]) => (
+                    <button
+                      key={v}
+                      className={`franja-mini ${a.franja === v ? 'on' : ''}`}
+                      title={`Franja ${lbl}`}
+                      onClick={() => setFranjaRow(a, v)}
+                    >
+                      {lbl}
+                    </button>
+                  ))}
                 </div>
               </li>
             )
