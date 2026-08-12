@@ -67,8 +67,12 @@ En **Inicio** (admin) una tarjeta **"📅 Próximo feriado"** muestra el feriado
 (`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0024**
 (0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff; 0021 = tabla `eventos`
 para la Agenda admin; 0022 = tabla `dif_semanal` para el registro semanal Nico↔Eze; 0023 = tablas `contenidos` + `redes_metricas`
-para la pestaña Redes; 0024 = `contenidos.fecha` opcional (backlog) + `contenidos.pasos` jsonb (checklist) + `redes_metricas.meta`,
-aplicadas 2026-08-11). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
+para la pestaña Redes; 0024 = `contenidos.fecha` opcional (backlog) + `contenidos.pasos` jsonb (checklist) + `redes_metricas.meta`;
+0025 = `alumnos.franja` (am/pm/ambas), aplicadas 2026-08-11). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → repo a **privado**.
+**Franja horaria del alumno (2026-08-11, migración 0025):** en la ficha (`AlumnoDetalle.jsx`) selector inline **AM / PM / Ambas**
+(guarda al toque en `alumnos.franja`; tocar la activa la limpia). En **Estadísticas** el gráfico "Franja (AM / PM)" ahora cuenta por
+`alumnos.franja` (Vienen AM = am|ambas, Vienen PM = pm|ambas, AM y PM = ambas, Sin definir), con drill a los alumnos. **OJO patrón:**
+agregar una columna nueva al `.select()` rompe la query hasta correr la migración → en estos casos el SQL va **antes** del deploy.
 **Agenda — mejoras (2026-08-11):** cuadrantes al doble de alto (`min-height: max(80px,13.5vh)`); cada día muestra el **texto** del
 evento en chips de color (no solo puntito); **filtro por tipo** (chips arriba); y las **vacaciones de Horas** se traen como eventos
 read-only (`vacEventos` desde tabla `vacaciones`, no se editan en la Agenda). Sin migración.
