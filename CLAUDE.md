@@ -64,10 +64,21 @@ de una (tipo feriado, sin profe → Nico asigna después; anti-duplicados por fe
 En **Inicio** (admin) una tarjeta **"📅 Próximo feriado"** muestra el feriado más cercano (fecha + "en N días") y **a quién le toca**
 (o "sin asignar" en rojo); clickeable → lleva a la Agenda para asignarlo. Sale del mismo `eventos` (admin-only), así que los profes no lo ven.
 **⚠️ Deploy 2026-08-10:** Netlify pausó los deploys (créditos del ciclo agotados, se destraba ~4/sept). Puente en **GitHub Pages**
-(`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0021**
+(`nicolasm9.github.io/app-peak`, repo temporalmente público) — ver [[auto-deploy]] en memoria. Migraciones aplicadas: **0001–0024**
 (0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff; 0021 = tabla `eventos`
-para la Agenda admin; 0022 = tabla `dif_semanal` para el registro semanal Nico↔Eze, aplicada 2026-08-11). Pendiente operativo:
-cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
+para la Agenda admin; 0022 = tabla `dif_semanal` para el registro semanal Nico↔Eze; 0023 = tablas `contenidos` + `redes_metricas`
+para la pestaña Redes; 0024 = `contenidos.fecha` opcional (backlog) + `contenidos.pasos` jsonb (checklist) + `redes_metricas.meta`,
+aplicadas 2026-08-11). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → volver el repo a **privado**.
+**Agenda — mejoras (2026-08-11):** cuadrantes al doble de alto (`min-height: max(80px,13.5vh)`); cada día muestra el **texto** del
+evento en chips de color (no solo puntito); **filtro por tipo** (chips arriba); y las **vacaciones de Horas** se traen como eventos
+read-only (`vacEventos` desde tabla `vacaciones`, no se editan en la Agenda). Sin migración.
+**Redes [admin] (`Redes.jsx`, 2026-08-11):** pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
+la Agenda): cada día carga ideas/contenido con **tipo** (historia/publicación/ambas) y **checklist** de 4 pasos (grabar→editar→copy→subir,
+`contenidos.pasos` jsonb, se tildan inline desde el día; el puntito se prende cuando `subir`=true). **Backlog** "Ideas sueltas"
+(`fecha` null) con input para programarlas al calendario. **KPIs del mes**: subidos / historias / publicaciones / **consultas p/ entrenar**
+(manual, `redes_metricas.consultas`, editable) / **altas del mes** (de `alumnos.fecha_alta`) / **conversión** (altas÷consultas). **Meta**
+mensual (`redes_metricas.meta`) con barra de progreso + "hace N días que no subís". Todo verificado (data-layer por REST). Pendiente idea
+futura descartada por Nico: seguidores nuevos por mes.
 **UI (2026-08-11):** interlineado título→subtítulo unificado en toda la app — `.cal-sub` pasó de margen negativo a `margin: 4px 0 16px`
 + `.section-head:has(+ .cal-sub) { margin-bottom: 0 }` (el gap queda parejo en ~4px esté el título suelto o dentro del section-head);
 Inicio dejó de usar `.muted` con margen inline y usa `.cal-sub`.
