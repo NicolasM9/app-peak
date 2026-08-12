@@ -69,7 +69,8 @@ En **Inicio** (admin) una tarjeta **"📅 Próximo feriado"** muestra el feriado
 para la Agenda admin; 0022 = tabla `dif_semanal` para el registro semanal Nico↔Eze; 0023 = tablas `contenidos` + `redes_metricas`
 para la pestaña Redes; 0024 = `contenidos.fecha` opcional (backlog) + `contenidos.pasos` jsonb (checklist) + `redes_metricas.meta`;
 0025 = `alumnos.franja` (am/pm/ambas), aplicadas 2026-08-11). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → repo a **privado**.
-**Franja horaria del alumno (2026-08-11, migración 0025):** en la ficha (`AlumnoDetalle.jsx`) selector inline **AM / PM / Ambas**
+**Franja horaria del alumno (2026-08-11, migración 0025):** selector **AM / PM / Ambas** en la **lista** de Alumnos (al lado de "Baja",
+`setFranjaRow` con stopPropagation, en mobile cae a 2da línea vía `@media (max-width:600px)`) y también en la **ficha** (`AlumnoDetalle.jsx`)
 (guarda al toque en `alumnos.franja`; tocar la activa la limpia). En **Estadísticas** el gráfico "Franja (AM / PM)" ahora cuenta por
 `alumnos.franja` (Vienen AM = am|ambas, Vienen PM = pm|ambas, AM y PM = ambas, Sin definir), con drill a los alumnos. **OJO patrón:**
 agregar una columna nueva al `.select()` rompe la query hasta correr la migración → en estos casos el SQL va **antes** del deploy.
