@@ -35,7 +35,7 @@ export default function Estadisticas({ onIrAlumno }) {
   useEffect(() => {
     ;(async () => {
       const [{ data: al }, { data: ra }, { data: se }, { data: pr }, { data: les }] = await Promise.all([
-        supabase.from('alumnos').select('id, nombre, deporte, fecha_nacimiento, fecha_alta, medicion_nutricional').eq('estado', 'activo').order('nombre'),
+        supabase.from('alumnos').select('id, nombre, deporte, fecha_nacimiento, fecha_alta, medicion_nutricional, franja').eq('estado', 'activo').order('nombre'),
         supabase.from('sesion_alumnos').select('alumno_id, sesion_id'),
         supabase.from('sesiones').select('id, dia, hora_inicio, tipo, profe_id'),
         supabase.from('profes_publico').select('id, nombre').order('id'),
@@ -97,13 +97,14 @@ export default function Estadisticas({ onIrAlumno }) {
     })
     const deportes = [...depMap.entries()].map(([label, ids]) => ({ label, n: ids.length, ids })).sort((x, y) => y.n - x.n)
 
-    // AM / PM
+    // AM / PM (de la franja elegida en la ficha del alumno)
     const franjas = [
-      { label: 'Vienen AM', test: (o) => o.franjas.has('AM') },
-      { label: 'Vienen PM', test: (o) => o.franjas.has('PM') },
-      { label: 'AM y PM', test: (o) => o.franjas.has('AM') && o.franjas.has('PM') },
+      { label: 'Vienen AM', test: (a) => a.franja === 'am' || a.franja === 'ambas' },
+      { label: 'Vienen PM', test: (a) => a.franja === 'pm' || a.franja === 'ambas' },
+      { label: 'AM y PM', test: (a) => a.franja === 'ambas' },
+      { label: 'Sin definir', test: (a) => !a.franja },
     ].map((f) => {
-      const ids = [...porAlumno.entries()].filter(([, o]) => f.test(o)).map(([id]) => id)
+      const ids = alumnos.filter(f.test).map((a) => a.id)
       return { label: f.label, n: ids.length, ids }
     })
 
@@ -203,7 +204,7 @@ export default function Estadisticas({ onIrAlumno }) {
       <div className="estad-charts">
         <Barras titulo="Edades" datos={stats.charts.edades} onPick={abrir} vacio="Cargá la fecha de nacimiento en las fichas." />
         <Barras titulo="Deportes" datos={stats.charts.deportes} onPick={abrir} vacio="Cargá el deporte en las fichas." />
-        <Barras titulo="Franja (AM / PM)" datos={stats.charts.franjas} onPick={abrir} vacio="Armá el roster de cada sesión (Calendario)." />
+        <Barras titulo="Franja (AM / PM)" datos={stats.charts.franjas} onPick={abrir} vacio="Elegí la franja (AM/PM) en la ficha de cada alumno." />
         <Barras titulo="Días por semana" datos={stats.charts.diasSemana} onPick={abrir} vacio="Armá el roster de cada sesión (Calendario)." />
         <Barras titulo="Antigüedad" datos={stats.charts.antig} onPick={abrir} vacio="Se completa con las altas nuevas (fecha de alta)." />
       </div>

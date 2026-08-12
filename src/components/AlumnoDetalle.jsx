@@ -14,6 +14,11 @@ const EST_FISICO = {
   lesionado: { label: 'Lesionado', color: '#ef4444' },
   recuperacion: { label: 'En recuperación', color: '#eab308' },
 }
+const FRANJAS = [
+  { value: 'am', label: 'AM' },
+  { value: 'pm', label: 'PM' },
+  { value: 'ambas', label: 'Ambas' },
+]
 
 export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor }) {
   const [pagos, setPagos] = useState([])
@@ -25,6 +30,16 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
   const [nuevaNota, setNuevaNota] = useState('')
   const [guardandoNota, setGuardandoNota] = useState(false)
   const [showInforme, setShowInforme] = useState(false)
+  const [franja, setFranja] = useState(alumno.franja || null)
+
+  useEffect(() => { setFranja(alumno.franja || null) }, [alumno.id, alumno.franja])
+
+  async function setFranjaVal(v) {
+    const nueva = franja === v ? null : v
+    setFranja(nueva)
+    await supabase.from('alumnos').update({ franja: nueva }).eq('id', alumno.id)
+    onChanged && onChanged()
+  }
 
   async function loadPagos() {
     const { data } = await supabase
@@ -139,6 +154,20 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
         {alumno.ajuste_monto ? (
           <span><b>Ajuste:</b> {formatARS(alumno.ajuste_monto)}{alumno.ajuste_motivo ? ` (${alumno.ajuste_motivo})` : ''}</span>
         ) : null}
+      </div>
+
+      <div className="franja-linea">
+        <b>Franja horaria:</b>
+        {FRANJAS.map((f) => (
+          <button
+            key={f.value}
+            className={`franja-btn ${franja === f.value ? 'on' : ''}`}
+            onClick={() => setFranjaVal(f.value)}
+          >
+            {f.label}
+          </button>
+        ))}
+        {!franja && <span className="muted" style={{ fontSize: 13 }}>sin definir</span>}
       </div>
 
       {alumno.paga_directo_profe ? (

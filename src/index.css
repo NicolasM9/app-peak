@@ -2367,6 +2367,26 @@ textarea {
   font-size: 14px;
   color: #dfe4ec;
 }
+.franja-linea {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin: 0 0 16px;
+  font-size: 14px;
+  color: #dfe4ec;
+}
+.franja-btn {
+  padding: 6px 14px;
+  border-radius: 999px;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  color: #c3cad6;
+  font: inherit;
+  font-size: 13px;
+  cursor: pointer;
+}
+.franja-btn.on { background: #1a4fa3; border-color: #1a4fa3; color: #fff; font-weight: 600; }
 
 /* ===== Evolución del alumno ===== */
 .ev-grid {
