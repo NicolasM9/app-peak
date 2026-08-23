@@ -22,7 +22,7 @@ function Form({ alumno, onDone, onCancel }) {
     onDone()
   }
   return (
-    <div>
+    <div className="nm-scope">
       <div className="section-head"><button className="btn-back" onClick={onCancel}>← Volver</button></div>
       <h1 className="section-title">{alumno?.id ? 'Editar alumno' : 'Nuevo alumno online'}</h1>
       <form className="form" onSubmit={submit}>
@@ -74,7 +74,7 @@ export default function NMAlumnos({ onBack }) {
   const activos = alumnos.filter((a) => a.activo).length
 
   return (
-    <div className="nm-alu">
+    <div className="nm-alu nm-scope">
       <div className="section-head">
         <button className="btn-back" onClick={onBack}>← NM</button>
         <button className="btn-primary" onClick={() => setView({ name: 'form' })}>+ Nuevo</button>

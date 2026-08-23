@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS, formatFecha } from '../lib/format'
 import { hoyISO } from '../lib/domain'
+import NMInforme from './NMInforme'
 
 // Sparkline propia (misma que Evolución)
 function Spark({ values, color, w = 110, h = 34 }) {
@@ -29,6 +30,7 @@ export default function NMAlumnoDetalle({ alumno, onBack, onEdit, onChanged }) {
   const [nuevoObj, setNuevoObj] = useState('')
   const [pagoForm, setPagoForm] = useState(null)   // {mes,monto,fecha_pago,medio}
   const [progForm, setProgForm] = useState(null)   // {metrica,valor,unidad,fecha}
+  const [showInforme, setShowInforme] = useState(false)
 
   async function load() {
     setLoading(true)
@@ -105,11 +107,16 @@ export default function NMAlumnoDetalle({ alumno, onBack, onEdit, onChanged }) {
   })
   const metricasUsadas = [...new Set(progreso.map((p) => p.metrica))]
 
+  if (showInforme) return <NMInforme alumno={alumno} onClose={() => setShowInforme(false)} />
+
   return (
-    <div className="nm-alu-det">
+    <div className="nm-alu-det nm-scope">
       <div className="section-head">
         <button className="btn-back" onClick={onBack}>← Alumnos online</button>
-        <button className="btn-ghost" onClick={onEdit}>Editar datos</button>
+        <div className="section-head-actions">
+          <button className="btn-ghost" onClick={() => setShowInforme(true)}>📄 Informe</button>
+          <button className="btn-ghost" onClick={onEdit}>Editar datos</button>
+        </div>
       </div>
       <h1 className="section-title">{alumno.nombre}</h1>
       <p className="detalle-meta">

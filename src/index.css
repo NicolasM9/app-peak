@@ -3561,3 +3561,54 @@ textarea {
 .nm-metrica-regs { display: flex; flex-wrap: wrap; gap: 5px 10px; margin-top: 6px; }
 .nm-reg { font-size: 11.5px; color: var(--muted); cursor: pointer; }
 .nm-reg:hover { color: #ef8a8a; }
+
+/* ============ NM identidad (negro + verde lima) ============ */
+.nm-scope { --cobalt: #c6f24e; --cobalt-dark: #aee02f; }
+.nm-scope .btn-primary { color: #0f1706; }
+.nm-scope .nm-diachip.on { color: #0f1706; }
+.nm-scope .nm-ghost { color: #0f1706; }
+.nav-nm .nav-lock { color: #c6f24e; }
+
+.nm-logo-head { margin: 4px 0 8px; }
+
+/* selector de período (informe) */
+.nm-inf-periodos { display: flex; gap: 6px; flex: 1; justify-content: center; flex-wrap: wrap; }
+.nm-per-b {
+  background: #141824; border: 1px solid #2a3143; border-radius: 999px;
+  color: #c9d0da; font: inherit; font-size: 12px; padding: 6px 12px; cursor: pointer;
+}
+.nm-per-b.on { background: var(--cobalt); border-color: var(--cobalt); color: #0f1706; font-weight: 600; }
+
+/* ---- Informe NM (hoja blanca + banda negra + verde) ---- */
+.nm-inf { color: #14181f; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+.nm-inf-head {
+  display: flex; align-items: center; justify-content: space-between; gap: 16px;
+  background: #000; border-radius: 12px; padding: 16px 20px; margin: 0 0 20px;
+}
+.nm-inf-head-r { text-align: right; }
+.nm-inf-tit { font-family: 'Anton', sans-serif; font-size: 22px; letter-spacing: .5px; color: #fff; }
+.nm-inf-periodo { font-size: 12px; color: #c6f24e; margin-top: 3px; }
+.nm-inf-alumno { margin-bottom: 16px; }
+.nm-inf-alumno-nom { font-family: 'Anton', sans-serif; font-size: 26px; color: #14181f; line-height: 1.1; }
+.nm-inf-alumno-sub { font-size: 13px; color: #5a6470; margin-top: 2px; }
+.nm-inf-sec { margin-bottom: 18px; }
+.nm-inf-sec-tit {
+  font-size: 13px; text-transform: uppercase; letter-spacing: .06em; color: #000;
+  border-bottom: 2px solid #c6f24e; padding-bottom: 5px; margin-bottom: 10px;
+}
+.nm-inf-obj { list-style: none; display: flex; flex-direction: column; gap: 6px; }
+.nm-inf-obj li { font-size: 14px; color: #242c38; }
+.nm-inf-obj li.ok { color: #6a7480; }
+.nm-inf-obj-mk { color: #6f9e00; font-weight: 700; }
+.nm-inf-vacio { font-size: 13px; color: #8a94a0; font-style: italic; }
+.nm-inf-tabla { display: flex; flex-direction: column; }
+.nm-inf-fila { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 9px 2px; border-bottom: 1px solid #eef1f4; }
+.nm-inf-fila-l { display: flex; flex-direction: column; gap: 2px; min-width: 0; }
+.nm-inf-fila-nom { font-size: 14px; font-weight: 600; color: #14181f; }
+.nm-inf-fila-val { font-size: 13px; color: #42505f; }
+.nm-inf-fila-r { display: flex; align-items: center; gap: 12px; flex: none; }
+.nm-inf-delta { font-size: 13px; font-weight: 700; white-space: nowrap; }
+.nm-inf-delta.up { color: #3f8f0e; }
+.nm-inf-delta.down { color: #c0392b; }
+.nm-inf-coment { font-size: 14px; color: #242c38; line-height: 1.5; }
+.nm-inf-pie { margin-top: 22px; padding-top: 12px; border-top: 1px solid #e2e6ea; font-size: 11px; color: #9aa4b0; text-align: center; }

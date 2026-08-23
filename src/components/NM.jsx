@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { CalendarRange, Users, Wallet, FolderOpen, ChevronRight } from 'lucide-react'
 import NMContenido from './NMContenido'
 import NMAlumnos from './NMAlumnos'
+import NMLogo from './NMLogo'
 
 const CARDS = [
   { id: 'contenido', titulo: 'Calendario de contenido', desc: 'Qué subir cada día de la semana', Icon: CalendarRange, color: '#7c3aed', activo: true },
@@ -17,8 +18,8 @@ export default function NM() {
   if (view === 'alumnos') return <NMAlumnos onBack={() => setView('home')} />
 
   return (
-    <div className="nm">
-      <h1 className="section-title">NM</h1>
+    <div className="nm nm-scope">
+      <div className="nm-logo-head"><NMLogo height={58} /></div>
       <p className="cal-sub">Tu espacio privado. Nada de esto se cruza con Peak ni con los pagos.</p>
 
       <div className="nm-grid">

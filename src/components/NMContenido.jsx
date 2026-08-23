@@ -167,7 +167,7 @@ export default function NMContenido({ onBack }) {
   }
 
   return (
-    <div className="nm-cont">
+    <div className="nm-cont nm-scope">
       <div className="section-head">
         <button className="btn-back" onClick={onBack}>← NM</button>
         <button className="btn-ghost" onClick={() => setEditPlan((v) => !v)}>✏️ Estructura fija</button>

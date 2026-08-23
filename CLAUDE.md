@@ -88,8 +88,14 @@ Vie=vitamina útil pre partido, Sáb/Dom=dump semanal) se muestra como tema de c
 Ficha: **Objetivos** (`nm_objetivos`, check/tachado), **Pagos** (`nm_pagos`, alta con mes/monto/fecha/medio + total cobrado — NO tocan Peak),
 **Progreso** (`nm_progreso`: cargás cualquier métrica libre con datalist + valor/unidad/fecha → se agrupa por métrica y dibuja **sparkline** propia
 (componente `Spark`, mismo estilo que `Evolucion`) con delta primero→último verde/rojo + últimos registros clickeables para borrar). Verificado en vivo por
-modo demo (`/?nmtest` + `window.__NMDEMO__`, andamiaje temporal que se borró antes del deploy). **Pendiente NM:** informes mensual/trim/anual (PDF) +
-**comparativas entre alumnos**, **Hacoaj/sueldo** (`nm_ingresos`), **Archivos** (upload a bucket `nm-archivos`). **Pendiente (próximas entregas):**
+modo demo (`/?nmtest` + `window.__NMDEMO__`, andamiaje temporal que se borró antes del deploy).
+**Identidad NM (2026-08-23):** la pestaña NM tiene estética propia **negro + verde lima** (`#c6f24e`), distinta del cobalto de Peak. Logo propio
+`NMLogo.jsx` (recreación vectorial del logo "NM Performance" que pasó Nico — monograma N+M verde + wordmark; el PNG real no llegó como archivo, si lo
+pasa se cambia el SVG). Re-skin por variable: cada root NM lleva clase **`nm-scope`** que redefine `--cobalt`/`--cobalt-dark` a verde (recolorea botones,
+chips activos, etc.) + fija texto oscuro sobre verde. **Informe (`NMInforme.jsx`, hecho):** botón "📄 Informe" en la ficha → hoja imprimible (reusa
+`.informe-hoja` + `window.print` + `@media print #informe-print`) con **banda negra + logo NM verde**, selector **mensual/trimestral/anual** (baseline =
+último valor ≤ inicio del período → ahora, delta verde/rojo + sparkline), objetivos y comentario de cierre editable. **Sin foto ni asistencia** (pedido de Nico).
+**Pendiente NM:** **comparativas entre alumnos** (en curso), **Hacoaj/sueldo** (`nm_ingresos`), **Archivos** (upload a bucket `nm-archivos`). **Pendiente (próximas entregas):**
 Alumnos online (CRM: pagos + progreso con gráficos + objetivos + informes mensual/trim/anual + comparativas), Hacoaj/sueldo (`nm_ingresos`), Archivos (upload a `nm-archivos`).
 **Franja horaria del alumno (2026-08-11, migración 0025):** selector **AM / PM / Ambas** en la **lista** de Alumnos (al lado de "Baja",
 `setFranjaRow` con stopPropagation, en mobile cae a 2da línea vía `@media (max-width:600px)`) y también en la **ficha** (`AlumnoDetalle.jsx`)
