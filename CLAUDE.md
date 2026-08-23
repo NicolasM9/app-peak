@@ -78,9 +78,12 @@ sin usar). RLS: `vacaciones_select` pasó a solo `es_admin()` y se dropeó `vaca
 con "Nico" — el nombre real es exactamente `Nico`, como en la cuenta Nico↔Eze) + gate cliente `esNico` en AppShell/Sidebar (bloque "Solo Nico", `NICO_SECC`).
 Migración 0027 crea: `nm_alumnos`, `nm_pagos`, `nm_progreso`, `nm_objetivos`, `nm_archivos` (+bucket Storage `nm-archivos`), `nm_ingresos`, `nm_contenido`,
 `nm_datos` (todas RLS `es_nico()`). **Landing** `NM.jsx` = grilla de cuadrados (tocás → sub-vista): Calendario de contenido / Alumnos online / Hacoaj-sueldo /
-Archivos. **Entrega 1 (hecha):** landing + **Calendario de contenido** (`NMContenido.jsx`): semana a semana (← →), estructura fija editable por día
+Archivos. **Entrega 1 (hecha):** landing + **Calendario de contenido** (`NMContenido.jsx`) estilo **Google Calendar / tablero** semana a semana (← →):
+7 columnas por día (scroll horizontal en mobile, Trello-like), cada contenido es una **tarjeta arrastrable** (drag por el ⠿ vía Pointer Events + `setPointerCapture`
++ `elementFromPoint`, un código para mouse y touch; borde `over` en la columna destino; autoscroll en los bordes), **varios eventos por día**, "+" por columna
+para sumar y tap → **modal** editor (título/nota/estado idea·listo·subido/**selector de Día** para mover sin arrastrar/borrar). Estructura fija editable por día
 (`nm_datos` clave `plantilla_contenido`: Lun=vitamina técnica, Mar=historias Hacoaj, Mié=video Santi+historias Peak, Jue=rotativo análisis/lesiones/online,
-Vie=vitamina útil pre partido, Sáb/Dom=dump semanal), cada día carga contenido + estado (idea/listo/subido) en `nm_contenido`. **Pendiente (próximas entregas):**
+Vie=vitamina útil pre partido, Sáb/Dom=dump semanal) se muestra como tema de cada columna; eventos en `nm_contenido` (múltiples filas por fecha; drag = update `fecha`). **Pendiente (próximas entregas):**
 Alumnos online (CRM: pagos + progreso con gráficos + objetivos + informes mensual/trim/anual + comparativas), Hacoaj/sueldo (`nm_ingresos`), Archivos (upload a `nm-archivos`).
 **Franja horaria del alumno (2026-08-11, migración 0025):** selector **AM / PM / Ambas** en la **lista** de Alumnos (al lado de "Baja",
 `setFranjaRow` con stopPropagation, en mobile cae a 2da línea vía `@media (max-width:600px)`) y también en la **ficha** (`AlumnoDetalle.jsx`)

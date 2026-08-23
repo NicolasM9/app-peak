@@ -1,6 +1,6 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { ChevronLeft, ChevronRight, Plus, X, GripVertical } from 'lucide-react'
 
 // Estructura fija de la semana (editable). Clave = día JS (0=Dom … 6=Sáb).
 const DEFAULT_PLANTILLA = {
@@ -13,6 +13,7 @@ const DEFAULT_PLANTILLA = {
   0: 'Dump semanal',
 }
 const DIAS = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
+const DIA_CORTO = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb']
 const ORDEN = [1, 2, 3, 4, 5, 6, 0] // lunes primero
 const COLOR = { 1: '#1a4fa3', 2: '#0891b2', 3: '#7c3aed', 4: '#c2410c', 5: '#16a34a', 6: '#db2777', 0: '#db2777' }
 const ESTADOS = {
@@ -37,24 +38,28 @@ function corto(d) { return `${d.getDate()}/${d.getMonth() + 1}` }
 
 export default function NMContenido({ onBack }) {
   const [lunes, setLunes] = useState(() => lunesDe(new Date()))
-  const [items, setItems] = useState({})           // fecha ISO → fila
+  const [evs, setEvs] = useState([])              // filas nm_contenido de la semana
   const [plantilla, setPlantilla] = useState(DEFAULT_PLANTILLA)
   const [loading, setLoading] = useState(true)
-  const [editando, setEditando] = useState(null)   // fecha ISO en edición
-  const [draft, setDraft] = useState({ titulo: '', estado: 'idea', nota: '' })
+  const [editor, setEditor] = useState(null)      // { id?, fecha, titulo, estado, nota }
   const [editPlan, setEditPlan] = useState(false)
   const [planDraft, setPlanDraft] = useState(DEFAULT_PLANTILLA)
+
+  // --- estado de arrastre ---
+  const dragRef = useRef(null)   // { id, from, pointerId, handle, target }
+  const ghostRef = useRef(null)
+  const boardRef = useRef(null)
+  const [dragId, setDragId] = useState(null)
+  const [overFecha, setOverFecha] = useState(null)
 
   async function load() {
     setLoading(true)
     const ini = iso(lunes), fin = iso(addDias(lunes, 6))
     const [{ data: conts }, { data: datos }] = await Promise.all([
-      supabase.from('nm_contenido').select('*').gte('fecha', ini).lte('fecha', fin),
+      supabase.from('nm_contenido').select('*').gte('fecha', ini).lte('fecha', fin).order('created_at'),
       supabase.from('nm_datos').select('valor').eq('clave', 'plantilla_contenido'),
     ])
-    const map = {}
-    ;(conts || []).forEach((c) => { map[c.fecha] = c })
-    setItems(map)
+    setEvs(conts || [])
     const pl = { ...DEFAULT_PLANTILLA, ...(datos?.[0]?.valor || {}) }
     setPlantilla(pl)
     setPlanDraft(pl)
@@ -65,41 +70,43 @@ export default function NMContenido({ onBack }) {
   const hoy = iso(new Date())
   const dias = ORDEN.map((dow, i) => {
     const fecha = addDias(lunes, i)
-    return { dow, fecha, iso: iso(fecha) }
+    return { dow, fecha, iso: iso(fecha), n: fecha.getDate() }
   })
-  const subidos = Object.values(items).filter((i) => i.estado === 'subido').length
-  const conAlgo = Object.values(items).filter((i) => i.titulo).length
+  const totalCargados = evs.length
+  const subidos = evs.filter((e) => e.estado === 'subido').length
 
-  function abrirEditor(fechaISO, item) {
-    setEditando(fechaISO)
-    setDraft({ titulo: item?.titulo || '', estado: item?.estado || 'idea', nota: item?.nota || '' })
+  function nuevo(fechaISO) {
+    setEditor({ fecha: fechaISO, titulo: '', estado: 'idea', nota: '' })
+  }
+  function abrir(ev) {
+    setEditor({ id: ev.id, fecha: ev.fecha, titulo: ev.titulo || '', estado: ev.estado || 'idea', nota: ev.nota || '' })
   }
 
-  async function guardar(fechaISO) {
-    const existing = items[fechaISO]
-    const payload = {
-      fecha: fechaISO,
-      titulo: draft.titulo.trim() || null,
-      estado: draft.estado,
-      nota: draft.nota.trim() || null,
-    }
-    if (existing) {
-      await supabase.from('nm_contenido').update(payload).eq('id', existing.id)
-      setItems((m) => ({ ...m, [fechaISO]: { ...existing, ...payload } }))
+  async function guardarEvento() {
+    const ed = editor
+    if (!ed.titulo.trim()) return
+    const payload = { fecha: ed.fecha, titulo: ed.titulo.trim(), estado: ed.estado, nota: ed.nota.trim() || null }
+    if (ed.id) {
+      await supabase.from('nm_contenido').update(payload).eq('id', ed.id)
+      setEvs((l) => l.map((x) => (x.id === ed.id ? { ...x, ...payload } : x)))
     } else {
       const { data } = await supabase.from('nm_contenido').insert(payload).select().single()
-      if (data) setItems((m) => ({ ...m, [fechaISO]: data }))
+      if (data) setEvs((l) => [...l, data])
     }
-    setEditando(null)
+    setEditor(null)
   }
 
-  async function borrar(fechaISO) {
-    const existing = items[fechaISO]
-    if (existing) {
-      await supabase.from('nm_contenido').delete().eq('id', existing.id)
-      setItems((m) => { const n = { ...m }; delete n[fechaISO]; return n })
+  async function borrarEvento() {
+    if (editor?.id) {
+      await supabase.from('nm_contenido').delete().eq('id', editor.id)
+      setEvs((l) => l.filter((x) => x.id !== editor.id))
     }
-    setEditando(null)
+    setEditor(null)
+  }
+
+  async function moverEvento(id, nuevaFecha) {
+    setEvs((l) => l.map((x) => (x.id === id ? { ...x, fecha: nuevaFecha } : x)))
+    await supabase.from('nm_contenido').update({ fecha: nuevaFecha }).eq('id', id)
   }
 
   async function guardarPlantilla() {
@@ -111,6 +118,54 @@ export default function NMContenido({ onBack }) {
     setEditPlan(false)
   }
 
+  // ---- arrastre (pointer events, mouse + touch) ----
+  function posGhost(x, y) {
+    const g = ghostRef.current
+    if (g) g.style.transform = `translate(${x + 10}px, ${y - 14}px)`
+  }
+  function handleDown(e, ev) {
+    e.preventDefault()
+    e.stopPropagation()
+    const handle = e.currentTarget
+    try { handle.setPointerCapture(e.pointerId) } catch { /* noop */ }
+    dragRef.current = { id: ev.id, from: ev.fecha, pointerId: e.pointerId, handle, target: ev.fecha }
+    setDragId(ev.id)
+    setOverFecha(ev.fecha)
+    const g = ghostRef.current
+    if (g) { g.textContent = ev.titulo || '(sin título)'; g.style.display = 'block' }
+    posGhost(e.clientX, e.clientY)
+  }
+  function handleMove(e) {
+    const d = dragRef.current
+    if (!d || e.pointerId !== d.pointerId) return
+    e.preventDefault()
+    posGhost(e.clientX, e.clientY)
+    const el = document.elementFromPoint(e.clientX, e.clientY)
+    const col = el && el.closest('[data-fecha]')
+    const f = col ? col.getAttribute('data-fecha') : null
+    d.target = f
+    setOverFecha(f)
+    const b = boardRef.current
+    if (b) {
+      const r = b.getBoundingClientRect()
+      if (e.clientX < r.left + 42) b.scrollLeft -= 16
+      else if (e.clientX > r.right - 42) b.scrollLeft += 16
+    }
+  }
+  function handleUp(e) {
+    const d = dragRef.current
+    if (!d || e.pointerId !== d.pointerId) return
+    e.preventDefault()
+    const g = ghostRef.current
+    if (g) g.style.display = 'none'
+    try { d.handle.releasePointerCapture(e.pointerId) } catch { /* noop */ }
+    const target = d.target
+    dragRef.current = null
+    setDragId(null)
+    setOverFecha(null)
+    if (target && target !== d.from) moverEvento(d.id, target)
+  }
+
   return (
     <div className="nm-cont">
       <div className="section-head">
@@ -118,7 +173,7 @@ export default function NMContenido({ onBack }) {
         <button className="btn-ghost" onClick={() => setEditPlan((v) => !v)}>✏️ Estructura fija</button>
       </div>
       <h1 className="section-title">Calendario de contenido</h1>
-      <p className="cal-sub">Qué subir cada día · vas semana a semana. La estructura fija se repite; llenás el contenido de cada día.</p>
+      <p className="cal-sub">Arrastrá cada contenido de un día a otro (tomalo del ⠿). Tocá una tarjeta para editar, o el "+" para sumar.</p>
 
       {editPlan && (
         <div className="nm-plan-edit">
@@ -143,7 +198,7 @@ export default function NMContenido({ onBack }) {
         <button className="nm-week-btn" onClick={() => setLunes((l) => addDias(l, -7))} aria-label="Semana anterior"><ChevronLeft size={18} /></button>
         <div className="nm-week-label">
           <b>Semana del {corto(lunes)} al {corto(addDias(lunes, 6))}</b>
-          <span className="muted">{conAlgo}/7 cargados · {subidos} subidos</span>
+          <span className="muted">{totalCargados} cargados · {subidos} subidos</span>
         </div>
         <button className="nm-week-btn" onClick={() => setLunes((l) => addDias(l, 7))} aria-label="Semana siguiente"><ChevronRight size={18} /></button>
       </div>
@@ -152,63 +207,113 @@ export default function NMContenido({ onBack }) {
       {loading ? (
         <p className="muted">Cargando…</p>
       ) : (
-        <div className="nm-dias">
-          {dias.map(({ dow, fecha, iso: f }) => {
-            const item = items[f]
-            const est = item?.estado ? ESTADOS[item.estado] : null
+        <div className="nm-board" ref={boardRef}>
+          {dias.map(({ dow, fecha, iso: f, n }) => {
             const esHoy = f === hoy
+            const items = evs.filter((e) => e.fecha === f)
             return (
-              <div key={f} className={`nm-dia ${esHoy ? 'hoy' : ''}`} style={{ '--d': COLOR[dow] }}>
-                <div className="nm-dia-head">
-                  <span className="nm-dia-nombre">
-                    {DIAS[dow]} <span className="nm-dia-fecha">{corto(fecha)}</span>
-                    {esHoy && <span className="nm-dia-hoy">hoy</span>}
+              <div
+                key={f}
+                data-fecha={f}
+                className={`nm-col ${esHoy ? 'hoy' : ''} ${overFecha === f ? 'over' : ''}`}
+                style={{ '--d': COLOR[dow] }}
+              >
+                <div className="nm-col-head">
+                  <span className="nm-col-day">
+                    {DIA_CORTO[dow]} <span className="nm-col-num">{n}</span>
+                    {esHoy && <span className="nm-col-hoy">hoy</span>}
                   </span>
-                  {est && <span className="nm-dia-estado" style={{ color: est.color }}>{est.label}</span>}
+                  <button className="nm-col-add" onClick={() => nuevo(f)} aria-label="Agregar"><Plus size={16} /></button>
                 </div>
-                <div className="nm-dia-bloque">{plantilla[dow]}</div>
-
-                {editando === f ? (
-                  <div className="nm-dia-editor">
-                    <textarea
-                      autoFocus
-                      placeholder="¿Qué va este día? (idea o contenido)"
-                      value={draft.titulo}
-                      onChange={(e) => setDraft({ ...draft, titulo: e.target.value })}
-                    />
-                    <input
-                      placeholder="Nota (opcional)"
-                      value={draft.nota}
-                      onChange={(e) => setDraft({ ...draft, nota: e.target.value })}
-                    />
-                    <div className="nm-estado-pick">
-                      {Object.entries(ESTADOS).map(([k, v]) => (
-                        <button
-                          key={k}
-                          className={`nm-estado-b ${draft.estado === k ? 'on' : ''}`}
-                          style={draft.estado === k ? { background: v.color, borderColor: v.color } : {}}
-                          onClick={() => setDraft({ ...draft, estado: k })}
-                        >{v.label}</button>
-                      ))}
-                    </div>
-                    <div className="nm-dia-editor-acts">
-                      {items[f] && <button className="nm-del" onClick={() => borrar(f)}>Borrar</button>}
-                      <span style={{ flex: 1 }} />
-                      <button className="btn-ghost" onClick={() => setEditando(null)}>Cancelar</button>
-                      <button className="btn-primary" onClick={() => guardar(f)}>Guardar</button>
-                    </div>
-                  </div>
-                ) : item?.titulo ? (
-                  <button className="nm-dia-cont" onClick={() => abrirEditor(f, item)}>
-                    <span>{item.titulo}</span>
-                    {item.nota && <span className="nm-dia-nota">{item.nota}</span>}
-                  </button>
-                ) : (
-                  <button className="nm-dia-add" onClick={() => abrirEditor(f, null)}>＋ Agregar contenido</button>
-                )}
+                <div className="nm-col-theme">{plantilla[dow]}</div>
+                <div className="nm-col-list">
+                  {items.length === 0 ? (
+                    <button className="nm-col-empty" onClick={() => nuevo(f)}>＋</button>
+                  ) : (
+                    items.map((ev) => {
+                      const est = ESTADOS[ev.estado] || ESTADOS.idea
+                      return (
+                        <div
+                          key={ev.id}
+                          className={`nm-ev ${dragId === ev.id ? 'dragging' : ''}`}
+                          style={{ '--e': est.color }}
+                        >
+                          <span
+                            className="nm-ev-grip"
+                            onPointerDown={(e) => handleDown(e, ev)}
+                            onPointerMove={handleMove}
+                            onPointerUp={handleUp}
+                            onPointerCancel={handleUp}
+                            aria-label="Arrastrar"
+                          >
+                            <GripVertical size={15} />
+                          </span>
+                          <button className="nm-ev-body" onClick={() => abrir(ev)}>
+                            <span className="nm-ev-tit">{ev.titulo}</span>
+                            <span className="nm-ev-est" style={{ color: est.color }}>{est.label}</span>
+                          </button>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
               </div>
             )
           })}
+        </div>
+      )}
+
+      {/* fantasma de arrastre */}
+      <div className="nm-ghost" ref={ghostRef} />
+
+      {/* editor de evento */}
+      {editor && (
+        <div className="nm-modal-back" onClick={() => setEditor(null)}>
+          <div className="nm-modal" onClick={(e) => e.stopPropagation()}>
+            <div className="nm-modal-head">
+              <b>{editor.id ? 'Editar contenido' : 'Nuevo contenido'}</b>
+              <button className="nm-modal-x" onClick={() => setEditor(null)} aria-label="Cerrar"><X size={18} /></button>
+            </div>
+            <textarea
+              className="nm-modal-tit"
+              autoFocus
+              placeholder="¿Qué subir ese día?"
+              value={editor.titulo}
+              onChange={(e) => setEditor((s) => ({ ...s, titulo: e.target.value }))}
+            />
+            <input
+              className="nm-modal-nota"
+              placeholder="Nota (opcional)"
+              value={editor.nota}
+              onChange={(e) => setEditor((s) => ({ ...s, nota: e.target.value }))}
+            />
+            <div className="nm-estado-pick">
+              {Object.entries(ESTADOS).map(([k, v]) => (
+                <button
+                  key={k}
+                  className={`nm-estado-b ${editor.estado === k ? 'on' : ''}`}
+                  style={editor.estado === k ? { background: v.color, borderColor: v.color } : {}}
+                  onClick={() => setEditor((s) => ({ ...s, estado: k }))}
+                >{v.label}</button>
+              ))}
+            </div>
+            <div className="nm-modal-dias">
+              <span className="muted">Día:</span>
+              {dias.map((d) => (
+                <button
+                  key={d.iso}
+                  className={`nm-diachip ${editor.fecha === d.iso ? 'on' : ''}`}
+                  onClick={() => setEditor((s) => ({ ...s, fecha: d.iso }))}
+                >{DIA_CORTO[d.dow]} {d.n}</button>
+              ))}
+            </div>
+            <div className="nm-modal-acts">
+              {editor.id && <button className="nm-del" onClick={borrarEvento}>Borrar</button>}
+              <span style={{ flex: 1 }} />
+              <button className="btn-ghost" onClick={() => setEditor(null)}>Cancelar</button>
+              <button className="btn-primary" onClick={guardarEvento} disabled={!editor.titulo.trim()}>Guardar</button>
+            </div>
+          </div>
         </div>
       )}
     </div>
