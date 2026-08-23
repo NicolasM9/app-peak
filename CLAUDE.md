@@ -68,7 +68,10 @@ En **Inicio** (admin) una tarjeta **"📅 Próximo feriado"** muestra el feriado
 (0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff; 0021 = tabla `eventos`
 para la Agenda admin; 0022 = tabla `dif_semanal` para el registro semanal Nico↔Eze; 0023 = tablas `contenidos` + `redes_metricas`
 para la pestaña Redes; 0024 = `contenidos.fecha` opcional (backlog) + `contenidos.pasos` jsonb (checklist) + `redes_metricas.meta`;
-0025 = `alumnos.franja` (am/pm/ambas), aplicadas 2026-08-11). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → repo a **privado**.
+0025 = `alumnos.franja` (am/pm/ambas), aplicadas 2026-08-11; 0026 = vacaciones admin-only, 2026-08-23). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → repo a **privado**.
+**Vacaciones privadas (2026-08-23, migración 0026):** las vacaciones ahora las ven/gestionan **solo los admins** (Nico/Eze). Se sacó la
+sección Vacaciones de **Horas** para el profe (`{esAdmin && (...)}`) y se quitó **"Mis vacaciones"** de **Mi Peak** (`MisVacaciones.jsx` queda
+sin usar). RLS: `vacaciones_select` pasó a solo `es_admin()` y se dropeó `vacaciones_profe_write` (revierte el self-service de vacaciones de Fase A).
 **Franja horaria del alumno (2026-08-11, migración 0025):** selector **AM / PM / Ambas** en la **lista** de Alumnos (al lado de "Baja",
 `setFranjaRow` con stopPropagation, en mobile cae a 2da línea vía `@media (max-width:600px)`) y también en la **ficha** (`AlumnoDetalle.jsx`)
 (guarda al toque en `alumnos.franja`; tocar la activa la limpia). En **Estadísticas** el gráfico "Franja (AM / PM)" ahora cuenta por

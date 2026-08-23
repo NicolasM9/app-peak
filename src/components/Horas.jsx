@@ -386,6 +386,7 @@ export default function Horas({ esAdmin }) {
             )
           })()}
 
+          {esAdmin && (<>
           <div className="section-subhead" style={{ marginTop: 24 }}>
             <h2>Vacaciones</h2>
             {esAdmin && !vacForm && (
@@ -451,6 +452,7 @@ export default function Horas({ esAdmin }) {
               ))}
             </ul>
           )}
+          </>)}
         </>
       )}
     </div>

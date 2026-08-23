@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
-import MisVacaciones from './MisVacaciones'
 
 const DIAS = [
   { key: 'lunes', label: 'Lunes' },
@@ -97,7 +96,6 @@ export default function MiPeak({ profe }) {
         )}
       </div>
 
-      <MisVacaciones profeId={profe.id} />
     </div>
   )
 }
