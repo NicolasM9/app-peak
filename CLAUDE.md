@@ -68,10 +68,20 @@ En **Inicio** (admin) una tarjeta **"📅 Próximo feriado"** muestra el feriado
 (0019 = tipo `bloqueo`; 0020 = tabla `plantillas_bloque` + lectura de `config` horario_gimnasio para staff; 0021 = tabla `eventos`
 para la Agenda admin; 0022 = tabla `dif_semanal` para el registro semanal Nico↔Eze; 0023 = tablas `contenidos` + `redes_metricas`
 para la pestaña Redes; 0024 = `contenidos.fecha` opcional (backlog) + `contenidos.pasos` jsonb (checklist) + `redes_metricas.meta`;
-0025 = `alumnos.franja` (am/pm/ambas), aplicadas 2026-08-11; 0026 = vacaciones admin-only, 2026-08-23). Pendiente operativo: cuando Netlify se destrabe (~4/sept) → repo a **privado**.
+0025 = `alumnos.franja` (am/pm/ambas), aplicadas 2026-08-11; 0026 = vacaciones admin-only, 2026-08-23). **0027 = pestaña NM (pendiente de aplicar).**
+Pendiente operativo: cuando Netlify se destrabe (~4/sept) → repo a **privado**.
 **Vacaciones privadas (2026-08-23, migración 0026):** las vacaciones ahora las ven/gestionan **solo los admins** (Nico/Eze). Se sacó la
 sección Vacaciones de **Horas** para el profe (`{esAdmin && (...)}`) y se quitó **"Mis vacaciones"** de **Mi Peak** (`MisVacaciones.jsx` queda
 sin usar). RLS: `vacaciones_select` pasó a solo `es_admin()` y se dropeó `vacaciones_profe_write` (revierte el self-service de vacaciones de Fase A).
+**Pestaña NM — privada de Nico (2026-08-23, migración 0027, EN CURSO):** espacio personal **solo de Nico** (ni Eze ni profes; ni en pantalla ni en base),
+**totalmente aparte de Peak** (tablas nuevas `nm_*`, no tocan alumnos/pagos/facturación). Gate: helper **`es_nico()`** (admin cuyo `profes.nombre` empieza
+con "Nico" — el nombre real es exactamente `Nico`, como en la cuenta Nico↔Eze) + gate cliente `esNico` en AppShell/Sidebar (bloque "Solo Nico", `NICO_SECC`).
+Migración 0027 crea: `nm_alumnos`, `nm_pagos`, `nm_progreso`, `nm_objetivos`, `nm_archivos` (+bucket Storage `nm-archivos`), `nm_ingresos`, `nm_contenido`,
+`nm_datos` (todas RLS `es_nico()`). **Landing** `NM.jsx` = grilla de cuadrados (tocás → sub-vista): Calendario de contenido / Alumnos online / Hacoaj-sueldo /
+Archivos. **Entrega 1 (hecha):** landing + **Calendario de contenido** (`NMContenido.jsx`): semana a semana (← →), estructura fija editable por día
+(`nm_datos` clave `plantilla_contenido`: Lun=vitamina técnica, Mar=historias Hacoaj, Mié=video Santi+historias Peak, Jue=rotativo análisis/lesiones/online,
+Vie=vitamina útil pre partido, Sáb/Dom=dump semanal), cada día carga contenido + estado (idea/listo/subido) en `nm_contenido`. **Pendiente (próximas entregas):**
+Alumnos online (CRM: pagos + progreso con gráficos + objetivos + informes mensual/trim/anual + comparativas), Hacoaj/sueldo (`nm_ingresos`), Archivos (upload a `nm-archivos`).
 **Franja horaria del alumno (2026-08-11, migración 0025):** selector **AM / PM / Ambas** en la **lista** de Alumnos (al lado de "Baja",
 `setFranjaRow` con stopPropagation, en mobile cae a 2da línea vía `@media (max-width:600px)`) y también en la **ficha** (`AlumnoDetalle.jsx`)
 (guarda al toque en `alumnos.franja`; tocar la activa la limpia). En **Estadísticas** el gráfico "Franja (AM / PM)" ahora cuenta por

@@ -13,6 +13,7 @@ import {
   UserPlus,
   Share2,
   Lock,
+  Sparkles,
   LogOut,
   X,
 } from 'lucide-react'
@@ -35,7 +36,7 @@ const ADMIN_ITEMS = [
   { id: 'acuerdos', label: 'Acuerdos profes', Icon: FileText },
 ]
 
-export default function Sidebar({ seccion, onIr, esAdmin, nombre, open, onClose }) {
+export default function Sidebar({ seccion, onIr, esAdmin, esNico, nombre, open, onClose }) {
   return (
     <>
       <div className={`sidebar-overlay ${open ? 'show' : ''}`} onClick={onClose} />
@@ -80,6 +81,20 @@ export default function Sidebar({ seccion, onIr, esAdmin, nombre, open, onClose 
                   <Lock size={13} className="nav-lock" />
                 </button>
               ))}
+            </>
+          )}
+
+          {esNico && (
+            <>
+              <div className="nav-divider">Solo Nico</div>
+              <button
+                className={`nav-item nav-nm ${seccion === 'nm' ? 'on' : ''}`}
+                onClick={() => onIr('nm')}
+              >
+                <Sparkles size={18} />
+                <span style={{ flex: 1, textAlign: 'left' }}>NM</span>
+                <Lock size={13} className="nav-lock" />
+              </button>
             </>
           )}
         </nav>

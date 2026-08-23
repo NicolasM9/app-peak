@@ -13,20 +13,23 @@ import MiAcuerdo from './MiAcuerdo'
 import MisPersonalizados from './MisPersonalizados'
 import AgendaMes from './AgendaMes'
 import Redes from './Redes'
+import NM from './NM'
 import { Menu } from 'lucide-react'
 
 const TITULOS = {
   inicio: 'Inicio', calendario: 'Calendario', alumnos: 'Alumnos',
   planificaciones: 'Planificaciones', horas: 'Horas', pagos: 'Pagos',
   estadisticas: 'Estadísticas', acuerdos: 'Acuerdos profes',
-  miacuerdo: 'Mi acuerdo', personalizados: 'Personalizados', agenda: 'Agenda', redes: 'Redes',
+  miacuerdo: 'Mi acuerdo', personalizados: 'Personalizados', agenda: 'Agenda', redes: 'Redes', nm: 'NM',
 }
 const ADMIN_SECC = new Set(['alumnos', 'pagos', 'acuerdos', 'estadisticas', 'agenda', 'redes'])
 const PROFE_SECC = new Set(['miacuerdo', 'personalizados'])
+const NICO_SECC = new Set(['nm'])
 
 export default function AppShell({ profe, user }) {
   const nombre = profe?.nombre || user?.email
   const esAdmin = profe?.rol === 'admin'
+  const esNico = esAdmin && (profe?.nombre || '').toLowerCase().startsWith('nico')
   const [seccion, setSeccion] = useState('inicio')
   const [menuOpen, setMenuOpen] = useState(false)
   const [alumnoTarget, setAlumnoTarget] = useState(null)
@@ -34,6 +37,7 @@ export default function AppShell({ profe, user }) {
   let sec = seccion
   if (ADMIN_SECC.has(sec) && !esAdmin) sec = 'inicio'
   if (PROFE_SECC.has(sec) && esAdmin) sec = 'inicio'
+  if (NICO_SECC.has(sec) && !esNico) sec = 'inicio'
 
   function ir(id) {
     setSeccion(id)
@@ -79,6 +83,9 @@ export default function AppShell({ profe, user }) {
       case 'redes':
         return <Redes />
 
+      case 'nm':
+        return <NM />
+
       default:
         return esAdmin ? <Inicio onIrAlumno={irAlAlumno} onIr={ir} /> : <MiPeak profe={profe} />
     }
@@ -90,6 +97,7 @@ export default function AppShell({ profe, user }) {
         seccion={sec}
         onIr={ir}
         esAdmin={esAdmin}
+        esNico={esNico}
         nombre={nombre}
         open={menuOpen}
         onClose={() => setMenuOpen(false)}
