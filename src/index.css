@@ -3628,3 +3628,22 @@ textarea {
 .nm-cmp-bar { height: 100%; background: var(--cobalt); border-radius: 6px; min-width: 3px; }
 .nm-cmp-bar.neg { background: #ef4444; }
 .nm-cmp-val { width: 66px; flex: none; text-align: right; font-size: 12.5px; font-weight: 600; color: #eef1f6; }
+
+/* ---- NM Hacoaj/sueldo ---- */
+.nm-ing-kpis { display: flex; gap: 10px; margin: 4px 0 12px; }
+.nm-ing-kpi { flex: 1; background: #141824; border: 1px solid #232a3a; border-radius: 12px; padding: 12px 14px; display: flex; flex-direction: column; gap: 4px; }
+.nm-ing-kpi-lbl { font-size: 12px; color: var(--muted); }
+.nm-ing-kpi-val { font-size: 20px; font-weight: 700; color: #fff; }
+.nm-ing-conceptos { display: flex; flex-wrap: wrap; gap: 8px 14px; margin-bottom: 14px; }
+.nm-ing-concepto { font-size: 13px; color: #c9d0da; display: flex; align-items: center; gap: 6px; }
+.nm-ing-dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; flex: none; }
+
+/* ---- NM Archivos ---- */
+.nm-arch-list { list-style: none; display: flex; flex-direction: column; gap: 8px; }
+.nm-arch-row { display: flex; align-items: center; gap: 10px; background: #141824; border: 1px solid #232a3a; border-left: 4px solid var(--c, #8b93a1); border-radius: 10px; padding: 10px 12px; }
+.nm-arch-info { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; cursor: pointer; }
+.nm-arch-cat { font-size: 10.5px; text-transform: uppercase; letter-spacing: .04em; color: var(--c); font-weight: 700; }
+.nm-arch-tit { font-size: 14px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nm-arch-sub { font-size: 12px; color: var(--muted); }
+.nm-arch-ver { background: #0e1119; border: 1px solid #2a3143; border-radius: 8px; color: #c9d0da; font: inherit; font-size: 12.5px; padding: 6px 12px; cursor: pointer; flex: none; }
+.nm-arch-ver:hover { border-color: var(--cobalt); color: #fff; }

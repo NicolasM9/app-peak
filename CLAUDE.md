@@ -97,7 +97,10 @@ chips activos, etc.) + fija texto oscuro sobre verde. **Informe (`NMInforme.jsx`
 último valor ≤ inicio del período → ahora, delta verde/rojo + sparkline), objetivos y comentario de cierre editable. **Sin foto ni asistencia** (pedido de Nico).
 **Comparativas (`NMComparativas.jsx`, hecho):** botón "📊 Comparar" en la lista de Alumnos online → compara a TODOS los alumnos en una métrica
 (chips por métrica) con barras horizontales rankeadas; toggle **Valor actual** vs **Mejora (desde el inicio)** (delta; barra roja si negativa).
-**Pendiente NM:** **Hacoaj/sueldo** (`nm_ingresos`), **Archivos** (upload a bucket `nm-archivos`). **Pendiente (próximas entregas):**
+**Hacoaj/sueldo (`NMIngresos.jsx`, hecho, sin SQL nuevo):** ingresos personales en `nm_ingresos` (concepto Hacoaj/Online/Otro + mes + monto + nota);
+KPIs Este mes / Este año + desglose por concepto. **Archivos (`NMArchivos.jsx`, hecho, sin SQL nuevo):** subida a bucket Storage `nm-archivos`
+(mismo patrón que `Mediciones`: upload → `createSignedUrl` para ver → `remove` al borrar), categorías lesiones/partidos/planificacion/otro con filtro.
+**NM completo:** las 4 tarjetas (Calendario, Alumnos online, Hacoaj/sueldo, Archivos) están hechas. Migraciones NM aplicadas: 0027 (tablas nm_* + es_nico + bucket). **Pendiente (próximas entregas):**
 Alumnos online (CRM: pagos + progreso con gráficos + objetivos + informes mensual/trim/anual + comparativas), Hacoaj/sueldo (`nm_ingresos`), Archivos (upload a `nm-archivos`).
 **Franja horaria del alumno (2026-08-11, migración 0025):** selector **AM / PM / Ambas** en la **lista** de Alumnos (al lado de "Baja",
 `setFranjaRow` con stopPropagation, en mobile cae a 2da línea vía `@media (max-width:600px)`) y también en la **ficha** (`AlumnoDetalle.jsx`)
