@@ -95,7 +95,9 @@ pasa se cambia el SVG). Re-skin por variable: cada root NM lleva clase **`nm-sco
 chips activos, etc.) + fija texto oscuro sobre verde. **Informe (`NMInforme.jsx`, hecho):** botón "📄 Informe" en la ficha → hoja imprimible (reusa
 `.informe-hoja` + `window.print` + `@media print #informe-print`) con **banda negra + logo NM verde**, selector **mensual/trimestral/anual** (baseline =
 último valor ≤ inicio del período → ahora, delta verde/rojo + sparkline), objetivos y comentario de cierre editable. **Sin foto ni asistencia** (pedido de Nico).
-**Pendiente NM:** **comparativas entre alumnos** (en curso), **Hacoaj/sueldo** (`nm_ingresos`), **Archivos** (upload a bucket `nm-archivos`). **Pendiente (próximas entregas):**
+**Comparativas (`NMComparativas.jsx`, hecho):** botón "📊 Comparar" en la lista de Alumnos online → compara a TODOS los alumnos en una métrica
+(chips por métrica) con barras horizontales rankeadas; toggle **Valor actual** vs **Mejora (desde el inicio)** (delta; barra roja si negativa).
+**Pendiente NM:** **Hacoaj/sueldo** (`nm_ingresos`), **Archivos** (upload a bucket `nm-archivos`). **Pendiente (próximas entregas):**
 Alumnos online (CRM: pagos + progreso con gráficos + objetivos + informes mensual/trim/anual + comparativas), Hacoaj/sueldo (`nm_ingresos`), Archivos (upload a `nm-archivos`).
 **Franja horaria del alumno (2026-08-11, migración 0025):** selector **AM / PM / Ambas** en la **lista** de Alumnos (al lado de "Baja",
 `setFranjaRow` con stopPropagation, en mobile cae a 2da línea vía `@media (max-width:600px)`) y también en la **ficha** (`AlumnoDetalle.jsx`)

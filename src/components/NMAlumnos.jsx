@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import NMAlumnoDetalle from './NMAlumnoDetalle'
+import NMComparativas from './NMComparativas'
 
 function Form({ alumno, onDone, onCancel }) {
   const [f, setF] = useState({
@@ -67,6 +68,9 @@ export default function NMAlumnos({ onBack }) {
     if (!alumno) return <p className="muted"><button className="btn-back" onClick={() => setView({ name: 'list' })}>← Volver</button> No se encontró.</p>
     return <NMAlumnoDetalle alumno={alumno} onBack={() => setView({ name: 'list' })} onEdit={() => setView({ name: 'form', alumno })} onChanged={load} />
   }
+  if (view.name === 'comparar') {
+    return <NMComparativas onBack={() => setView({ name: 'list' })} />
+  }
 
   const filtrados = alumnos
     .filter((a) => verInactivos || a.activo)
@@ -77,7 +81,10 @@ export default function NMAlumnos({ onBack }) {
     <div className="nm-alu nm-scope">
       <div className="section-head">
         <button className="btn-back" onClick={onBack}>← NM</button>
-        <button className="btn-primary" onClick={() => setView({ name: 'form' })}>+ Nuevo</button>
+        <div className="section-head-actions">
+          <button className="btn-ghost" onClick={() => setView({ name: 'comparar' })}>📊 Comparar</button>
+          <button className="btn-primary" onClick={() => setView({ name: 'form' })}>+ Nuevo</button>
+        </div>
       </div>
       <h1 className="section-title">Alumnos online</h1>
       <p className="cal-sub">Tus alumnos online, aparte de Peak. Pagos y progreso propios.</p>

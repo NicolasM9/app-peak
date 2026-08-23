@@ -3612,3 +3612,19 @@ textarea {
 .nm-inf-delta.down { color: #c0392b; }
 .nm-inf-coment { font-size: 14px; color: #242c38; line-height: 1.5; }
 .nm-inf-pie { margin-top: 22px; padding-top: 12px; border-top: 1px solid #e2e6ea; font-size: 11px; color: #9aa4b0; text-align: center; }
+
+/* ---- NM Comparativas ---- */
+.nm-cmp-metricas { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 10px; }
+.nm-chip { background: #141824; border: 1px solid #2a3143; border-radius: 999px; color: #c9d0da; font: inherit; font-size: 12px; padding: 6px 12px; cursor: pointer; }
+.nm-chip.on { background: var(--cobalt); border-color: var(--cobalt); color: #0f1706; font-weight: 600; }
+.nm-cmp-modo { display: flex; gap: 6px; margin-bottom: 16px; }
+.nm-cmp-modo-b { flex: 1; background: #141824; border: 1px solid #2a3143; border-radius: 9px; color: #c9d0da; font: inherit; font-size: 12.5px; padding: 8px; cursor: pointer; }
+.nm-cmp-modo-b.on { border-color: var(--cobalt); color: #fff; }
+.nm-cmp-list { display: flex; flex-direction: column; gap: 8px; }
+.nm-cmp-row { display: flex; align-items: center; gap: 9px; }
+.nm-cmp-pos { width: 16px; text-align: center; color: var(--muted); font-size: 12px; flex: none; }
+.nm-cmp-name { width: 92px; flex: none; font-size: 13px; color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nm-cmp-bar-wrap { flex: 1; height: 24px; background: #0e1119; border: 1px solid #232a3a; border-radius: 7px; overflow: hidden; }
+.nm-cmp-bar { height: 100%; background: var(--cobalt); border-radius: 6px; min-width: 3px; }
+.nm-cmp-bar.neg { background: #ef4444; }
+.nm-cmp-val { width: 66px; flex: none; text-align: right; font-size: 12.5px; font-weight: 600; color: #eef1f6; }
