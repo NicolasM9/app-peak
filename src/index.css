@@ -3532,3 +3532,32 @@ textarea {
   background: #0e1119; border: 1px solid #2a3143; border-radius: 8px;
   color: #fff; font: inherit; font-size: 13px; padding: 7px 10px;
 }
+
+/* ---- NM Alumnos online ---- */
+.nm-inline-add { display: flex; gap: 8px; margin-bottom: 10px; }
+.nm-inline-add input {
+  flex: 1; background: #0e1119; border: 1px solid #2a3143; border-radius: 9px;
+  color: #fff; font: inherit; font-size: 14px; padding: 9px 11px;
+}
+.nm-obj-list { list-style: none; display: flex; flex-direction: column; gap: 6px; margin-bottom: 4px; }
+.nm-obj {
+  display: flex; align-items: center; gap: 10px;
+  background: #141824; border: 1px solid #232a3a; border-radius: 9px; padding: 8px 10px;
+}
+.nm-obj-check {
+  width: 22px; height: 22px; flex: none; border-radius: 6px; border: 1px solid #2a3143;
+  background: #0e1119; color: #16a34a; cursor: pointer; font-weight: 700; line-height: 1;
+}
+.nm-obj.ok .nm-obj-check { background: #16a34a; border-color: #16a34a; color: #fff; }
+.nm-obj-txt { flex: 1; font-size: 14px; color: #eef1f6; }
+.nm-obj.ok .nm-obj-txt { text-decoration: line-through; color: var(--muted); }
+
+.nm-metricas { display: flex; flex-direction: column; gap: 10px; }
+.nm-metrica { background: #141824; border: 1px solid #232a3a; border-radius: 12px; padding: 12px 14px; }
+.nm-metrica-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.nm-metrica-nom { font-size: 15px; font-weight: 600; color: #fff; }
+.nm-metrica-last { font-size: 15px; font-weight: 700; color: #fff; }
+.nm-metrica-body { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin: 6px 0 2px; }
+.nm-metrica-regs { display: flex; flex-wrap: wrap; gap: 5px 10px; margin-top: 6px; }
+.nm-reg { font-size: 11.5px; color: var(--muted); cursor: pointer; }
+.nm-reg:hover { color: #ef8a8a; }

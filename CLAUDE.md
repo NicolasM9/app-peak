@@ -83,7 +83,13 @@ Archivos. **Entrega 1 (hecha):** landing + **Calendario de contenido** (`NMConte
 + `elementFromPoint`, un código para mouse y touch; borde `over` en la columna destino; autoscroll en los bordes), **varios eventos por día**, "+" por columna
 para sumar y tap → **modal** editor (título/nota/estado idea·listo·subido/**selector de Día** para mover sin arrastrar/borrar). Estructura fija editable por día
 (`nm_datos` clave `plantilla_contenido`: Lun=vitamina técnica, Mar=historias Hacoaj, Mié=video Santi+historias Peak, Jue=rotativo análisis/lesiones/online,
-Vie=vitamina útil pre partido, Sáb/Dom=dump semanal) se muestra como tema de cada columna; eventos en `nm_contenido` (múltiples filas por fecha; drag = update `fecha`). **Pendiente (próximas entregas):**
+Vie=vitamina útil pre partido, Sáb/Dom=dump semanal) se muestra como tema de cada columna; eventos en `nm_contenido` (múltiples filas por fecha; drag = update `fecha`).
+**Entrega 2 (hecha, sin SQL nuevo — usa tablas de 0027):** **Alumnos online** (`NMAlumnos.jsx` lista+alta/edición → `NMAlumnoDetalle.jsx` ficha).
+Ficha: **Objetivos** (`nm_objetivos`, check/tachado), **Pagos** (`nm_pagos`, alta con mes/monto/fecha/medio + total cobrado — NO tocan Peak),
+**Progreso** (`nm_progreso`: cargás cualquier métrica libre con datalist + valor/unidad/fecha → se agrupa por métrica y dibuja **sparkline** propia
+(componente `Spark`, mismo estilo que `Evolucion`) con delta primero→último verde/rojo + últimos registros clickeables para borrar). Verificado en vivo por
+modo demo (`/?nmtest` + `window.__NMDEMO__`, andamiaje temporal que se borró antes del deploy). **Pendiente NM:** informes mensual/trim/anual (PDF) +
+**comparativas entre alumnos**, **Hacoaj/sueldo** (`nm_ingresos`), **Archivos** (upload a bucket `nm-archivos`). **Pendiente (próximas entregas):**
 Alumnos online (CRM: pagos + progreso con gráficos + objetivos + informes mensual/trim/anual + comparativas), Hacoaj/sueldo (`nm_ingresos`), Archivos (upload a `nm-archivos`).
 **Franja horaria del alumno (2026-08-11, migración 0025):** selector **AM / PM / Ambas** en la **lista** de Alumnos (al lado de "Baja",
 `setFranjaRow` con stopPropagation, en mobile cae a 2da línea vía `@media (max-width:600px)`) y también en la **ficha** (`AlumnoDetalle.jsx`)

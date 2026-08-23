@@ -1,10 +1,11 @@
 import { useState } from 'react'
 import { CalendarRange, Users, Wallet, FolderOpen, ChevronRight } from 'lucide-react'
 import NMContenido from './NMContenido'
+import NMAlumnos from './NMAlumnos'
 
 const CARDS = [
   { id: 'contenido', titulo: 'Calendario de contenido', desc: 'Qué subir cada día de la semana', Icon: CalendarRange, color: '#7c3aed', activo: true },
-  { id: 'alumnos', titulo: 'Alumnos online', desc: 'Pagos, progreso, informes y comparativas', Icon: Users, color: '#1a4fa3', activo: false },
+  { id: 'alumnos', titulo: 'Alumnos online', desc: 'Pagos, progreso, informes y comparativas', Icon: Users, color: '#1a4fa3', activo: true },
   { id: 'ingresos', titulo: 'Hacoaj y sueldo', desc: 'Tus ingresos personales', Icon: Wallet, color: '#0891b2', activo: false },
   { id: 'archivos', titulo: 'Archivos', desc: 'Lesiones, partidos, planificación macro', Icon: FolderOpen, color: '#c2410c', activo: false },
 ]
@@ -13,6 +14,7 @@ export default function NM() {
   const [view, setView] = useState('home')
 
   if (view === 'contenido') return <NMContenido onBack={() => setView('home')} />
+  if (view === 'alumnos') return <NMAlumnos onBack={() => setView('home')} />
 
   return (
     <div className="nm">
