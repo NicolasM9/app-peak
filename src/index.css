@@ -3711,3 +3711,23 @@ textarea {
   max-width: 200px; padding: 5px 9px; border-radius: 6px; color: #fff; font-size: 12px; font-weight: 600;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 0 8px 24px rgba(0, 0, 0, .5); will-change: transform;
 }
+
+/* ---- Agenda: íconos, vista Lista, resumen de feriados ---- */
+.agenda-chip-ic { margin-right: 3px; }
+.agenda-vista { display: flex; gap: 6px; justify-content: center; margin: 0 0 12px; }
+.agenda-vista-b { background: #141824; border: 1px solid #2a3143; border-radius: 8px; color: #c9d0da; font: inherit; font-size: 13px; font-weight: 600; padding: 6px 16px; cursor: pointer; }
+.agenda-vista-b.on { background: var(--cobalt); border-color: var(--cobalt); color: #fff; }
+
+.agenda-fer-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
+.agenda-fer-list { display: flex; flex-direction: column; gap: 4px; max-height: 320px; overflow-y: auto; }
+.agenda-fer-row { display: grid; grid-template-columns: 48px 1fr auto; align-items: center; gap: 10px; text-align: left; background: rgba(255, 255, 255, 0.03); border: 1px solid rgba(255, 255, 255, 0.07); border-radius: 8px; padding: 8px 10px; color: #e7ebf2; font: inherit; cursor: pointer; }
+.agenda-fer-row:hover { border-color: var(--cobalt); }
+.agenda-fer-fecha { font-size: 13px; color: #8b94a6; font-weight: 600; }
+.agenda-fer-tit { font-size: 13.5px; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agenda-fer-profe { font-size: 12px; color: #7ec99a; white-space: nowrap; }
+.agenda-fer-profe.sin { color: #ef8a8a; }
+
+.agenda-lista { display: flex; flex-direction: column; gap: 14px; }
+.agenda-lista-dia { display: flex; flex-direction: column; gap: 6px; }
+.agenda-lista-fecha { font-size: 13px; font-weight: 700; color: #c3cad6; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 4px; }
+.agenda-lista-fecha.hoy { color: var(--cobalt); }

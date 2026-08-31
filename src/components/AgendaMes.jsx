@@ -5,12 +5,12 @@ const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', '
 const DOW = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
 const DOWL = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado']
 const TIPOS = [
-  { value: 'feriado', label: 'Feriado', bg: '#c15b3f' },
-  { value: 'campamento', label: 'Campamento', bg: '#1f8f63' },
-  { value: 'vacaciones', label: 'Vacaciones', bg: '#2f6fb0' },
-  { value: 'partido', label: 'Partido', bg: '#6d4bd0' },
-  { value: 'evento', label: 'Evento importante', bg: '#b3557a' },
-  { value: 'otro', label: 'Otro', bg: '#5b6675' },
+  { value: 'feriado', label: 'Feriado', bg: '#c15b3f', ic: '🇦🇷' },
+  { value: 'campamento', label: 'Campamento', bg: '#1f8f63', ic: '🏕️' },
+  { value: 'vacaciones', label: 'Vacaciones', bg: '#2f6fb0', ic: '🏖️' },
+  { value: 'partido', label: 'Partido', bg: '#6d4bd0', ic: '⚽' },
+  { value: 'evento', label: 'Evento importante', bg: '#b3557a', ic: '⭐' },
+  { value: 'otro', label: 'Otro', bg: '#5b6675', ic: '📌' },
 ]
 const tinfo = (t) => TIPOS.find((x) => x.value === t) || TIPOS[5]
 
@@ -65,6 +65,9 @@ export default function AgendaMes() {
   const suppressClick = useRef(false)
   const [dragId, setDragId] = useState(null)
   const [overFecha, setOverFecha] = useState(null)
+  const [vista, setVista] = useState('mes') // 'mes' | 'lista'
+  const [verFer, setVerFer] = useState(false)
+  const [feriadosAnio, setFeriadosAnio] = useState([])
 
   const mStart = ymd(year, month, 1)
   const mEnd = ymd(year, month, new Date(year, month + 1, 0).getDate())
@@ -140,6 +143,18 @@ export default function AgendaMes() {
     await load()
   }
 
+  async function abrirFeriados() {
+    const { data } = await supabase.from('eventos').select('*').eq('tipo', 'feriado')
+      .gte('fecha', `${year}-01-01`).lte('fecha', `${year}-12-31`).order('fecha')
+    setFeriadosAnio(data || [])
+    setVerFer(true)
+  }
+  function irAFeriado(e) {
+    const [y, m] = e.fecha.split('-').map(Number)
+    setYear(y); setMonth(m - 1); setSel(e.fecha); setVerFer(false)
+    editar(e)
+  }
+
   async function borrar() {
     if (!form?.id) return
     setSaving(true)
@@ -206,19 +221,48 @@ export default function AgendaMes() {
 
   const hoy = todayYmd()
 
+  // datos para la vista Lista (eventos del mes agrupados por día de inicio)
+  const evsMes = visibles.filter((e) => e.fecha <= mEnd && (e.fecha_fin || e.fecha) >= mStart)
+  const porDiaLista = {}
+  evsMes.forEach((e) => { (porDiaLista[e.fecha] ||= []).push(e) })
+  const diasLista = Object.keys(porDiaLista).sort()
+
   return (
     <div className="agenda">
       <div className="section-head">
         <h1 className="section-title">Agenda</h1>
         <div className="section-head-actions">
+          <button className="btn-ghost" onClick={abrirFeriados}>📋 Feriados del año</button>
           <button className="btn-ghost" onClick={cargarFeriados} disabled={cargandoFer}>
-            {cargandoFer ? 'Cargando…' : '🇦🇷 Feriados 2026'}
+            {cargandoFer ? 'Cargando…' : '🇦🇷 Cargar 2026'}
           </button>
           <button className="btn-primary" onClick={() => nuevo(sel)}>+ Agregar</button>
         </div>
       </div>
       <p className="cal-sub">Feriados, campamentos, vacaciones, partidos y eventos del staff · privado (solo admins)</p>
       {ferMsg && <p className="plan-ok" style={{ marginTop: 0 }}>{ferMsg}</p>}
+
+      {verFer && (
+        <div className="agenda-form">
+          <div className="agenda-fer-head">
+            <span className="plan-copiar-tit">Feriados {year} · a quién le toca</span>
+            <button className="btn-ghost btn-mini" onClick={() => setVerFer(false)}>Cerrar</button>
+          </div>
+          {feriadosAnio.length === 0 ? (
+            <p className="cal-sub" style={{ margin: 0 }}>No hay feriados cargados en {year}. Tocá “🇦🇷 Cargar 2026” para traerlos.</p>
+          ) : (
+            <div className="agenda-fer-list">
+              {feriadosAnio.map((e) => (
+                <button key={e.id} className="agenda-fer-row" onClick={() => irAFeriado(e)}>
+                  <span className="agenda-fer-fecha">{cortita(e.fecha)}</span>
+                  <span className="agenda-fer-tit">{e.titulo}</span>
+                  <span className={`agenda-fer-profe ${e.profe_id ? '' : 'sin'}`}>{e.profe_id ? nombreProfe(e.profe_id) : 'sin asignar'}</span>
+                </button>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
 
       {form && (
         <div className="agenda-form">
@@ -272,17 +316,50 @@ export default function AgendaMes() {
         <button className="btn-ghost btn-mini" onClick={nextMes}>→</button>
       </div>
 
+      <div className="agenda-vista">
+        <button className={`agenda-vista-b ${vista === 'mes' ? 'on' : ''}`} onClick={() => setVista('mes')}>📅 Mes</button>
+        <button className={`agenda-vista-b ${vista === 'lista' ? 'on' : ''}`} onClick={() => setVista('lista')}>📋 Lista</button>
+      </div>
+
       <div className="agenda-filtros">
         <button className={`agenda-filtro ${!filtro ? 'on' : ''}`} onClick={() => setFiltro(null)}>Todos</button>
         {TIPOS.map((t) => (
           <button key={t.value} className={`agenda-filtro ${filtro === t.value ? 'on' : ''}`} onClick={() => setFiltro(filtro === t.value ? null : t.value)}>
-            <span className="agenda-dot" style={{ background: t.bg }} /> {t.label}
+            <span className="agenda-dot" style={{ background: t.bg }} /> {t.ic} {t.label}
           </button>
         ))}
       </div>
 
       {loading ? (
         <p className="muted">Cargando…</p>
+      ) : vista === 'lista' ? (
+        <div className="agenda-lista">
+          {diasLista.length === 0 ? (
+            <p className="muted">No hay eventos este mes.</p>
+          ) : (
+            diasLista.map((f) => (
+              <div key={f} className="agenda-lista-dia">
+                <div className={`agenda-lista-fecha ${f === hoy ? 'hoy' : ''}`}>{diaLargo(f)}</div>
+                {porDiaLista[f].map((e) => e._vac ? (
+                  <div key={e.id} className="agenda-ev agenda-ev-ro" style={{ borderLeftColor: tinfo(e.tipo).bg }}>
+                    <span className="agenda-ev-tit">{tinfo(e.tipo).ic} {e.titulo}</span>
+                    <span className="agenda-ev-meta">Vacaciones · {cortita(e.fecha)}→{cortita(e.fecha_fin)} · se edita en Horas</span>
+                  </div>
+                ) : (
+                  <button key={e.id} className="agenda-ev" style={{ borderLeftColor: tinfo(e.tipo).bg }} onClick={() => editar(e)}>
+                    <span className="agenda-ev-tit">{tinfo(e.tipo).ic} {e.titulo}</span>
+                    <span className="agenda-ev-meta">
+                      {tinfo(e.tipo).label}
+                      {e.profe_id ? ` · ${nombreProfe(e.profe_id)}` : ''}
+                      {e.fecha_fin && e.fecha_fin !== e.fecha ? ` · ${cortita(e.fecha)}→${cortita(e.fecha_fin)}` : ''}
+                    </span>
+                    {e.nota ? <span className="agenda-ev-nota">{e.nota}</span> : null}
+                  </button>
+                ))}
+              </div>
+            ))
+          )}
+        </div>
       ) : (
         <>
           <div className="agenda-grid agenda-dow">
@@ -296,7 +373,7 @@ export default function AgendaMes() {
               return (
                 <button key={i} data-fecha={f}
                   className={`agenda-cell ${f === hoy ? 'hoy' : ''} ${sel === f ? 'sel' : ''} ${overFecha === f && dragId != null ? 'over' : ''}`}
-                  onClick={() => { if (suppressClick.current) { suppressClick.current = false; return } setSel(f) }}>
+                  onClick={() => { if (suppressClick.current) { suppressClick.current = false; return } if (eventosDe(f).length === 0) nuevo(f); else setSel(f) }}>
                   <span className="agenda-daynum">{d}</span>
                   <span className="agenda-evs">
                     {evs.slice(0, 3).map((e) => (
@@ -308,7 +385,7 @@ export default function AgendaMes() {
                         onPointerUp={chipUp}
                         onPointerCancel={chipUp}
                         onClick={(ev) => { if (suppressClick.current) { ev.stopPropagation(); suppressClick.current = false } }}
-                      >{e.titulo}</span>
+                      ><span className="agenda-chip-ic">{tinfo(e.tipo).ic}</span>{e.titulo}</span>
                     ))}
                     {evs.length > 3 && <span className="agenda-more">+{evs.length - 3}</span>}
                   </span>
@@ -319,7 +396,7 @@ export default function AgendaMes() {
 
           <div className="agenda-legend">
             {TIPOS.map((t) => (
-              <span key={t.value} className="agenda-leg"><span className="agenda-dot" style={{ background: t.bg }} /> {t.label}</span>
+              <span key={t.value} className="agenda-leg"><span className="agenda-dot" style={{ background: t.bg }} /> {t.ic} {t.label}</span>
             ))}
           </div>
 
@@ -341,7 +418,7 @@ export default function AgendaMes() {
                   <button key={e.id} className="agenda-ev" style={{ borderLeftColor: tinfo(e.tipo).bg }} onClick={() => editar(e)}>
                     <span className="agenda-ev-tit">{e.titulo}</span>
                     <span className="agenda-ev-meta">
-                      {tinfo(e.tipo).label}
+                      {tinfo(e.tipo).ic} {tinfo(e.tipo).label}
                       {e.profe_id ? ` · ${nombreProfe(e.profe_id)}` : ''}
                       {e.fecha_fin && e.fecha_fin !== e.fecha ? ` · ${cortita(e.fecha)}→${cortita(e.fecha_fin)}` : ''}
                     </span>

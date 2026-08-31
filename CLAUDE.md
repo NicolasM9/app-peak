@@ -130,7 +130,12 @@ read-only (`vacEventos` desde tabla `vacaciones`, no se editan en la Agenda). Si
 grilla desbordaba → se cambió `.agenda-grid` a `grid-template-columns: repeat(7, minmax(0,1fr))` + `.agenda-cell{min-width:0}` (ahora los encabezados
 Lun–Dom coinciden con los días). **Arrastrar eventos a otro día:** cada chip (no las vacaciones read-only) es arrastrable (Pointer Events, `setPointerCapture`
 en el `pointerdown` + `elementFromPoint`; celda destino con clase `over`; fantasma `.agenda-ghost`); al soltar hace `update` de `eventos.fecha` (y corre
-`fecha_fin` el mismo delta si es multi-día). `suppressClick` evita que el drag seleccione el día; tap normal sigue seleccionando. Todo verificado en vivo (demo `?agtest`). pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
+`fecha_fin` el mismo delta si es multi-día). `suppressClick` evita que el drag seleccione el día; tap normal sigue seleccionando. Todo verificado en vivo (demo `?agtest`).
+**Agenda — 4 mejoras UX (2026-08-31, sin SQL):** (1) **íconos por tipo** en `TIPOS.ic` (🇦🇷/🏕️/🏖️/⚽/⭐/📌) en chips (`.agenda-chip-ic`), filtros, leyenda y detalle
+—así en mobile, aunque el texto se corte, se ve el tipo; (2) **vista Lista** (toggle `vista` mes|lista, `.agenda-vista`): eventos del mes agrupados por día de inicio
+con texto completo (reusa `.agenda-ev`), tap → editar; (3) **resumen "Feriados del año"** (botón → `abrirFeriados` fetch feriados del año → panel `.agenda-fer-*`
+con fecha·título·profe / "sin asignar" en rojo; click → va al mes y abre el editor para asignar); (4) **tocar un día vacío abre "Nuevo evento" directo** (si el
+día no tiene eventos → `nuevo(f)`, si tiene → selecciona). Verificado en vivo. **Pendiente Agenda:** repetir eventos + estirar duración (drag del borde). pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
 la Agenda): cada día carga ideas/contenido con **tipo** (historia/publicación/ambas) y **checklist** de 4 pasos (grabar→editar→copy→subir,
 `contenidos.pasos` jsonb, se tildan inline desde el día; el puntito se prende cuando `subir`=true). **Backlog** "Ideas sueltas"
 (`fecha` null) con input para programarlas al calendario. **KPIs del mes**: subidos / historias / publicaciones / **consultas p/ entrenar**
