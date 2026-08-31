@@ -59,7 +59,12 @@ parsea tab/coma/2-espacios → filas); (2) **arrastrar filas** para reordenar (s
 quedan ⧉ duplicar y ✕ borrar); (3) **autoguardado** (debounce 900ms sobre `ec`/`bloques`, upsert a `planificaciones`; pill "Guardando…/Guardado ✓/Error";
 `firstRun`+`dirtyRef` para no guardar en el load); (4) **pestañas Día 1–4** dentro de la semana (`cambiarDia` guarda el actual y carga el otro; ver la semana
 entera sin salir); (5) **columnas # y Ejercicio fijas** (`position:sticky`; OJO: el `overflow:hidden` del contenedor rompe sticky → el borde/redondeo va en `.ejt`
-que scrollea, no en `.ejt-grid`). El botón "Guardar rutina" se sacó (guarda solo); ← Volver guarda si hay cambios. Pendiente: **#8 plantillas de día/semana completos** (necesita migración 0028).
+que scrollea, no en `.ejt-grid`). El botón "Guardar rutina" se sacó (guarda solo); ← Volver guarda si hay cambios.
+**Plantillas de día/semana (2026-08-31, migración 0028):** tabla nueva **`plantillas_plan`** (id, tipo `dia|semana`, nombre, contenido jsonb, RLS
+`for all to authenticated` = todos los profes). En `PlanDia.jsx`, botón **"📁 Día / Semana"** abre panel: guardar el día actual (`{ec,bloques}`) o la semana entera
+(`{dias:[{dia,ec,bloques}]}`) como plantilla con nombre; lista de plantillas con **Aplicar** (día → reemplaza el día actual; semana → upsert de los 4 días con confirm)
+y ✕. El botón viejo "Desde plantilla" (bloque suelto, `plantillas_bloque`) se renombró **"📁 Bloque guardado"**. Query aislada → deploy pudo ir antes del SQL.
+**Las 6 mejoras de Planificación que pidió Nico (todas menos Descanso/Tempo y totales automáticos) están hechas.**
 **Extras (2026-08-10, HECHOS — migración 0020):** (1) **Plantillas de bloque** en `PlanDia.jsx`: cada bloque tiene 💾 "Guardar como
 plantilla" (nombre+ejercicios → tabla `plantillas_bloque`, la usan todos los profes); botón "📁 Desde plantilla" lista las guardadas
 e inserta una como bloque nuevo; se borran desde el panel. (2) **Horario del gimnasio** en la Grilla (`GrillaSemanal.jsx`): la línea de

@@ -3696,3 +3696,6 @@ textarea {
 .plan-save.saving { color: #d0a83c; }
 .plan-save.saved { color: #4caf50; }
 .plan-save.error { color: #ef8a8a; }
+
+.plan-tpl-save { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; margin-top: 8px; }
+.plan-tpl-save input { flex: 1; min-width: 180px; background: #0e1119; border: 1px solid #2a3143; border-radius: 8px; color: #fff; font: inherit; font-size: 14px; padding: 8px 11px; }

@@ -173,6 +173,11 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
   const [plantillas, setPlantillas] = useState([])
   const [picker, setPicker] = useState(false)
   const [tplMsg, setTplMsg] = useState('')
+  const [tplPlan, setTplPlan] = useState([])
+  const [planPanel, setPlanPanel] = useState(false)
+  const [planNombre, setPlanNombre] = useState('')
+  const [planMsg, setPlanMsg] = useState('')
+  const [confirmSem, setConfirmSem] = useState(null) // id de plantilla de semana a confirmar
 
   const firstRun = useRef(true)
   const dirtyRef = useRef(false)
@@ -195,7 +200,7 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
     const { data } = await supabase.from('plantillas_bloque').select('id, nombre, ejercicios').order('nombre')
     setPlantillas(data || [])
   }
-  useEffect(() => { loadPlantillas() }, [])
+  useEffect(() => { loadPlantillas(); loadTplPlan() }, [])
 
   // --- Guardado ---
   async function guardarDia(d, ecData, bloquesData) {
@@ -258,6 +263,67 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
   async function borrarPlantilla(id) {
     await supabase.from('plantillas_bloque').delete().eq('id', id)
     await loadPlantillas()
+  }
+
+  // --- Plantillas de día / semana completos ---
+  async function loadTplPlan() {
+    const { data } = await supabase.from('plantillas_plan').select('id, tipo, nombre, contenido').order('created_at', { ascending: false })
+    setTplPlan(data || [])
+  }
+
+  function diaLimpio() {
+    return {
+      ec: limpiarEj(ec),
+      bloques: bloques.map((b) => ({ nombre: (b.nombre || 'Bloque').trim(), ejercicios: limpiarEj(b.ejercicios) })).filter((b) => b.ejercicios.length),
+    }
+  }
+  async function guardarDiaTpl() {
+    const nombre = planNombre.trim()
+    if (!nombre) { setPlanMsg('Poné un nombre para la plantilla.'); return }
+    const cont = diaLimpio()
+    if (!cont.ec.length && !cont.bloques.length) { setPlanMsg('Este día está vacío.'); return }
+    if (dirtyRef.current) await guardarDia(diaActivo, ec, bloques)
+    const { error: err } = await supabase.from('plantillas_plan').insert({ tipo: 'dia', nombre, contenido: cont })
+    if (err) { setPlanMsg('No se pudo guardar.'); return }
+    setPlanNombre(''); setPlanMsg(`Guardaste el día como plantilla “${nombre}” ✓`)
+    await loadTplPlan()
+  }
+  async function guardarSemanaTpl() {
+    const nombre = planNombre.trim()
+    if (!nombre) { setPlanMsg('Poné un nombre para la plantilla.'); return }
+    if (dirtyRef.current) await guardarDia(diaActivo, ec, bloques)
+    const { data } = await supabase.from('planificaciones').select('dia, ec, bloques').eq('mes', mes).eq('semana', semana)
+    const dias = (data || []).filter((r) => (r.ec || []).length || (r.bloques || []).length).map((r) => ({ dia: r.dia, ec: r.ec || [], bloques: r.bloques || [] }))
+    if (!dias.length) { setPlanMsg('La semana está vacía.'); return }
+    const { error: err } = await supabase.from('plantillas_plan').insert({ tipo: 'semana', nombre, contenido: { dias } })
+    if (err) { setPlanMsg('No se pudo guardar.'); return }
+    setPlanNombre(''); setPlanMsg(`Guardaste la semana como plantilla “${nombre}” ✓`)
+    await loadTplPlan()
+  }
+  async function recargarDia() {
+    const { data } = await supabase.from('planificaciones').select('ec, bloques').eq('mes', mes).eq('semana', semana).eq('dia', diaActivo).maybeSingle()
+    firstRun.current = true
+    setEc(clone(data?.ec))
+    setBloques(data?.bloques?.length ? data.bloques.map((b) => ({ nombre: b.nombre || 'Bloque', ejercicios: clone(b.ejercicios) })) : defaultBloques())
+    setSaveState('saved')
+  }
+  async function aplicarDiaTpl(t) {
+    firstRun.current = true
+    setEc(clone(t.contenido?.ec))
+    setBloques(t.contenido?.bloques?.length ? t.contenido.bloques.map((b) => ({ nombre: b.nombre || 'Bloque', ejercicios: clone(b.ejercicios) })) : defaultBloques())
+    await guardarDia(diaActivo, t.contenido?.ec || [], t.contenido?.bloques || [])
+    setPlanPanel(false); setPlanMsg('')
+  }
+  async function aplicarSemanaTpl(t) {
+    const dias = t.contenido?.dias || []
+    const rows = dias.map((d) => ({ mes, semana, dia: d.dia, ec: d.ec || [], bloques: d.bloques || [], updated_at: new Date().toISOString() }))
+    if (rows.length) await supabase.from('planificaciones').upsert(rows, { onConflict: 'mes,semana,dia' })
+    setConfirmSem(null); setPlanPanel(false); setPlanMsg('')
+    await recargarDia()
+  }
+  async function borrarTplPlan(id) {
+    await supabase.from('plantillas_plan').delete().eq('id', id)
+    await loadTplPlan()
   }
 
   const setBloque = (bi, patch) => setBloques((l) => l.map((b, idx) => (idx === bi ? { ...b, ...patch } : b)))
@@ -379,7 +445,8 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
 
       <div className="plan-add-row">
         <button type="button" className="btn-ghost" onClick={addBloque}>+ Agregar bloque</button>
-        <button type="button" className="btn-ghost" onClick={() => { setPicker((v) => !v); setTplMsg('') }}>📁 Desde plantilla</button>
+        <button type="button" className="btn-ghost" onClick={() => { setPicker((v) => !v); setTplMsg('') }}>📁 Bloque guardado</button>
+        <button type="button" className="btn-ghost" onClick={() => { setPlanPanel((v) => !v); setPlanMsg('') }}>📁 Día / Semana</button>
       </div>
 
       {tplMsg && <p className="plan-ok">{tplMsg}</p>}
@@ -398,6 +465,43 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
                     <span className="tpl-meta">{(t.ejercicios || []).length} ejercicio{(t.ejercicios || []).length === 1 ? '' : 's'} · insertar</span>
                   </button>
                   <button type="button" className="tpl-del" title="Borrar plantilla" onClick={() => borrarPlantilla(t.id)}>✕</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {planPanel && (
+        <div className="plan-copiar">
+          <span className="plan-copiar-tit">Plantillas de día y semana</span>
+          <div className="plan-tpl-save">
+            <input value={planNombre} onChange={(e) => setPlanNombre(e.target.value)} placeholder="Nombre (ej: Día de fuerza, Semana base)" />
+            <button type="button" className="btn-ghost" onClick={guardarDiaTpl}>💾 Guardar este día</button>
+            <button type="button" className="btn-ghost" onClick={guardarSemanaTpl}>💾 Guardar la semana</button>
+          </div>
+          {planMsg && <p className="plan-ok" style={{ margin: '6px 0 0' }}>{planMsg}</p>}
+          {tplPlan.length === 0 ? (
+            <p className="cal-sub" style={{ margin: '8px 0 0' }}>Todavía no guardaste plantillas de día/semana. Cargá un día y tocá “Guardar este día”.</p>
+          ) : (
+            <div className="tpl-list" style={{ marginTop: 8 }}>
+              {tplPlan.map((t) => (
+                <div key={t.id} className="tpl-row">
+                  {confirmSem === t.id ? (
+                    <div className="tpl-use" style={{ cursor: 'default' }}>
+                      <span className="tpl-nombre">¿Reemplazar los 4 días de esta semana con “{t.nombre}”?</span>
+                      <span className="baja-confirm">
+                        <button type="button" className="confirm-si" onClick={() => aplicarSemanaTpl(t)}>Sí</button>
+                        <button type="button" className="confirm-no" onClick={() => setConfirmSem(null)}>No</button>
+                      </span>
+                    </div>
+                  ) : (
+                    <button type="button" className="tpl-use" onClick={() => (t.tipo === 'semana' ? setConfirmSem(t.id) : aplicarDiaTpl(t))}>
+                      <span className="tpl-nombre">{t.tipo === 'semana' ? '🗓️' : '📄'} {t.nombre}</span>
+                      <span className="tpl-meta">{t.tipo === 'semana' ? `semana (${(t.contenido?.dias || []).length} días) · aplicar a esta semana` : 'día · aplicar a este día'}</span>
+                    </button>
+                  )}
+                  <button type="button" className="tpl-del" title="Borrar" onClick={() => borrarTplPlan(t.id)}>✕</button>
                 </div>
               ))}
             </div>
