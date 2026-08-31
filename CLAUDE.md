@@ -49,6 +49,11 @@ tipo **`bloqueo`** (migración **0019**) para marcar turnos no disponibles. Fix 
 (nombre + Series×Reps) con reordenar/duplicar/borrar; **autocompletado** de ejercicios (datalist con la biblioteca de todos los
 usados); bloques con **nombre editable** + reordenar/quitar; **"Copiar de…"** trae otro día. En la lista, **"Copiar mes"** duplica
 toda la planificación de un mes a otro. Sin migración (mismo modelo `ec`/`bloques`). **Las 3 fases (A/B/C) que pidió Nico están hechas.**
+**Planificación tipo Excel (2026-08-31, sin SQL — jsonb):** `PlanDia.jsx` — el editor de ejercicios (`ListaEjercicios`) pasó de tarjetas a una
+**grilla tipo planilla** (`.ejt-*`): encabezados de columna (# · Ejercicio · Series · Reps · **Peso** · **Obs.** · acciones), celdas grandes/legibles
+(font 15px), gridlines, `overflow-x:auto` (scroll horizontal en mobile, min-width 620). **Enter** en un ejercicio baja a la fila de abajo y, si es la
+última, agrega una nueva (como Excel). Se sumaron 2 columnas nuevas **`peso`** y **`obs`** al modelo `ec`/`bloques` (jsonb → sin migración; también van al
+Modo TV). Bloques más grandes (padding/título). Pendiente idea a futuro: drag para reordenar filas, copiar/pegar rango, columna Descanso.
 **Extras (2026-08-10, HECHOS — migración 0020):** (1) **Plantillas de bloque** en `PlanDia.jsx`: cada bloque tiene 💾 "Guardar como
 plantilla" (nombre+ejercicios → tabla `plantillas_bloque`, la usan todos los profes); botón "📁 Desde plantilla" lista las guardadas
 e inserta una como bloque nuevo; se borran desde el panel. (2) **Horario del gimnasio** en la Grilla (`GrillaSemanal.jsx`): la línea de

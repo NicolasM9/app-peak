@@ -1,13 +1,15 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
-const emptyEj = () => ({ nombre: '', series: '', reps: '' })
-const clone = (arr) => (arr || []).map((e) => ({ nombre: e.nombre || '', series: e.series || '', reps: e.reps || '' }))
+const emptyEj = () => ({ nombre: '', series: '', reps: '', peso: '', obs: '' })
+const clone = (arr) => (arr || []).map((e) => ({ nombre: e.nombre || '', series: e.series || '', reps: e.reps || '', peso: e.peso || '', obs: e.obs || '' }))
 const limpiarEj = (arr) =>
   (arr || []).filter((e) => (e.nombre || '').trim()).map((e) => ({
     nombre: e.nombre.trim(),
     series: (e.series || '').toString().trim(),
     reps: (e.reps || '').toString().trim(),
+    peso: (e.peso || '').toString().trim(),
+    obs: (e.obs || '').toString().trim(),
   }))
 const move = (list, i, dir) => {
   const j = i + dir
@@ -17,38 +19,59 @@ const move = (list, i, dir) => {
   return c
 }
 
-// Editor reutilizable de una lista de ejercicios (para la entrada en calor y cada bloque)
+// Editor tipo Excel de una lista de ejercicios (entrada en calor y cada bloque)
 function ListaEjercicios({ ejercicios, onChange }) {
+  const gridRef = useRef(null)
   const setEj = (i, k, v) => onChange(ejercicios.map((e, idx) => (idx === i ? { ...e, [k]: v } : e)))
   const add = () => onChange([...ejercicios, emptyEj()])
   const dup = (i) => onChange([...ejercicios.slice(0, i + 1), { ...ejercicios[i] }, ...ejercicios.slice(i + 1)])
   const del = (i) => onChange(ejercicios.filter((_, idx) => idx !== i))
   const mv = (i, d) => onChange(move(ejercicios, i, d))
 
+  // Enter (como en Excel): baja a la fila de abajo; si es la última, agrega una nueva.
+  const onEnter = (ev, i) => {
+    if (ev.key !== 'Enter') return
+    ev.preventDefault()
+    if (i === ejercicios.length - 1) add()
+    requestAnimationFrame(() => {
+      const inputs = gridRef.current?.querySelectorAll('.ejt-nombre')
+      inputs?.[i + 1]?.focus()
+    })
+  }
+
   return (
-    <div className="ejp-lista">
-      {ejercicios.map((e, i) => (
-        <div key={i} className="ejp-row">
-          <input
-            className="ejp-nombre"
-            list="ejlib"
-            value={e.nombre}
-            onChange={(ev) => setEj(i, 'nombre', ev.target.value)}
-            placeholder="Ejercicio"
-          />
-          <div className="ejp-meta">
-            <input className="ejp-num" inputMode="numeric" value={e.series} onChange={(ev) => setEj(i, 'series', ev.target.value)} placeholder="Series" />
-            <span className="ejp-x">×</span>
-            <input className="ejp-num" value={e.reps} onChange={(ev) => setEj(i, 'reps', ev.target.value)} placeholder="Reps" />
-            <div className="ejp-acc">
-              <button type="button" title="Subir" onClick={() => mv(i, -1)} disabled={i === 0}>↑</button>
-              <button type="button" title="Bajar" onClick={() => mv(i, 1)} disabled={i === ejercicios.length - 1}>↓</button>
-              <button type="button" title="Duplicar" onClick={() => dup(i)}>⧉</button>
-              <button type="button" title="Quitar" className="ejp-del" onClick={() => del(i)}>✕</button>
-            </div>
-          </div>
+    <div className="ejt">
+      <div className="ejt-grid" ref={gridRef}>
+        <div className="ejt-head">
+          <span className="ejt-cn">#</span>
+          <span>Ejercicio</span>
+          <span>Series</span>
+          <span>Reps</span>
+          <span>Peso</span>
+          <span>Obs.</span>
+          <span />
         </div>
-      ))}
+        {ejercicios.length === 0 ? (
+          <div className="ejt-empty">Sin ejercicios todavía — tocá “+ ejercicio”.</div>
+        ) : (
+          ejercicios.map((e, i) => (
+            <div key={i} className="ejt-row">
+              <span className="ejt-cn">{i + 1}</span>
+              <input className="ejt-cell ejt-nombre" list="ejlib" value={e.nombre} onChange={(ev) => setEj(i, 'nombre', ev.target.value)} onKeyDown={(ev) => onEnter(ev, i)} placeholder="Ejercicio" />
+              <input className="ejt-cell ejt-c" inputMode="numeric" value={e.series} onChange={(ev) => setEj(i, 'series', ev.target.value)} placeholder="—" />
+              <input className="ejt-cell ejt-c" value={e.reps} onChange={(ev) => setEj(i, 'reps', ev.target.value)} placeholder="—" />
+              <input className="ejt-cell ejt-c" value={e.peso} onChange={(ev) => setEj(i, 'peso', ev.target.value)} placeholder="—" />
+              <input className="ejt-cell ejt-obs" value={e.obs} onChange={(ev) => setEj(i, 'obs', ev.target.value)} placeholder="—" />
+              <div className="ejt-acc">
+                <button type="button" title="Subir" onClick={() => mv(i, -1)} disabled={i === 0}>↑</button>
+                <button type="button" title="Bajar" onClick={() => mv(i, 1)} disabled={i === ejercicios.length - 1}>↓</button>
+                <button type="button" title="Duplicar" onClick={() => dup(i)}>⧉</button>
+                <button type="button" title="Quitar" className="ejt-del" onClick={() => del(i)}>✕</button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
       <button type="button" className="btn-ghost btn-add-ej" onClick={add}>+ ejercicio</button>
     </div>
   )
@@ -172,7 +195,7 @@ export default function PlanDia({ mes, mesLargo, semana, dia, item, onBack }) {
                 {s.ejercicios.filter((e) => (e.nombre || '').trim()).map((e, j) => (
                   <div key={j} className="plan-tv-ej">
                     <span className="plan-tv-ej-nombre">{e.nombre}</span>
-                    <span className="plan-tv-ej-datos">{[e.series && e.series + ' series', e.reps].filter(Boolean).join(' · ')}</span>
+                    <span className="plan-tv-ej-datos">{[e.series && e.series + ' series', e.reps, e.peso && e.peso].filter(Boolean).join(' · ')}</span>
                   </div>
                 ))}
               </div>
