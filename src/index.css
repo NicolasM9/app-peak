@@ -3731,3 +3731,14 @@ textarea {
 .agenda-lista-dia { display: flex; flex-direction: column; gap: 6px; }
 .agenda-lista-fecha { font-size: 13px; font-weight: 700; color: #c3cad6; border-bottom: 1px solid rgba(255, 255, 255, 0.08); padding-bottom: 4px; }
 .agenda-lista-fecha.hoy { color: var(--cobalt); }
+
+/* ---- Agenda: estirar (resize) + chip flex ---- */
+.agenda-chip { display: flex; align-items: center; gap: 2px; }
+.agenda-chip-ic { margin-right: 0; flex: none; }
+.agenda-chip-txt { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agenda-chip-grip {
+  flex: none; cursor: ew-resize; touch-action: none; font-size: 12px; line-height: 1; font-weight: 700;
+  min-width: 16px; text-align: center; padding: 2px 3px; margin: -2px -3px -2px 0; border-radius: 0 4px 4px 0;
+  background: rgba(0, 0, 0, .22);
+}
+.agenda-chip-grip:hover { background: rgba(0, 0, 0, .38); }

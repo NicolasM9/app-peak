@@ -43,6 +43,26 @@ function cortita(f) { const [, m, d] = f.split('-').map(Number); return `${d}/${
 function parseYmd(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d) }
 function addDaysYmd(s, n) { const dt = parseYmd(s); dt.setDate(dt.getDate() + n); return ymd(dt.getFullYear(), dt.getMonth(), dt.getDate()) }
 function diffDays(a, b) { return Math.round((parseYmd(a) - parseYmd(b)) / 86400000) }
+function generarFechas(inicio, modo, hasta) {
+  const out = []
+  const start = parseYmd(inicio), end = parseYmd(hasta)
+  if (end < start) return [inicio]
+  if (modo === 'semanal' || modo === 'quincenal') {
+    const step = modo === 'semanal' ? 7 : 14
+    const d = new Date(start)
+    while (d <= end && out.length < 80) { out.push(ymd(d.getFullYear(), d.getMonth(), d.getDate())); d.setDate(d.getDate() + step) }
+  } else if (modo === 'mensual') {
+    const day = start.getDate()
+    let k = 0
+    while (out.length < 80 && k < 400) {
+      const d = new Date(start.getFullYear(), start.getMonth() + k, day)
+      k++
+      if (d > end) break
+      if (d.getDate() === day) out.push(ymd(d.getFullYear(), d.getMonth(), d.getDate()))
+    }
+  }
+  return out.length ? out : [inicio]
+}
 
 export default function AgendaMes() {
   const now = new Date()
@@ -65,6 +85,8 @@ export default function AgendaMes() {
   const suppressClick = useRef(false)
   const [dragId, setDragId] = useState(null)
   const [overFecha, setOverFecha] = useState(null)
+  const resizeRef = useRef(null)
+  const [resizeId, setResizeId] = useState(null)
   const [vista, setVista] = useState('mes') // 'mes' | 'lista'
   const [verFer, setVerFer] = useState(false)
   const [feriadosAnio, setFeriadosAnio] = useState([])
@@ -103,7 +125,7 @@ export default function AgendaMes() {
   function nextMes() { setSel(null); if (month === 11) { setYear(year + 1); setMonth(0) } else setMonth(month + 1) }
   function hoyMes() { setSel(null); setYear(now.getFullYear()); setMonth(now.getMonth()) }
 
-  function nuevo(fecha) { setForm({ titulo: '', tipo: 'evento', fecha: fecha || todayYmd(), fecha_fin: '', profe_id: '', nota: '' }) }
+  function nuevo(fecha) { setForm({ titulo: '', tipo: 'evento', fecha: fecha || todayYmd(), fecha_fin: '', profe_id: '', nota: '', repetir: 'no', repetirHasta: '' }) }
   function editar(e) { setForm({ id: e.id, titulo: e.titulo, tipo: e.tipo, fecha: e.fecha, fecha_fin: e.fecha_fin || '', profe_id: e.profe_id ? String(e.profe_id) : '', nota: e.nota || '' }) }
 
   async function guardar() {
@@ -117,9 +139,17 @@ export default function AgendaMes() {
       profe_id: form.profe_id ? Number(form.profe_id) : null,
       nota: (form.nota || '').trim() || null,
     }
-    const { error } = form.id
-      ? await supabase.from('eventos').update(payload).eq('id', form.id)
-      : await supabase.from('eventos').insert(payload)
+    let error
+    if (!form.id && form.repetir && form.repetir !== 'no' && !payload.fecha_fin) {
+      const hasta = form.repetirHasta || `${parseYmd(form.fecha).getFullYear()}-12-31`
+      const fechas = generarFechas(form.fecha, form.repetir, hasta)
+      const rows = fechas.map((f) => ({ ...payload, fecha: f, fecha_fin: null }))
+      ;({ error } = await supabase.from('eventos').insert(rows))
+    } else if (form.id) {
+      ;({ error } = await supabase.from('eventos').update(payload).eq('id', form.id))
+    } else {
+      ;({ error } = await supabase.from('eventos').insert(payload))
+    }
     setSaving(false)
     if (error) return
     setSel(form.fecha)
@@ -196,6 +226,40 @@ export default function AgendaMes() {
     d.target = cell ? cell.getAttribute('data-fecha') : null
     setOverFecha(d.target)
   }
+  // estirar (resize) desde el borde derecho del último día del evento
+  function resizeDown(e, ev) {
+    e.stopPropagation()
+    try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* noop */ }
+    resizeRef.current = { ev, pointerId: e.pointerId, el: e.currentTarget, target: ev.fecha_fin || ev.fecha }
+    setResizeId(ev.id)
+    setOverFecha(ev.fecha_fin || ev.fecha)
+  }
+  function resizeMove(e) {
+    const r = resizeRef.current
+    if (!r || e.pointerId !== r.pointerId) return
+    e.preventDefault()
+    const cell = document.elementFromPoint(e.clientX, e.clientY)?.closest('[data-fecha]')
+    const f = cell?.getAttribute('data-fecha')
+    if (f && f >= r.ev.fecha) { r.target = f; setOverFecha(f) }
+  }
+  function resizeUp(e) {
+    const r = resizeRef.current
+    if (!r || e.pointerId !== r.pointerId) return
+    e.preventDefault()
+    try { r.el.releasePointerCapture(e.pointerId) } catch { /* noop */ }
+    const { target, ev } = r
+    resizeRef.current = null
+    setResizeId(null); setOverFecha(null)
+    suppressClick.current = true
+    setTimeout(() => { suppressClick.current = false }, 400)
+    const actual = ev.fecha_fin || ev.fecha
+    if (target && target !== actual) {
+      const nuevaFin = target === ev.fecha ? null : target
+      setEventos((l) => l.map((x) => (x.id === ev.id ? { ...x, fecha_fin: nuevaFin } : x)))
+      supabase.from('eventos').update({ fecha_fin: nuevaFin }).eq('id', ev.id)
+    }
+  }
+
   function chipUp(e) {
     const d = dragRef.current
     if (!d || e.pointerId !== d.pointerId) return
@@ -293,6 +357,23 @@ export default function AgendaMes() {
               <input type="date" value={form.fecha_fin} min={form.fecha} onChange={(e) => setForm({ ...form, fecha_fin: e.target.value })} />
             </label>
           </div>
+          {!form.id && !form.fecha_fin && (
+            <div className="agenda-form-row two">
+              <label>Repetir
+                <select value={form.repetir || 'no'} onChange={(e) => setForm({ ...form, repetir: e.target.value })}>
+                  <option value="no">No se repite</option>
+                  <option value="semanal">Cada semana</option>
+                  <option value="quincenal">Cada 2 semanas</option>
+                  <option value="mensual">Cada mes</option>
+                </select>
+              </label>
+              {form.repetir && form.repetir !== 'no' && (
+                <label>Repetir hasta
+                  <input type="date" value={form.repetirHasta || ''} min={form.fecha} onChange={(e) => setForm({ ...form, repetirHasta: e.target.value })} />
+                </label>
+              )}
+            </div>
+          )}
           <div className="agenda-form-row">
             <input className="agenda-in" value={form.nota} onChange={(e) => setForm({ ...form, nota: e.target.value })} placeholder="Nota (opcional)" />
           </div>
@@ -372,7 +453,7 @@ export default function AgendaMes() {
               const evs = eventosDe(f)
               return (
                 <button key={i} data-fecha={f}
-                  className={`agenda-cell ${f === hoy ? 'hoy' : ''} ${sel === f ? 'sel' : ''} ${overFecha === f && dragId != null ? 'over' : ''}`}
+                  className={`agenda-cell ${f === hoy ? 'hoy' : ''} ${sel === f ? 'sel' : ''} ${overFecha === f && (dragId != null || resizeId != null) ? 'over' : ''}`}
                   onClick={() => { if (suppressClick.current) { suppressClick.current = false; return } if (eventosDe(f).length === 0) nuevo(f); else setSel(f) }}>
                   <span className="agenda-daynum">{d}</span>
                   <span className="agenda-evs">
@@ -385,7 +466,19 @@ export default function AgendaMes() {
                         onPointerUp={chipUp}
                         onPointerCancel={chipUp}
                         onClick={(ev) => { if (suppressClick.current) { ev.stopPropagation(); suppressClick.current = false } }}
-                      ><span className="agenda-chip-ic">{tinfo(e.tipo).ic}</span>{e.titulo}</span>
+                      >
+                        <span className="agenda-chip-ic">{tinfo(e.tipo).ic}</span>
+                        <span className="agenda-chip-txt">{e.titulo}</span>
+                        {!e._vac && f === (e.fecha_fin || e.fecha) && (
+                          <span className="agenda-chip-grip"
+                            onPointerDown={(ev) => resizeDown(ev, e)}
+                            onPointerMove={resizeMove}
+                            onPointerUp={resizeUp}
+                            onPointerCancel={resizeUp}
+                            onClick={(ev) => ev.stopPropagation()}
+                            title="Estirar la duración">⟩</span>
+                        )}
+                      </span>
                     ))}
                     {evs.length > 3 && <span className="agenda-more">+{evs.length - 3}</span>}
                   </span>

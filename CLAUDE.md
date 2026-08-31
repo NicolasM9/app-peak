@@ -135,7 +135,12 @@ en el `pointerdown` + `elementFromPoint`; celda destino con clase `over`; fantas
 —así en mobile, aunque el texto se corte, se ve el tipo; (2) **vista Lista** (toggle `vista` mes|lista, `.agenda-vista`): eventos del mes agrupados por día de inicio
 con texto completo (reusa `.agenda-ev`), tap → editar; (3) **resumen "Feriados del año"** (botón → `abrirFeriados` fetch feriados del año → panel `.agenda-fer-*`
 con fecha·título·profe / "sin asignar" en rojo; click → va al mes y abre el editor para asignar); (4) **tocar un día vacío abre "Nuevo evento" directo** (si el
-día no tiene eventos → `nuevo(f)`, si tiene → selecciona). Verificado en vivo. **Pendiente Agenda:** repetir eventos + estirar duración (drag del borde). pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
+día no tiene eventos → `nuevo(f)`, si tiene → selecciona). Verificado en vivo.
+**Agenda — repetir + estirar (2026-08-31, sin SQL):** (5) **repetir eventos**: en el form (evento nuevo de 1 día) selector **Repetir** (No/semanal/quincenal/mensual)
++ **Repetir hasta** (default fin de año); al guardar, `generarFechas` arma las fechas y hace un `insert` de N filas independientes en `eventos` (cap 80).
+(6) **estirar duración**: tirador **⟩** (`.agenda-chip-grip`, con fondo para el dedo) en el chip del **último día** del evento; se arrastra a otra fecha (Pointer
+Events, `resizeDown/Move/Up`) → `update` de `eventos.fecha_fin` (si cae en el mismo día de inicio → `null` = 1 día). El grip hace `stopPropagation` para no
+disparar el move del chip. **Las 6 mejoras de Agenda que pidió Nico están hechas** (íconos, Lista, feriados del año, tap-vacío-agrega, repetir, estirar). pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
 la Agenda): cada día carga ideas/contenido con **tipo** (historia/publicación/ambas) y **checklist** de 4 pasos (grabar→editar→copy→subir,
 `contenidos.pasos` jsonb, se tildan inline desde el día; el puntito se prende cuando `subir`=true). **Backlog** "Ideas sueltas"
 (`fecha` null) con input para programarlas al calendario. **KPIs del mes**: subidos / historias / publicaciones / **consultas p/ entrenar**
