@@ -53,7 +53,13 @@ toda la planificación de un mes a otro. Sin migración (mismo modelo `ec`/`bloq
 **grilla tipo planilla** (`.ejt-*`): encabezados de columna (# · Ejercicio · Series · Reps · **Peso** · **Obs.** · acciones), celdas grandes/legibles
 (font 15px), gridlines, `overflow-x:auto` (scroll horizontal en mobile, min-width 620). **Enter** en un ejercicio baja a la fila de abajo y, si es la
 última, agrega una nueva (como Excel). Se sumaron 2 columnas nuevas **`peso`** y **`obs`** al modelo `ec`/`bloques` (jsonb → sin migración; también van al
-Modo TV). Bloques más grandes (padding/título). Pendiente idea a futuro: drag para reordenar filas, copiar/pegar rango, columna Descanso.
+Modo TV). Bloques más grandes (padding/título).
+**Planificación — 5 mejoras UX (2026-08-31, sin SQL):** en `PlanDia.jsx`: (1) **Pegar de Excel** (botón por lista + `onPaste` en la celda nombre → `parseFilas`
+parsea tab/coma/2-espacios → filas); (2) **arrastrar filas** para reordenar (se agarra del `#`, Pointer Events + `elementFromPoint`, reemplaza las flechitas ↑↓;
+quedan ⧉ duplicar y ✕ borrar); (3) **autoguardado** (debounce 900ms sobre `ec`/`bloques`, upsert a `planificaciones`; pill "Guardando…/Guardado ✓/Error";
+`firstRun`+`dirtyRef` para no guardar en el load); (4) **pestañas Día 1–4** dentro de la semana (`cambiarDia` guarda el actual y carga el otro; ver la semana
+entera sin salir); (5) **columnas # y Ejercicio fijas** (`position:sticky`; OJO: el `overflow:hidden` del contenedor rompe sticky → el borde/redondeo va en `.ejt`
+que scrollea, no en `.ejt-grid`). El botón "Guardar rutina" se sacó (guarda solo); ← Volver guarda si hay cambios. Pendiente: **#8 plantillas de día/semana completos** (necesita migración 0028).
 **Extras (2026-08-10, HECHOS — migración 0020):** (1) **Plantillas de bloque** en `PlanDia.jsx`: cada bloque tiene 💾 "Guardar como
 plantilla" (nombre+ejercicios → tabla `plantillas_bloque`, la usan todos los profes); botón "📁 Desde plantilla" lista las guardadas
 e inserta una como bloque nuevo; se borran desde el panel. (2) **Horario del gimnasio** en la Grilla (`GrillaSemanal.jsx`): la línea de
