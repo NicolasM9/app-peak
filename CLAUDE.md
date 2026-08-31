@@ -126,7 +126,11 @@ agregar una columna nueva al `.select()` rompe la query hasta correr la migraci�
 **Agenda — mejoras (2026-08-11):** cuadrantes al doble de alto (`min-height: max(80px,13.5vh)`); cada día muestra el **texto** del
 evento en chips de color (no solo puntito); **filtro por tipo** (chips arriba); y las **vacaciones de Horas** se traen como eventos
 read-only (`vacEventos` desde tabla `vacaciones`, no se editan en la Agenda). Sin migración.
-**Redes [admin] (`Redes.jsx`, 2026-08-11):** pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
+**Agenda — alineación + arrastre (2026-08-31, sin SQL):** fix del **"corrido"**: en mobile los chips `nowrap` inflaban las columnas (min-content) y la
+grilla desbordaba → se cambió `.agenda-grid` a `grid-template-columns: repeat(7, minmax(0,1fr))` + `.agenda-cell{min-width:0}` (ahora los encabezados
+Lun–Dom coinciden con los días). **Arrastrar eventos a otro día:** cada chip (no las vacaciones read-only) es arrastrable (Pointer Events, `setPointerCapture`
+en el `pointerdown` + `elementFromPoint`; celda destino con clase `over`; fantasma `.agenda-ghost`); al soltar hace `update` de `eventos.fecha` (y corre
+`fecha_fin` el mismo delta si es multi-día). `suppressClick` evita que el drag seleccione el día; tap normal sigue seleccionando. Todo verificado en vivo (demo `?agtest`). pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
 la Agenda): cada día carga ideas/contenido con **tipo** (historia/publicación/ambas) y **checklist** de 4 pasos (grabar→editar→copy→subir,
 `contenidos.pasos` jsonb, se tildan inline desde el día; el puntito se prende cuando `subir`=true). **Backlog** "Ideas sueltas"
 (`fecha` null) con input para programarlas al calendario. **KPIs del mes**: subidos / historias / publicaciones / **consultas p/ entrenar**

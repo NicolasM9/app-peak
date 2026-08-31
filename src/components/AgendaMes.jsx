@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { supabase } from '../lib/supabase'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
@@ -40,6 +40,9 @@ const ymd = (y, m, d) => `${y}-${pad(m + 1)}-${pad(d)}` // m 0-indexed
 const todayYmd = () => { const d = new Date(); return ymd(d.getFullYear(), d.getMonth(), d.getDate()) }
 function diaLargo(f) { const [y, m, d] = f.split('-').map(Number); const dt = new Date(y, m - 1, d); return `${DOWL[dt.getDay()]} ${d} de ${MESES[m - 1]}` }
 function cortita(f) { const [, m, d] = f.split('-').map(Number); return `${d}/${m}` }
+function parseYmd(s) { const [y, m, d] = s.split('-').map(Number); return new Date(y, m - 1, d) }
+function addDaysYmd(s, n) { const dt = parseYmd(s); dt.setDate(dt.getDate() + n); return ymd(dt.getFullYear(), dt.getMonth(), dt.getDate()) }
+function diffDays(a, b) { return Math.round((parseYmd(a) - parseYmd(b)) / 86400000) }
 
 export default function AgendaMes() {
   const now = new Date()
@@ -55,6 +58,13 @@ export default function AgendaMes() {
   const [saving, setSaving] = useState(false)
   const [cargandoFer, setCargandoFer] = useState(false)
   const [ferMsg, setFerMsg] = useState('')
+
+  // arrastre de eventos
+  const dragRef = useRef(null)
+  const ghostRef = useRef(null)
+  const suppressClick = useRef(false)
+  const [dragId, setDragId] = useState(null)
+  const [overFecha, setOverFecha] = useState(null)
 
   const mStart = ymd(year, month, 1)
   const mEnd = ymd(year, month, new Date(year, month + 1, 0).getDate())
@@ -137,6 +147,53 @@ export default function AgendaMes() {
     setSaving(false)
     setForm(null)
     await load()
+  }
+
+  async function moverEvento(ev, nuevaFecha) {
+    const delta = diffDays(nuevaFecha, ev.fecha)
+    if (!delta) return
+    const nuevaFin = ev.fecha_fin ? addDaysYmd(ev.fecha_fin, delta) : null
+    setEventos((l) => l.map((x) => (x.id === ev.id ? { ...x, fecha: nuevaFecha, fecha_fin: nuevaFin } : x)))
+    await supabase.from('eventos').update({ fecha: nuevaFecha, fecha_fin: nuevaFin }).eq('id', ev.id)
+  }
+
+  // arrastre (pointer events, mouse + touch); vacaciones no se arrastran
+  function posGhost(x, y) { const g = ghostRef.current; if (g) g.style.transform = `translate(${x + 10}px, ${y - 14}px)` }
+  function chipDown(e, ev) {
+    if (ev._vac) return
+    try { e.currentTarget.setPointerCapture(e.pointerId) } catch { /* noop */ }
+    dragRef.current = { ev, pointerId: e.pointerId, startX: e.clientX, startY: e.clientY, dragging: false, el: e.currentTarget, target: ev.fecha }
+  }
+  function chipMove(e) {
+    const d = dragRef.current
+    if (!d || e.pointerId !== d.pointerId) return
+    if (!d.dragging) {
+      if (Math.hypot(e.clientX - d.startX, e.clientY - d.startY) < 6) return
+      d.dragging = true
+      setDragId(d.ev.id)
+      const g = ghostRef.current
+      if (g) { g.textContent = d.ev.titulo; g.style.background = tinfo(d.ev.tipo).bg; g.style.display = 'block' }
+    }
+    e.preventDefault()
+    posGhost(e.clientX, e.clientY)
+    const el = document.elementFromPoint(e.clientX, e.clientY)
+    const cell = el && el.closest('[data-fecha]')
+    d.target = cell ? cell.getAttribute('data-fecha') : null
+    setOverFecha(d.target)
+  }
+  function chipUp(e) {
+    const d = dragRef.current
+    if (!d || e.pointerId !== d.pointerId) return
+    const wasDragging = d.dragging, target = d.target, ev = d.ev
+    if (d.dragging) {
+      try { d.el.releasePointerCapture(e.pointerId) } catch { /* noop */ }
+      const g = ghostRef.current; if (g) g.style.display = 'none'
+      suppressClick.current = true
+      setTimeout(() => { suppressClick.current = false }, 400)
+    }
+    dragRef.current = null
+    setDragId(null); setOverFecha(null)
+    if (wasDragging && target && target !== ev.fecha) moverEvento(ev, target)
   }
 
   // celdas del mes (lunes primero)
@@ -237,11 +294,21 @@ export default function AgendaMes() {
               const f = ymd(year, month, d)
               const evs = eventosDe(f)
               return (
-                <button key={i} className={`agenda-cell ${f === hoy ? 'hoy' : ''} ${sel === f ? 'sel' : ''}`} onClick={() => setSel(f)}>
+                <button key={i} data-fecha={f}
+                  className={`agenda-cell ${f === hoy ? 'hoy' : ''} ${sel === f ? 'sel' : ''} ${overFecha === f && dragId != null ? 'over' : ''}`}
+                  onClick={() => { if (suppressClick.current) { suppressClick.current = false; return } setSel(f) }}>
                   <span className="agenda-daynum">{d}</span>
                   <span className="agenda-evs">
                     {evs.slice(0, 3).map((e) => (
-                      <span key={e.id} className="agenda-chip" style={{ background: tinfo(e.tipo).bg }} title={e.titulo}>{e.titulo}</span>
+                      <span key={e.id}
+                        className={`agenda-chip ${e._vac ? '' : 'drag'} ${dragId === e.id ? 'dragging' : ''}`}
+                        style={{ background: tinfo(e.tipo).bg }} title={e.titulo}
+                        onPointerDown={(ev) => chipDown(ev, e)}
+                        onPointerMove={chipMove}
+                        onPointerUp={chipUp}
+                        onPointerCancel={chipUp}
+                        onClick={(ev) => { if (suppressClick.current) { ev.stopPropagation(); suppressClick.current = false } }}
+                      >{e.titulo}</span>
                     ))}
                     {evs.length > 3 && <span className="agenda-more">+{evs.length - 3}</span>}
                   </span>
@@ -286,6 +353,8 @@ export default function AgendaMes() {
           )}
         </>
       )}
+
+      <div className="agenda-ghost" ref={ghostRef} />
     </div>
   )
 }
