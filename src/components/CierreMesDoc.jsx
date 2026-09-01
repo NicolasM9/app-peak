@@ -1,0 +1,204 @@
+import { useEffect, useState } from 'react'
+import { supabase } from '../lib/supabase'
+import { formatARS } from '../lib/format'
+import { MEDICION_MONTO } from '../lib/domain'
+import { haceCuanto } from './Lesiones'
+
+const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+  'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
+
+// Documento de "Cierre del mes anterior" para el Inicio (admin).
+// Trae por su cuenta toda la info del mes `periodo` ('YYYY-MM-01') y arma
+// un resumen imprimible (window.print, reusa el layout .informe-*).
+// No escribe nada: es solo lectura.
+export default function CierreMesDoc({ periodo, onClose }) {
+  const [d, setD] = useState(null)
+
+  useEffect(() => {
+    ;(async () => {
+      const [{ data: alumnos }, { data: pagos }, { data: gastos }, { data: profes }, { data: lesiones }] =
+        await Promise.all([
+          supabase
+            .from('alumnos')
+            .select('id, nombre, estado, fecha_alta, fecha_baja, medicion_nutricional, paga_directo_profe, planes(nombre)'),
+          supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
+          supabase.from('gastos').select('categoria, monto, descripcion').eq('periodo', periodo),
+          supabase.from('profes').select('id, nombre, base_mensual, rol').eq('rol', 'profe').order('id'),
+          supabase.from('lesiones').select('alumno_id, tipo, desde').is('hasta', null),
+        ])
+      setD({
+        alumnos: alumnos || [],
+        pagos: pagos || [],
+        gastos: gastos || [],
+        profes: profes || [],
+        lesiones: lesiones || [],
+      })
+    })()
+  }, [periodo])
+
+  const ym = (periodo || '').slice(0, 7) // 'YYYY-MM'
+  const [y, m] = ym.split('-')
+  const mesLabel = `${MESES[Number(m) - 1]} ${y}`
+  const enMes = (iso) => (iso || '').slice(0, 7) === ym
+
+  if (!d) {
+    return (
+      <div className="informe-screen">
+        <div className="informe-toolbar">
+          <button className="btn-back" onClick={onClose}>← Volver</button>
+        </div>
+        <p className="muted">Armando el cierre de {mesLabel}…</p>
+      </div>
+    )
+  }
+
+  const activos = d.alumnos.filter((a) => a.estado === 'activo')
+  const activosPeak = activos.filter((a) => !a.paga_directo_profe)
+  const online = activos.filter((a) => (a.planes?.nombre || '') === 'Online')
+  const altas = d.alumnos.filter((a) => enMes(a.fecha_alta)).map((a) => a.nombre).sort()
+  const bajas = d.alumnos.filter((a) => enMes(a.fecha_baja)).map((a) => a.nombre).sort()
+
+  const cobrado = d.pagos
+    .filter((p) => enMes(p.fecha_pago))
+    .reduce((s, p) => s + Number(p.monto || 0), 0)
+  const mitad = Math.round(cobrado / 2)
+
+  const gastosOper = d.gastos.reduce((s, g) => s + Number(g.monto || 0), 0)
+  const profesPago = d.profes
+    .map((p) => ({ nombre: p.nombre, monto: Number(p.base_mensual || 0) }))
+    .filter((x) => x.monto > 0)
+  const totalProfes = profesPago.reduce((s, x) => s + x.monto, 0)
+  const conMedicion = activosPeak.filter((a) => a.medicion_nutricional).length
+  const diegoTotal = conMedicion * MEDICION_MONTO
+  const totalGastos = gastosOper + totalProfes + diegoTotal
+  const resultado = cobrado - totalGastos
+
+  const nombrePorId = new Map(d.alumnos.map((a) => [a.id, a.nombre]))
+  const lesionados = (d.lesiones || [])
+    .map((l) => ({ nombre: nombrePorId.get(l.alumno_id) || '—', tipo: l.tipo, desde: l.desde }))
+    .sort((a, b) => (a.desde < b.desde ? -1 : 1))
+
+  return (
+    <div className="informe-screen">
+      <div className="informe-toolbar">
+        <button className="btn-back" onClick={onClose}>← Volver</button>
+        <button className="btn-primary" onClick={() => window.print()}>🖨 Descargar PDF</button>
+      </div>
+
+      <div className="informe-hoja" id="informe-print">
+        <div className="inf-head">
+          <div>
+            <div className="inf-marca">PEAK PERFORMANCE</div>
+            <div className="inf-tit">Cierre del mes</div>
+          </div>
+          <div className="inf-fecha">{mesLabel}</div>
+        </div>
+
+        {/* ---- Alumnos ---- */}
+        <section className="inf-sec">
+          <h3 className="inf-sec-tit">Alumnos</h3>
+          <div className="inf-tabla">
+            <Fila lbl="Activos del centro" val={activosPeak.length} fuerte />
+            <Fila lbl="Alumnos online (plan Online)" val={online.length} />
+            <Fila lbl="Altas del mes" val={`+${altas.length}`} />
+            <Fila lbl="Bajas del mes" val={`−${bajas.length}`} />
+          </div>
+          {altas.length > 0 && (
+            <p className="cm-names"><b>Altas:</b> {altas.join(', ')}</p>
+          )}
+          {bajas.length > 0 && (
+            <p className="cm-names"><b>Bajas:</b> {bajas.join(', ')}</p>
+          )}
+          {altas.length === 0 && bajas.length === 0 && (
+            <p className="inf-vacio" style={{ marginTop: 6 }}>Sin altas ni bajas este mes.</p>
+          )}
+        </section>
+
+        {/* ---- Ingresos ---- */}
+        <section className="inf-sec">
+          <h3 className="inf-sec-tit">Plata cobrada</h3>
+          <div className="inf-tabla">
+            <Fila lbl="Cobrado en el mes" val={formatARS(cobrado)} fuerte />
+            <Fila lbl="Nico" val={formatARS(mitad)} />
+            <Fila lbl="Eze" val={formatARS(mitad)} />
+          </div>
+          <p className="cm-names">Nico y Eze cobraron {formatARS(mitad)} cada uno (mitad del total).</p>
+        </section>
+
+        {/* ---- Gastos ---- */}
+        <section className="inf-sec">
+          <h3 className="inf-sec-tit">Gastos</h3>
+          <div className="inf-tabla">
+            {d.gastos.length === 0 ? (
+              <Fila lbl="Gastos operativos" val={formatARS(0)} />
+            ) : (
+              <>
+                {d.gastos.map((g, i) => (
+                  <Fila
+                    key={i}
+                    lbl={g.categoria + (g.descripcion ? ` · ${g.descripcion}` : '')}
+                    val={formatARS(Number(g.monto || 0))}
+                  />
+                ))}
+                <Fila lbl="Subtotal gastos operativos" val={formatARS(gastosOper)} />
+              </>
+            )}
+          </div>
+
+          <p className="cm-subtit">Pago a profes</p>
+          <div className="inf-tabla">
+            {profesPago.length === 0 ? (
+              <p className="inf-vacio">Sin pagos a profes cargados.</p>
+            ) : (
+              <>
+                {profesPago.map((p, i) => (
+                  <Fila key={i} lbl={p.nombre} val={formatARS(p.monto)} />
+                ))}
+                <Fila lbl="Subtotal profes" val={formatARS(totalProfes)} />
+              </>
+            )}
+          </div>
+
+          <div className="inf-tabla" style={{ marginTop: 4 }}>
+            <Fila lbl={`Mediciones (Diego) · ${conMedicion} alumno${conMedicion === 1 ? '' : 's'}`} val={formatARS(diegoTotal)} />
+            <Fila lbl="Total gastos" val={formatARS(totalGastos)} fuerte />
+          </div>
+        </section>
+
+        {/* ---- Resultado ---- */}
+        <section className="inf-sec">
+          <h3 className="inf-sec-tit">Resultado del mes</h3>
+          <div className="cm-resultado" style={resultado < 0 ? { color: '#d4443a' } : null}>
+            {formatARS(resultado)}
+          </div>
+          <p className="inf-vacio" style={{ marginTop: 4 }}>Plata cobrada − gastos totales.</p>
+        </section>
+
+        {/* ---- Lesionados ---- */}
+        <section className="inf-sec">
+          <h3 className="inf-sec-tit">Lesionados (estado actual)</h3>
+          {lesionados.length === 0 ? (
+            <p className="inf-vacio">Nadie lesionado ahora.</p>
+          ) : (
+            <div className="inf-tabla">
+              {lesionados.map((l, i) => (
+                <Fila key={i} lbl={`${l.nombre} · ${l.tipo}`} val={haceCuanto(l.desde)} />
+              ))}
+            </div>
+          )}
+        </section>
+
+        <div className="inf-pie">Peak Performance · Cierre de {mesLabel}</div>
+      </div>
+    </div>
+  )
+}
+
+function Fila({ lbl, val, fuerte }) {
+  return (
+    <div className="inf-fila">
+      <span className="inf-fila-lbl" style={fuerte ? { fontWeight: 800 } : null}>{lbl}</span>
+      <span className="inf-fila-val" style={fuerte ? { fontWeight: 800 } : null}>{val}</span>
+    </div>
+  )
+}

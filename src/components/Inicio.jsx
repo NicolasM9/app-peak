@@ -9,12 +9,21 @@ import {
   ESTADO_INFO,
 } from '../lib/domain'
 import { haceCuanto } from './Lesiones'
+import CierreMesDoc from './CierreMesDoc'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
   'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre']
 
 export default function Inicio({ onIrAlumno, onIr }) {
   const [data, setData] = useState(null)
+  const [verCierre, setVerCierre] = useState(false)
+
+  // Cierre del mes ANTERIOR (disponible en Inicio la primera semana del mes)
+  const _now = new Date()
+  const _prev = new Date(_now.getFullYear(), _now.getMonth() - 1, 1)
+  const prevPeriodo = `${_prev.getFullYear()}-${String(_prev.getMonth() + 1).padStart(2, '0')}-01`
+  const prevMesLabel = `${MESES[_prev.getMonth()]} ${_prev.getFullYear()}`
+  const esPrimeraSemana = _now.getDate() <= 7
 
   useEffect(() => {
     ;(async () => {
@@ -33,6 +42,10 @@ export default function Inicio({ onIrAlumno, onIr }) {
       setData({ alumnos: alumnos || [], pagos: pagos || [], asistencias: asistencias || [], lesiones: lesiones || [], feriado: feriado || null, profes: profes || [] })
     })()
   }, [])
+
+  if (verCierre) {
+    return <CierreMesDoc periodo={prevPeriodo} onClose={() => setVerCierre(false)} />
+  }
 
   if (!data) return <p className="muted">Cargando…</p>
 
@@ -141,6 +154,17 @@ export default function Inicio({ onIrAlumno, onIr }) {
         <h1 className="section-title">Inicio</h1>
       </div>
       <p className="cal-sub">Resumen rápido de cómo viene todo</p>
+
+      {esPrimeraSemana && (
+        <button className="cierre-card" onClick={() => setVerCierre(true)}>
+          <span className="cierre-card-ic">📄</span>
+          <span className="cierre-card-txt">
+            <span className="cierre-card-tit">Cierre de {prevMesLabel}</span>
+            <span className="cierre-card-sub">Resumen del mes anterior · tocá para ver y descargar</span>
+          </span>
+          <span className="cierre-card-arrow">›</span>
+        </button>
+      )}
 
       <div className="stat-grid">
         <Stat label="Alumnos activos" value={activosPeak.length} onClick={() => onIr && onIr('alumnos')} />
