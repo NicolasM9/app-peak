@@ -140,7 +140,14 @@ día no tiene eventos → `nuevo(f)`, si tiene → selecciona). Verificado en vi
 + **Repetir hasta** (default fin de año); al guardar, `generarFechas` arma las fechas y hace un `insert` de N filas independientes en `eventos` (cap 80).
 (6) **estirar duración**: tirador **⟩** (`.agenda-chip-grip`, con fondo para el dedo) en el chip del **último día** del evento; se arrastra a otra fecha (Pointer
 Events, `resizeDown/Move/Up`) → `update` de `eventos.fecha_fin` (si cae en el mismo día de inicio → `null` = 1 día). El grip hace `stopPropagation` para no
-disparar el move del chip. **Las 6 mejoras de Agenda que pidió Nico están hechas** (íconos, Lista, feriados del año, tap-vacío-agrega, repetir, estirar). pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
+disparar el move del chip. **Las 6 mejoras de Agenda que pidió Nico están hechas** (íconos, Lista, feriados del año, tap-vacío-agrega, repetir, estirar).
+**Editor de precios de planes (2026-09-01, sin SQL):** nuevo `PreciosPlanes.jsx` — botón **"💲 Precios"** en Pagos (admin) → pantalla que lista los planes
+(`planes.precio_mensual`, RLS `planes_admin_write` = solo admin) separados en **"Planes del centro"** (Básico/Full/Semanal/Online/Por día) y **"Personalizados"**;
+cada uno con su precio editable ($ + input + unidad /mes·/semana·/día) y "Actual: $…". Guarda solo los que cambian (`update` por id); el precio nuevo se refleja
+al toque en facturación/cobros/ficha porque todo pasa por `precioMensual()` (`planes.precio_mensual`), y los pagos ya registrados guardan su monto histórico
+(no se tocan). Al cerrar recarga Pagos. Reemplaza la necesidad de tocar SQL cada trimestre. **Precios nuevos a cargar (pasados por Nico el 2026-09-01, los carga él
+desde el editor):** Básico $82.000, Full $90.000, Online $65.000, Semanal $36.000, Por día $18.000 (igual). Verificado en vivo con data real (demo route temporal, ya borrada).
+La pestaña Redes (bloque admin) es una pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
 la Agenda): cada día carga ideas/contenido con **tipo** (historia/publicación/ambas) y **checklist** de 4 pasos (grabar→editar→copy→subir,
 `contenidos.pasos` jsonb, se tildan inline desde el día; el puntito se prende cuando `subir`=true). **Backlog** "Ideas sueltas"
 (`fecha` null) con input para programarlas al calendario. **KPIs del mes**: subidos / historias / publicaciones / **consultas p/ entrenar**
