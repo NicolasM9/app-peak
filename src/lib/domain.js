@@ -38,16 +38,23 @@ export function estadoAlumno(pagos, today = new Date()) {
   return 'al_dia'
 }
 
+// Mes 'YYYY-MM' de hoy (o de una fecha dada). Sin líos de zona horaria.
+export function mesActualYM(today = new Date()) {
+  return `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}`
+}
+
+// ¿La fecha ISO ('YYYY-MM-DD') cae en el mes `ym` ('YYYY-MM')?
+// Compara por TEXTO a propósito: `new Date('2026-09-01')` se interpreta en UTC
+// y en Argentina (UTC-3) se corre al 31/08 → caía en el mes equivocado.
+export function esDelMes(iso, ym = mesActualYM()) {
+  return typeof iso === 'string' && iso.slice(0, 7) === ym
+}
+
 // Estado del MES ACTUAL (modelo virtual, igual que Pagos/Inicio): ¿pagó este mes?
 // Si pagó -> al_dia; si no, según la fecha de hoy vs el vencimiento del 6.
 export function estadoMesActual(pagos, today = new Date()) {
-  const y = today.getFullYear()
-  const m = today.getMonth()
-  const pagoEsteMes = (pagos || []).some((p) => {
-    if (!p.fecha_pago) return false
-    const d = new Date(p.fecha_pago)
-    return d.getFullYear() === y && d.getMonth() === m
-  })
+  const ym = mesActualYM(today)
+  const pagoEsteMes = (pagos || []).some((p) => esDelMes(p.fecha_pago, ym))
   if (pagoEsteMes) return 'al_dia'
   return estadoPago({ vencimiento: vencimientoPorDefecto(today), fecha_pago: null }, today)
 }

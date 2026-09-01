@@ -7,6 +7,8 @@ import {
   vencimientoPorDefecto,
   MEDICION_MONTO,
   ESTADO_INFO,
+  esDelMes,
+  mesActualYM,
 } from '../lib/domain'
 import { haceCuanto } from './Lesiones'
 import CierreMesDoc from './CierreMesDoc'
@@ -50,11 +52,8 @@ export default function Inicio({ onIrAlumno, onIr }) {
   if (!data) return <p className="muted">Cargando…</p>
 
   const ahora = new Date()
-  const esteMes = (iso) => {
-    if (!iso) return false
-    const d = new Date(iso)
-    return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth()
-  }
+  const mesYM = mesActualYM(ahora)
+  const esteMes = (iso) => esDelMes(iso, mesYM)
 
   const activos = data.alumnos.filter((a) => a.estado === 'activo')
   const activosPeak = activos.filter((a) => !a.paga_directo_profe)

@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
-import { precioMensual, hoyISO, vencimientoPorDefecto, estadoPago, ESTADO_INFO, waLink, MEDICION_MONTO } from '../lib/domain'
+import { precioMensual, hoyISO, vencimientoPorDefecto, estadoPago, ESTADO_INFO, waLink, MEDICION_MONTO, esDelMes, mesActualYM } from '../lib/domain'
 import CargaPagos from './CargaPagos'
 import CierreMes from './CierreMes'
 import HistorialFacturacion from './HistorialFacturacion'
@@ -82,24 +82,17 @@ export default function Pagos({ irAlAlumno }) {
   }, [])
 
   const ahora = new Date()
+  const mesYM = mesActualYM(ahora)
   const alumnosPeak = alumnos.filter((a) => !a.paga_directo_profe)
   const facturacion = alumnosPeak.reduce((s, a) => s + precioMensual(a), 0)
   const cobrado = pagos
-    .filter((p) => {
-      if (!p.fecha_pago) return false
-      const d = new Date(p.fecha_pago)
-      return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth()
-    })
+    .filter((p) => esDelMes(p.fecha_pago, mesYM))
     .reduce((s, p) => s + Number(p.monto || 0), 0)
 
   // Cobros del mes: por cada alumno activo, si ya pagó este mes o todavía debe
   const pagadoSet = new Set(
     pagos
-      .filter((p) => {
-        if (!p.fecha_pago) return false
-        const d = new Date(p.fecha_pago)
-        return d.getFullYear() === ahora.getFullYear() && d.getMonth() === ahora.getMonth()
-      })
+      .filter((p) => esDelMes(p.fecha_pago, mesYM))
       .map((p) => p.alumno_id),
   )
   const venc6 = vencimientoPorDefecto()

@@ -32,8 +32,7 @@ export default function HistorialFacturacion({ onClose }) {
     const get = (k) => map.get(k) || { cobrado: 0, n: 0, gastos: 0 }
     pagos.forEach((p) => {
       if (!p.fecha_pago) return
-      const d = new Date(p.fecha_pago)
-      const k = key(d.getFullYear(), d.getMonth())
+      const k = p.fecha_pago.slice(0, 7) // 'YYYY-MM' (por texto: evita el corrimiento de zona horaria)
       const o = get(k)
       o.cobrado += Number(p.monto || 0)
       o.n += 1

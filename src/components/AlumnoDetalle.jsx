@@ -77,7 +77,7 @@ export default function AlumnoDetalle({ alumno, onBack, onEdit, onChanged, autor
 
   // Resumen de pagos + estado del mes actual
   const anio = new Date().getFullYear()
-  const pagosDelAnio = pagos.filter((p) => p.fecha_pago && new Date(p.fecha_pago).getFullYear() === anio)
+  const pagosDelAnio = pagos.filter((p) => p.fecha_pago && p.fecha_pago.slice(0, 4) === String(anio))
   const totalAnio = pagosDelAnio.reduce((s, p) => s + Number(p.monto || 0), 0)
   const ultimoPago = pagos.filter((p) => p.fecha_pago).sort((a, b) => (a.fecha_pago < b.fecha_pago ? 1 : -1))[0]
   const estMes = estadoMesActual(pagos)
