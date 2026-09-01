@@ -58,10 +58,9 @@ export default function CierreMesDoc({ periodo, onClose }) {
   const altas = d.alumnos.filter((a) => enMes(a.fecha_alta)).map((a) => a.nombre).sort()
   const bajas = d.alumnos.filter((a) => enMes(a.fecha_baja)).map((a) => a.nombre).sort()
 
-  const cobrado = d.pagos
+  const facturado = d.pagos
     .filter((p) => enMes(p.fecha_pago))
     .reduce((s, p) => s + Number(p.monto || 0), 0)
-  const mitad = Math.round(cobrado / 2)
 
   const gastosOper = d.gastos.reduce((s, g) => s + Number(g.monto || 0), 0)
   const profesPago = d.profes
@@ -71,7 +70,8 @@ export default function CierreMesDoc({ periodo, onClose }) {
   const conMedicion = activosPeak.filter((a) => a.medicion_nutricional).length
   const diegoTotal = conMedicion * MEDICION_MONTO
   const totalGastos = gastosOper + totalProfes + diegoTotal
-  const resultado = cobrado - totalGastos
+  const resultado = facturado - totalGastos
+  const parteCada = Math.round(resultado / 2)
 
   const nombrePorId = new Map(d.alumnos.map((a) => [a.id, a.nombre]))
   const lesionados = (d.lesiones || [])
@@ -100,34 +100,48 @@ export default function CierreMesDoc({ periodo, onClose }) {
           <div className="inf-tabla">
             <Fila lbl="Activos del centro" val={activosPeak.length} fuerte />
             <Fila lbl="Alumnos online (plan Online)" val={online.length} />
-            <Fila lbl="Altas del mes" val={`+${altas.length}`} />
-            <Fila lbl="Bajas del mes" val={`−${bajas.length}`} />
           </div>
-          {altas.length > 0 && (
-            <p className="cm-names"><b>Altas:</b> {altas.join(', ')}</p>
+
+          <p className="cm-subtit">Altas del mes ({altas.length})</p>
+          {altas.length === 0 ? (
+            <p className="inf-vacio">Sin altas este mes.</p>
+          ) : (
+            <div className="cm-checklist">
+              {altas.map((n, i) => <CheckItem key={`a${i}`} nombre={n} />)}
+            </div>
           )}
-          {bajas.length > 0 && (
-            <p className="cm-names"><b>Bajas:</b> {bajas.join(', ')}</p>
-          )}
-          {altas.length === 0 && bajas.length === 0 && (
-            <p className="inf-vacio" style={{ marginTop: 6 }}>Sin altas ni bajas este mes.</p>
+
+          <p className="cm-subtit">Bajas del mes ({bajas.length})</p>
+          {bajas.length === 0 ? (
+            <p className="inf-vacio">Sin bajas este mes.</p>
+          ) : (
+            <div className="cm-checklist">
+              {bajas.map((n, i) => <CheckItem key={`b${i}`} nombre={n} />)}
+            </div>
           )}
         </section>
 
-        {/* ---- Ingresos ---- */}
+        {/* ---- Cuentas del mes ---- */}
         <section className="inf-sec">
-          <h3 className="inf-sec-tit">Plata cobrada</h3>
+          <h3 className="inf-sec-tit">Cuentas del mes</h3>
           <div className="inf-tabla">
-            <Fila lbl="Cobrado en el mes" val={formatARS(cobrado)} fuerte />
-            <Fila lbl="Nico" val={formatARS(mitad)} />
-            <Fila lbl="Eze" val={formatARS(mitad)} />
+            <Fila lbl="Total facturado" val={formatARS(facturado)} />
+            <Fila lbl="Total gastos" val={`− ${formatARS(totalGastos)}`} />
           </div>
-          <p className="cm-names">Nico y Eze cobraron {formatARS(mitad)} cada uno (mitad del total).</p>
+          <div className="cm-resultado" style={resultado < 0 ? { color: '#d4443a', marginTop: 10 } : { marginTop: 10 }}>
+            {formatARS(resultado)}
+          </div>
+          <p className="inf-vacio" style={{ marginTop: 2, marginBottom: 14 }}>Resultado del mes (facturado − gastos).</p>
+          <div className="inf-tabla">
+            <Fila lbl="Para Nico" val={formatARS(parteCada)} fuerte />
+            <Fila lbl="Para Eze" val={formatARS(parteCada)} fuerte />
+          </div>
+          <p className="cm-names">A Nico y a Eze les toca {formatARS(parteCada)} a cada uno (la mitad del resultado).</p>
         </section>
 
-        {/* ---- Gastos ---- */}
+        {/* ---- Detalle de gastos ---- */}
         <section className="inf-sec">
-          <h3 className="inf-sec-tit">Gastos</h3>
+          <h3 className="inf-sec-tit">Detalle de gastos</h3>
           <div className="inf-tabla">
             {d.gastos.length === 0 ? (
               <Fila lbl="Gastos operativos" val={formatARS(0)} />
@@ -165,15 +179,6 @@ export default function CierreMesDoc({ periodo, onClose }) {
           </div>
         </section>
 
-        {/* ---- Resultado ---- */}
-        <section className="inf-sec">
-          <h3 className="inf-sec-tit">Resultado del mes</h3>
-          <div className="cm-resultado" style={resultado < 0 ? { color: '#d4443a' } : null}>
-            {formatARS(resultado)}
-          </div>
-          <p className="inf-vacio" style={{ marginTop: 4 }}>Plata cobrada − gastos totales.</p>
-        </section>
-
         {/* ---- Lesionados ---- */}
         <section className="inf-sec">
           <h3 className="inf-sec-tit">Lesionados (estado actual)</h3>
@@ -200,5 +205,15 @@ function Fila({ lbl, val, fuerte }) {
       <span className="inf-fila-lbl" style={fuerte ? { fontWeight: 800 } : null}>{lbl}</span>
       <span className="inf-fila-val" style={fuerte ? { fontWeight: 800 } : null}>{val}</span>
     </div>
+  )
+}
+
+function CheckItem({ nombre }) {
+  const [on, setOn] = useState(false)
+  return (
+    <button type="button" className={'cm-check' + (on ? ' on' : '')} onClick={() => setOn((v) => !v)}>
+      <span className="cm-check-box">{on ? '✓' : ''}</span>
+      <span className="cm-check-lbl">{nombre}</span>
+    </button>
   )
 }
