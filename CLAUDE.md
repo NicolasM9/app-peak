@@ -156,6 +156,12 @@ online = plan Online; **altas/bajas como CHECKLIST** clickeable — componente `
 activosPeak sin pago en el mes y con `fecha_alta<=ym` — no cuenta a los que entraron después; CHECKLIST con monto `precioMensual` + Total pendiente; el tilde es marca
 personal, no baja el total), **Detalle de gastos** (gastos operativos + subtotal, pago a cada profe por nombre + subtotal, Diego, total), **Lesionados (estado actual)** (lesiones
 activas: nombre·tipo·hace cuánto). Verificado en vivo con agosto real (facturado $4.685.001 − gastos $1.885.500 = resultado $2.799.501 → $1.399.751 c/u; 2 deudores = $114.000).
+**Fix zona horaria en conteo de pagos (2026-09-01, sin SQL):** BUG que reportó Nico — los pagos cargados (carga rápida y demás) NO impactaban en el total. Causa: comparar el mes
+con `new Date('2026-09-01')` interpreta la fecha en UTC y en Argentina (UTC−3) la corre al 31/08 → los pagos del **día 1** caían en el mes anterior y no sumaban a "Cobrado/Ingresos
+del mes". Fix: helpers nuevos en `domain.js` **`mesActualYM()`** y **`esDelMes(iso, ym)`** que comparan por TEXTO (`iso.slice(0,7) === 'YYYY-MM'`). Reemplazado en `Pagos.jsx` (cobrado +
+pagadoSet), `Inicio.jsx` (`esteMes` → ingresos/deudores), `HistorialFacturacion.jsx` (agrupar por `fecha_pago.slice(0,7)`), `AlumnoDetalle.jsx` (pagos del año por `.slice(0,4)`),
+`domain.js` `estadoMesActual` (estado "pagó este mes"). El `CierreMesDoc` ya comparaba por texto (no tenía el bug). Verificado en vivo: Ingresos del mes pasó de $0 a $172.000 y deudores
+de 71 a 69 tras el fix (pagos reales cargados el 1/9). Los flujos ya recargan solos (`load()`/`loadPagos()` tras cada alta), así que ahora impacta al toque sin reiniciar la página.
 El `CierreMes.jsx` viejo (botón 📄 en Pagos, mes actual, recibe `datos`) queda como está. Idea futura: si Nico lo quiere disponible todo el mes o desde Pagos, es fácil.
 La pestaña Redes (bloque admin) es una pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
 la Agenda): cada día carga ideas/contenido con **tipo** (historia/publicación/ambas) y **checklist** de 4 pasos (grabar→editar→copy→subir,
