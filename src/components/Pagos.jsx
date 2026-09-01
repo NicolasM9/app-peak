@@ -66,7 +66,7 @@ export default function Pagos({ irAlAlumno }) {
       supabase.from('gastos').select('*').eq('periodo', periodo).order('monto', { ascending: false }),
       supabase
         .from('profes')
-        .select('id, nombre, base_mensual')
+        .select('id, nombre, base_mensual, split_resto, personalizados')
         .eq('rol', 'profe')
         .order('id'),
     ])
@@ -126,6 +126,27 @@ export default function Pagos({ irAlAlumno }) {
     .map((p) => ({ id: p.id, nombre: p.nombre, monto: Number(p.base_mensual || 0) }))
     .filter((x) => x.monto > 0)
   const totalProfes = pagosProfes.reduce((s, x) => s + x.monto, 0)
+
+  // Lo que recibe Peak de los personalizados repartidos: por cada personalizado
+  // que NO va 100% al profe, a Peak le queda (100 − split_resto)% (el "40%").
+  const personalizadosPeak = []
+  profes.forEach((p) => {
+    const split = Number(p.split_resto ?? 60)
+    const pctPeak = 100 - split
+    ;(p.personalizados || []).forEach((x) => {
+      if (x.al100) return // 100% al profe → Peak no recibe
+      const monto = Number(x.monto || 0)
+      if (monto <= 0) return
+      personalizadosPeak.push({
+        profe: p.nombre,
+        nombre: x.nombre,
+        monto,
+        pct: pctPeak,
+        cut: Math.round((monto * pctPeak) / 100),
+      })
+    })
+  })
+  const totalPeakPersonalizados = personalizadosPeak.reduce((s, x) => s + x.cut, 0)
   const gastosManuales = gastos.reduce((s, g) => s + Number(g.monto || 0), 0)
   const conMedicion = alumnosPeak.filter((a) => a.medicion_nutricional).length
   const diegoTotal = conMedicion * MEDICION_MONTO
@@ -403,6 +424,35 @@ export default function Pagos({ irAlAlumno }) {
             <p className="muted" style={{ textAlign: 'right', marginTop: 12 }}>
               Total gastos (con profes): <b style={{ color: '#fff' }}>{formatARS(totalGastos)}</b>
             </p>
+          )}
+
+          <div className="section-subhead">
+            <h2>Personalizados · 40% para Peak</h2>
+          </div>
+          <p className="cal-sub" style={{ marginTop: -4 }}>
+            De cada personalizado repartido, el profe se queda con su parte y a Peak le queda el resto. Sale de Acuerdos.
+          </p>
+          {personalizadosPeak.length === 0 ? (
+            <p className="muted">
+              No hay personalizados con reparto cargados. Los que van 100% al profe no cuentan acá.
+            </p>
+          ) : (
+            <>
+              <ul className="pago-list">
+                {personalizadosPeak.map((x, i) => (
+                  <li key={i} className="pago-row">
+                    <div className="pago-info">
+                      <span className="pago-venc">{x.nombre || 'Personalizado'}</span>
+                      <span className="pago-sub">{x.profe} · {formatARS(x.monto)} · {x.pct}% para Peak</span>
+                    </div>
+                    <span className="pago-monto" style={{ color: '#86d98f' }}>{formatARS(x.cut)}</span>
+                  </li>
+                ))}
+              </ul>
+              <p className="muted" style={{ textAlign: 'right', marginTop: 12 }}>
+                Total para Peak: <b style={{ color: '#86d98f' }}>{formatARS(totalPeakPersonalizados)}</b>
+              </p>
+            </>
           )}
         </>
       )}
