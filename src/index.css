@@ -3742,3 +3742,51 @@ textarea {
   background: rgba(0, 0, 0, .22);
 }
 .agenda-chip-grip:hover { background: rgba(0, 0, 0, .38); }
+
+/* ---- Editor de precios de planes (Pagos, admin) ---- */
+.precio-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 12px 0;
+  border-top: 1px solid #232a3a;
+}
+.precio-row:first-of-type { border-top: none; }
+.precio-info { min-width: 0; }
+.precio-nombre { color: #fff; font-size: 15px; font-weight: 500; }
+.precio-actual { color: #8b94a3; font-size: 12.5px; margin-top: 2px; }
+.precio-row-dirty .precio-actual { color: var(--cobalt); }
+.precio-input {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+  padding: 8px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--field-border);
+  background: var(--field-bg);
+}
+.precio-row-dirty .precio-input { border-color: var(--cobalt); }
+.precio-signo { color: #8b94a3; font-size: 16px; }
+.precio-input input {
+  width: 92px;
+  border: none;
+  background: transparent;
+  color: #fff;
+  font-size: 17px;
+  font-weight: 600;
+  outline: none;
+  text-align: right;
+  padding: 0;
+}
+.precio-unidad { color: #8b94a3; font-size: 13px; white-space: nowrap; }
+.precio-guardar {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-top: 16px;
+}
+.precio-msg { font-size: 13.5px; }
+.precio-ok { color: #86d98f; font-weight: 600; }
+.precio-err { color: #f0999a; font-weight: 600; }

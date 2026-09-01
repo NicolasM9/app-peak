@@ -6,6 +6,7 @@ import CargaPagos from './CargaPagos'
 import CierreMes from './CierreMes'
 import HistorialFacturacion from './HistorialFacturacion'
 import AvisoDeudores from './AvisoDeudores'
+import PreciosPlanes from './PreciosPlanes'
 import { exportarRespaldo } from '../lib/exportar'
 
 const CATEGORIAS = [
@@ -41,6 +42,7 @@ export default function Pagos({ irAlAlumno }) {
   const [showCierre, setShowCierre] = useState(false)
   const [showHistorial, setShowHistorial] = useState(false)
   const [showAviso, setShowAviso] = useState(false)
+  const [showPrecios, setShowPrecios] = useState(false)
 
   async function respaldo() {
     setExportando(true)
@@ -166,6 +168,10 @@ export default function Pagos({ irAlAlumno }) {
     return <HistorialFacturacion onClose={() => setShowHistorial(false)} />
   }
 
+  if (showPrecios) {
+    return <PreciosPlanes onClose={async () => { setShowPrecios(false); await load() }} />
+  }
+
   if (showAviso) {
     return <AvisoDeudores deudores={deudoresPend} mes={mesTxt} onClose={() => setShowAviso(false)} />
   }
@@ -195,6 +201,7 @@ export default function Pagos({ irAlAlumno }) {
       <div className="section-head">
         <h1 className="section-title">Pagos</h1>
         <div className="section-head-actions">
+          <button className="btn-ghost" onClick={() => setShowPrecios(true)}>💲 Precios</button>
           <button className="btn-ghost" onClick={() => setShowHistorial(true)}>📈 Historial</button>
           <button className="btn-ghost" onClick={() => setShowCierre(true)}>📄 Cierre de mes</button>
           <button className="btn-ghost" onClick={respaldo} disabled={exportando}>
