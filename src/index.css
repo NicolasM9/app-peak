@@ -3391,6 +3391,16 @@ textarea {
 .cm-check.on .cm-check-box { background: #1a4fa3; border-color: #1a4fa3; }
 .cm-check-lbl { font-size: 15px; color: #1a2230; line-height: 1.2; }
 .cm-check.on .cm-check-lbl { text-decoration: line-through; color: #97a0ad; }
+.cm-checklist-1 { grid-template-columns: 1fr; }
+.cm-check-monto {
+  margin-left: auto;
+  font-size: 14px;
+  font-weight: 600;
+  color: #5a6474;
+  white-space: nowrap;
+  padding-left: 12px;
+}
+.cm-check.on .cm-check-monto { color: #b3bac4; text-decoration: line-through; }
 .inf-pie {
   margin-top: 24px;
   padding-top: 12px;

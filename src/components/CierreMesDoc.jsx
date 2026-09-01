@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase'
 import { formatARS } from '../lib/format'
-import { MEDICION_MONTO } from '../lib/domain'
+import { MEDICION_MONTO, precioMensual } from '../lib/domain'
 import { haceCuanto } from './Lesiones'
 
 const MESES = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
@@ -20,7 +20,7 @@ export default function CierreMesDoc({ periodo, onClose }) {
         await Promise.all([
           supabase
             .from('alumnos')
-            .select('id, nombre, estado, fecha_alta, fecha_baja, medicion_nutricional, paga_directo_profe, planes(nombre)'),
+            .select('id, nombre, estado, fecha_alta, fecha_baja, medicion_nutricional, paga_directo_profe, ajuste_monto, planes(nombre, precio_mensual)'),
           supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
           supabase.from('gastos').select('categoria, monto, descripcion').eq('periodo', periodo),
           supabase.from('profes').select('id, nombre, base_mensual, rol').eq('rol', 'profe').order('id'),
@@ -72,6 +72,17 @@ export default function CierreMesDoc({ periodo, onClose }) {
   const totalGastos = gastosOper + totalProfes + diegoTotal
   const resultado = facturado - totalGastos
   const parteCada = Math.round(resultado / 2)
+
+  // Quién quedó por pagar ese mes: activos que le pagan a Peak, sin pago
+  // registrado en el mes, y que ya estaban de alta a esa altura (no los que
+  // entraron después del mes que se cierra).
+  const pagadoMes = new Set(d.pagos.filter((p) => enMes(p.fecha_pago)).map((p) => p.alumno_id))
+  const deudores = activosPeak
+    .filter((a) => !pagadoMes.has(a.id))
+    .filter((a) => !a.fecha_alta || a.fecha_alta.slice(0, 7) <= ym)
+    .map((a) => ({ nombre: a.nombre, monto: precioMensual(a) }))
+    .sort((x, y) => x.nombre.localeCompare(y.nombre))
+  const pendienteTotal = deudores.reduce((s, x) => s + x.monto, 0)
 
   const nombrePorId = new Map(d.alumnos.map((a) => [a.id, a.nombre]))
   const lesionados = (d.lesiones || [])
@@ -137,6 +148,25 @@ export default function CierreMesDoc({ periodo, onClose }) {
             <Fila lbl="Para Eze" val={formatARS(parteCada)} fuerte />
           </div>
           <p className="cm-names">A Nico y a Eze les toca {formatARS(parteCada)} a cada uno (la mitad del resultado).</p>
+        </section>
+
+        {/* ---- Quedan por pagar ---- */}
+        <section className="inf-sec">
+          <h3 className="inf-sec-tit">Quedan por pagar ({deudores.length})</h3>
+          {deudores.length === 0 ? (
+            <p className="inf-vacio">Todos pagaron este mes. 🎉</p>
+          ) : (
+            <>
+              <div className="cm-checklist cm-checklist-1">
+                {deudores.map((x, i) => (
+                  <CheckItem key={`d${i}`} nombre={x.nombre} monto={x.monto} />
+                ))}
+              </div>
+              <div className="inf-tabla" style={{ marginTop: 6 }}>
+                <Fila lbl="Total pendiente" val={formatARS(pendienteTotal)} fuerte />
+              </div>
+            </>
+          )}
         </section>
 
         {/* ---- Detalle de gastos ---- */}
@@ -208,12 +238,13 @@ function Fila({ lbl, val, fuerte }) {
   )
 }
 
-function CheckItem({ nombre }) {
+function CheckItem({ nombre, monto }) {
   const [on, setOn] = useState(false)
   return (
     <button type="button" className={'cm-check' + (on ? ' on' : '')} onClick={() => setOn((v) => !v)}>
       <span className="cm-check-box">{on ? '✓' : ''}</span>
       <span className="cm-check-lbl">{nombre}</span>
+      {monto != null && <span className="cm-check-monto">{formatARS(monto)}</span>}
     </button>
   )
 }
