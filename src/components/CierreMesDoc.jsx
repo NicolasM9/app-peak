@@ -23,7 +23,7 @@ export default function CierreMesDoc({ periodo, onClose }) {
             .select('id, nombre, estado, fecha_alta, fecha_baja, medicion_nutricional, paga_directo_profe, ajuste_monto, planes(nombre, precio_mensual)'),
           supabase.from('pagos').select('alumno_id, monto, fecha_pago'),
           supabase.from('gastos').select('categoria, monto, descripcion').eq('periodo', periodo),
-          supabase.from('profes').select('id, nombre, base_mensual, rol').eq('rol', 'profe').order('id'),
+          supabase.from('profes').select('id, nombre, base_mensual, split_resto, personalizados, rol').eq('rol', 'profe').order('id'),
           supabase.from('lesiones').select('alumno_id, tipo, desde').is('hasta', null),
         ])
       setD({
@@ -70,7 +70,19 @@ export default function CierreMesDoc({ periodo, onClose }) {
   const conMedicion = activosPeak.filter((a) => a.medicion_nutricional).length
   const diegoTotal = conMedicion * MEDICION_MONTO
   const totalGastos = gastosOper + totalProfes + diegoTotal
-  const resultado = facturado - totalGastos
+
+  // 40% de los personalizados repartidos que recibe Peak (de los acuerdos).
+  let personalizadosPeak = 0
+  d.profes.forEach((p) => {
+    const pctPeak = 100 - Number(p.split_resto ?? 60)
+    ;(p.personalizados || []).forEach((x) => {
+      if (x.al100) return
+      personalizadosPeak += Math.round((Number(x.monto || 0) * pctPeak) / 100)
+    })
+  })
+
+  // Resultado = plata cobrada + 40% de personalizados − gastos → mitad para cada uno
+  const resultado = facturado + personalizadosPeak - totalGastos
   const parteCada = Math.round(resultado / 2)
 
   // Quién quedó por pagar ese mes: activos que le pagan a Peak, sin pago
@@ -137,12 +149,17 @@ export default function CierreMesDoc({ periodo, onClose }) {
           <h3 className="inf-sec-tit">Cuentas del mes</h3>
           <div className="inf-tabla">
             <Fila lbl="Total facturado" val={formatARS(facturado)} />
+            {personalizadosPeak > 0 && (
+              <Fila lbl="Personalizados (40% Peak)" val={`+ ${formatARS(personalizadosPeak)}`} />
+            )}
             <Fila lbl="Total gastos" val={`− ${formatARS(totalGastos)}`} />
           </div>
           <div className="cm-resultado" style={resultado < 0 ? { color: '#d4443a', marginTop: 10 } : { marginTop: 10 }}>
             {formatARS(resultado)}
           </div>
-          <p className="inf-vacio" style={{ marginTop: 2, marginBottom: 14 }}>Resultado del mes (facturado − gastos).</p>
+          <p className="inf-vacio" style={{ marginTop: 2, marginBottom: 14 }}>
+            Resultado del mes ({personalizadosPeak > 0 ? 'facturado + personalizados − gastos' : 'facturado − gastos'}).
+          </p>
           <div className="inf-tabla">
             <Fila lbl="Para Nico" val={formatARS(parteCada)} fuerte />
             <Fila lbl="Para Eze" val={formatARS(parteCada)} fuerte />

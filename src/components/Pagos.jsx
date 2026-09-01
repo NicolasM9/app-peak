@@ -151,7 +151,8 @@ export default function Pagos({ irAlAlumno }) {
   const conMedicion = alumnosPeak.filter((a) => a.medicion_nutricional).length
   const diegoTotal = conMedicion * MEDICION_MONTO
   const totalGastos = gastosManuales + totalProfes + diegoTotal
-  const resultado = facturacion - totalGastos
+  // Resultado de Peak = facturación de planes + 40% de los personalizados − gastos
+  const resultado = facturacion + totalPeakPersonalizados - totalGastos
   const pctCobrado = facturacion > 0 ? Math.round((cobrado / facturacion) * 100) : 0
 
   // Cobrado vs promedio de meses anteriores (con datos)
@@ -254,7 +255,12 @@ export default function Pagos({ irAlAlumno }) {
             <div className="stat-card">
               <div className="stat-label">Resultado (esperado)</div>
               <div className="stat-value" style={{ color: '#86d98f' }}>{formatARS(resultado)}</div>
-              <div className="stat-sub">{formatARS(resultado / 2)} c/u (vos y Eze)</div>
+              <div className="stat-sub">{formatARS(Math.round(resultado / 2))} c/u (vos y Eze)</div>
+              {totalPeakPersonalizados > 0 && (
+                <div className="stat-sub" style={{ opacity: 0.75 }}>
+                  incluye {formatARS(totalPeakPersonalizados)} de personalizados
+                </div>
+              )}
             </div>
           </div>
 
@@ -431,6 +437,7 @@ export default function Pagos({ irAlAlumno }) {
           </div>
           <p className="cal-sub" style={{ marginTop: -4 }}>
             De cada personalizado repartido, el profe se queda con su parte y a Peak le queda el resto. Sale de Acuerdos.
+            Este total <b>ya está sumado al Resultado (esperado)</b> de arriba.
           </p>
           {personalizadosPeak.length === 0 ? (
             <p className="muted">
