@@ -150,9 +150,11 @@ desde el editor):** Básico $82.000, Full $90.000, Online $65.000, Semanal $36.0
 **Cierre del mes anterior en Inicio (2026-09-01, sin SQL):** nuevo `CierreMesDoc.jsx` — documento **imprimible** (reusa layout `.informe-*`/`window.print`) que trae por su
 cuenta todo el mes `periodo` (lee alumnos/pagos/gastos/profes/lesiones, solo lectura). En **Inicio** (admin) aparece una **tarjeta destacada** `.cierre-card` "Cierre de
 [mes anterior]" **solo la primera semana** del mes (`_now.getDate() <= 7`) → abre el doc del mes anterior (`prevPeriodo`). Secciones: **Alumnos** (activos del centro,
-online = plan Online, altas/bajas **con nombres**), **Plata cobrada** (total + "Nico y Eze cobraron $X cada uno" = mitad del total — pedido de Nico, NO se registra quién
-cobra c/pago), **Gastos** (lista de gastos operativos + subtotal, pago a cada profe por nombre + subtotal, Diego, total), **Resultado** (cobrado − gastos, verde/rojo),
-**Lesionados (estado actual)** (lesiones activas: nombre·tipo·hace cuánto). Verificado en vivo con agosto real (cobrado $4.685.001 → $2.342.501 c/u, resultado $2.799.501).
+online = plan Online; **altas/bajas como CHECKLIST** clickeable — componente `CheckItem` con estado local, casilla cobalto + tachado, grid 2 columnas `.cm-checklist`),
+**Cuentas del mes** (orden pedido por Nico: **Total facturado** [= cobrado del mes] → **Total gastos** → **Resultado** = facturado − gastos, verde/rojo → **Para Nico** /
+**Para Eze** = `Math.round(resultado/2)` cada uno; la mitad sale del RESULTADO, no del cobrado — NO se registra quién cobra c/pago), **Detalle de gastos** (gastos operativos +
+subtotal, pago a cada profe por nombre + subtotal, Diego, total), **Lesionados (estado actual)** (lesiones activas: nombre·tipo·hace cuánto). Verificado en vivo con agosto real
+(facturado $4.685.001 − gastos $1.885.500 = resultado $2.799.501 → $1.399.751 c/u).
 El `CierreMes.jsx` viejo (botón 📄 en Pagos, mes actual, recibe `datos`) queda como está. Idea futura: si Nico lo quiere disponible todo el mes o desde Pagos, es fácil.
 La pestaña Redes (bloque admin) es una pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
 la Agenda): cada día carga ideas/contenido con **tipo** (historia/publicación/ambas) y **checklist** de 4 pasos (grabar→editar→copy→subir,
