@@ -162,6 +162,11 @@ del mes". Fix: helpers nuevos en `domain.js` **`mesActualYM()`** y **`esDelMes(i
 pagadoSet), `Inicio.jsx` (`esteMes` → ingresos/deudores), `HistorialFacturacion.jsx` (agrupar por `fecha_pago.slice(0,7)`), `AlumnoDetalle.jsx` (pagos del año por `.slice(0,4)`),
 `domain.js` `estadoMesActual` (estado "pagó este mes"). El `CierreMesDoc` ya comparaba por texto (no tenía el bug). Verificado en vivo: Ingresos del mes pasó de $0 a $172.000 y deudores
 de 71 a 69 tras el fix (pagos reales cargados el 1/9). Los flujos ya recargan solos (`load()`/`loadPagos()` tras cada alta), así que ahora impacta al toque sin reiniciar la página.
+**Personalizados · 40% para Peak (2026-09-01, sin SQL):** sección nueva en `Pagos.jsx` (abajo de "Pagos a profes y terceros") que muestra **cuánto recibe Peak de los
+personalizados repartidos y de quiénes**. De cada `profes.personalizados` con `al100=false`, a Peak le queda `(100 − split_resto)%` (= 40% con el split default 60). Se sumó
+`split_resto, personalizados` al `.select()` de profes; `personalizadosPeak` = filas {profe, nombre, monto, pct, cut} con `cut = monto*(100-split)/100`; total `totalPeakPersonalizados`.
+Es SOLO informativo (NO suma a facturación/resultado — los personalizados nunca estuvieron en la facturación de Peak, van por acuerdo). Verificado en vivo: Octavio (Giuliano/Lucho/
+Gonza/Luli $85k→$34k, Santi $105k→$42k) + Ailén (Romi $105k→$42k, Meli $120k→$48k) = **Total para Peak $268.000**.
 El `CierreMes.jsx` viejo (botón 📄 en Pagos, mes actual, recibe `datos`) queda como está. Idea futura: si Nico lo quiere disponible todo el mes o desde Pagos, es fácil.
 La pestaña Redes (bloque admin) es una pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
 la Agenda): cada día carga ideas/contenido con **tipo** (historia/publicación/ambas) y **checklist** de 4 pasos (grabar→editar→copy→subir,
