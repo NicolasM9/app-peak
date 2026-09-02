@@ -167,6 +167,12 @@ personalizados repartidos y de quiénes**. De cada `profes.personalizados` con `
 `split_resto, personalizados` al `.select()` de profes; `personalizadosPeak` = filas {profe, nombre, monto, pct, cut} con `cut = monto*(100-split)/100`; total `totalPeakPersonalizados`.
 Es SOLO informativo (NO suma a facturación/resultado — los personalizados nunca estuvieron en la facturación de Peak, van por acuerdo). Verificado en vivo: Octavio (Giuliano/Lucho/
 Gonza/Luli $85k→$34k, Santi $105k→$42k) + Ailén (Romi $105k→$42k, Meli $120k→$48k) = **Total para Peak $268.000**.
+**Personalizados integrados al resultado (2026-09-02, sin SQL):** pedido de Nico. En `Pagos.jsx` el `resultado` pasó a `facturacion + totalPeakPersonalizados − totalGastos`
+(la tarjeta "Resultado (esperado)" muestra el nuevo total, el "c/u vos y Eze" con `Math.round`, y un sub "incluye $X de personalizados"; la sección Personalizados aclara que "ya
+está sumado al Resultado de arriba"). En `CierreMesDoc.jsx` se sumó `split_resto, personalizados` al `.select()` de profes, se calcula `personalizadosPeak`, y "Cuentas del mes"
+ahora es **Total facturado → Personalizados (40% Peak) + → Total gastos → Resultado → mitad c/u** (resultado = facturado + personalizados − gastos; la línea de personalizados solo
+aparece si >0). Verificado en vivo: Pagos resultado $5.064.500→$5.332.500 ($2.666.250 c/u); Cierre agosto resultado $3.027.501 → $1.513.751 c/u (facturado $4.685.001 + pers
+$268.000 − gastos $1.925.500). Como todo lee de `profes` en cada mount, un cambio en Acuerdos se refleja al toque (verificado editando Giuliano 85k→87k→85k y viendo impactar/revertir).
 El `CierreMes.jsx` viejo (botón 📄 en Pagos, mes actual, recibe `datos`) queda como está. Idea futura: si Nico lo quiere disponible todo el mes o desde Pagos, es fácil.
 La pestaña Redes (bloque admin) es una pestaña privada (bloque "Solo admins") = **calendario de contenido** (reusa la grilla de
 la Agenda): cada día carga ideas/contenido con **tipo** (historia/publicación/ambas) y **checklist** de 4 pasos (grabar→editar→copy→subir,
